@@ -1,6 +1,8 @@
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddControllersWithViews();
+
 var app = builder.Build();
-
-app.MapGet("/", () => "If you see this message, the program works correctly. :)");
-
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.MapDefaultControllerRoute();
 app.Run();
