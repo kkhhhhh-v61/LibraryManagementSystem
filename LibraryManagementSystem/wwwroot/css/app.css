@@ -121,7 +121,7 @@ header {
     bottom: 0;
     left: 50%;
     width: 0;
-    height: 2px;
+    height: var(--fixed-space-xxs);
     background-color: var(--text-primary);
     transform: translateX(-50%);
     transition: width 0.3s ease-in-out;
@@ -429,12 +429,6 @@ footer p a {
 .sitemap-logo img {
     height: calc(var(--fixed-font-size-md) * 1);
     aspect-ratio: 1;
-}
-
-.sitemap-logo h4 {
-    font-size: var(--fixed-font-size-sm);
-    font-weight: 700;
-    color: var(--text-primary);
 }
 
 .map-container {
