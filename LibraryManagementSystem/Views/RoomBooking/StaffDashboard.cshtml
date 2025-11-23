@@ -1,0 +1,88 @@
+﻿@{
+    ViewBag.Title = "Room Schedule";
+
+    DateTime current = ViewBag.SelectedDate;
+
+    string prevDate = current.AddDays(-1).ToString("yyyy-MM-dd");
+    string nextDate = current.AddDays(1).ToString("yyyy-MM-dd");
+    string dateString = current.ToString("yyyy-MM-dd"); 
+}
+
+@section head {
+    <link rel="stylesheet" href="/css/booking-dashboard.css" asp-append-version="true" />
+}
+
+<div class="page-header">
+    <h2>Master Booking Calendar</h2>
+    <button class="btn btn-primary" onclick="alert('Opens modal for Staff Override Booking...')">
+        <span>+</span> New Staff Booking
+    </button>
+</div>
+
+<div class="dashboard-container">
+
+    <div class="control-bar">
+
+        <div class="date-navigator">
+            <a href="?date=@prevDate" class="btn btn-outline btn-icon">◀</a>
+
+            <form method="get" action="/RoomBooking/StaffDashboard" style="margin:0;">
+                <div class="date-picker-wrapper">
+                    <input type="date"
+                           name="date"
+                           value="@dateString"
+                           class="form-control date-input"
+                           onchange="this.form.submit()" />
+                </div>
+            </form>
+
+            <a href="?date=@nextDate" class="btn btn-outline btn-icon">▶</a>
+
+            <span class="current-date-label">
+                @current.ToString("dddd, dd MMMM yyyy")
+            </span>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background: #4caf50;"></div>
+                <span>Member (Paid)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #673ab7;"></div>
+                <span>Staff Override</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #9e9e9e;"></div>
+                <span>Maintenance</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="calendar-wrapper">
+        <div class="timeline-grid">
+            <div class="timeline-header">
+                @for (int i = 0; i <= 12; i++)
+                {
+                    var leftPos = (i * 8.3333).ToString("0.00") + "%";
+                    var timeLabel = (9 + i).ToString("00") + ":00";
+                    <span class="time-label" style="left: @leftPos">@timeLabel</span>
+                }
+            </div>
+
+            <div class="timeline-row">
+                <div class="room-info">
+                    <span class="room-name">Disc. Room A</span>
+                    <span class="room-meta">Cap: 4 Pax</span>
+                </div>
+                <div class="time-track">
+                    <div class="booking-block status-paid" style="left: 8.33%; width: 16.66%;">
+                        <div class="bb-title">Ali</div>
+                        <div class="bb-sub">10:00 - 12:00</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
