@@ -232,11 +232,44 @@ main {
     width: calc(100% - var(--fixed-space-xl));
     height: 85%;
     margin: 0 var(--fixed-space-md);
-    padding: var(--fixed-space-md);
+    padding: var(--fixed-space-sm) var(--fixed-space-xs) var(--fixed-space-sm)
+        var(--fixed-space-sm);
     background-color: var(--background-inner);
-    border-radius: var(--fixed-space-lg);
+    border-radius: var(--fixed-space-md);
     box-shadow: inset 0 0 var(--fixed-space-xs) var(--fixed-space-xxs)
         var(--shadow-color);
+}
+
+.main-content-wrapper {
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    padding: var(--fixed-space-sm) var(--fixed-space-xs) var(--fixed-space-sm)
+        var(--fixed-space-sm);
+}
+
+/* Custom Scrollbar for main content */
+.main-content-wrapper {
+    scrollbar-width: thin;
+    scrollbar-color: var(--shadow-color) var(--background-inner);
+}
+
+.main-content-wrapper::-webkit-scrollbar {
+    width: 8px;
+}
+
+.main-content-wrapper::-webkit-scrollbar-track {
+    background-color: var(--background-inner);
+}
+
+.main-content-wrapper::-webkit-scrollbar-thumb {
+    background-color: var(--shadow-color);
+    border-radius: 10px;
+    border: 2px solid var(--background-inner);
+}
+
+.main-content-wrapper::-webkit-scrollbar-thumb:hover {
+    background-color: #888;
 }
 
 /* ==========================================================================
@@ -261,11 +294,12 @@ footer p a {
 }
 
 /* ==========================================================================
-   8. Index Page
+   8. Banner Showcase
    ========================================================================== */
 #banner-wrapper {
     position: relative;
     height: max(30vw, 30vh);
+    border-radius: var(--fixed-space-sm);
 }
 
 #banner-showcase {
@@ -323,4 +357,96 @@ footer p a {
 
 .banner-nav-item.active {
     background-color: white;
+}
+
+/* ==========================================================================
+   9. Sitemap
+   ========================================================================== */
+#sitemap {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    padding: var(--fixed-space-xl) 0;
+    margin-top: var(--fixed-space-lg);
+    border-top: var(--fixed-space-xxs) solid var(--border-color);
+}
+
+.sitemap-column {
+    flex: 1;
+    padding: 0 var(--fixed-space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--fixed-space-md);
+}
+
+.sitemap-column:first-child,
+.sitemap-column:last-child {
+    flex-grow: 0;
+    flex-basis: 25%;
+}
+
+.sitemap-column h3 {
+    font-size: var(--fixed-font-size-md);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--fixed-space-xxs);
+}
+
+.sitemap-column ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--fixed-space-sm);
+}
+
+.sitemap-column ul li {
+    line-height: var(--fixed-space-xl);
+}
+
+.sitemap-column ul li a {
+    font-size: var(--fixed-font-size-sm);
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: opacity 0.3s ease;
+}
+
+.sitemap-column ul li a:hover {
+    opacity: 0.7;
+}
+
+.sitemap-column ul li:last-child {
+    margin-bottom: var(--fixed-space-md);
+}
+
+.sitemap-logo {
+    display: flex;
+    align-items: center;
+    gap: var(--fixed-space-sm);
+    text-decoration: none;
+    margin-bottom: var(--fixed-space-sm);
+}
+
+.sitemap-logo img {
+    height: calc(var(--fixed-font-size-md) * 1);
+    aspect-ratio: 1;
+}
+
+.sitemap-logo h4 {
+    font-size: var(--fixed-font-size-sm);
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.map-container {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--fixed-space-sm);
+    overflow: hidden;
+    box-shadow: inset 0 0 var(--fixed-space-xs) var(--fixed-space-xxs)
+        rgba(0, 0, 0, 0.1);
+}
+
+.map-container iframe {
+    width: 100%;
+    height: 100%;
 }
