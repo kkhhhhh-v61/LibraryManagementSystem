@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>@ViewBag.Title | Open LMS</title> 
+        <title>@ViewBag.Title | @ViewBag.System</title> 
         <link rel="icon" type="image/x-icon" href="/images/favicon.svg" />
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,8 +15,35 @@
         <header>
             <a href="/" id="logo">
                 <img src="/images/favicon.svg" alt="Logo" />
-                <h1>Open LMS</h1>
+                <h1>@ViewBag.System</h1>
             </a>
+
+            <nav id="main-nav">
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/">Catalogue</a></li>
+                    <li><a href="/">Facility</a></li>
+                </ul>
+            </nav>
+
+            <nav id="util-nav">
+                <div class="util-item">
+                    <img src="/images/shelf.svg" alt="Shelf" />
+                    @* <span class="badge">0</span> *@
+                </div>
+                <div class="util-item">
+                    <img src="/images/basket.svg" alt="Basket" />
+                    @* <span class="badge">0</span> *@
+                </div>
+                <div id="profile-dropdown" class="util-item">
+                    <img src="/images/profile.svg" alt="Profile" />
+                    <ul class="dropdown-menu">
+                        <li><a href="/"><img src="/images/login.svg" alt="" />Log In</a></li>
+                        <li class="separator"></li>
+                        <li><a href="/"><img src="/images/register.svg" alt="" />Register</a></li>
+                    </ul>
+                </div>
+            </nav>
         </header>
 
         <main>
@@ -24,7 +51,7 @@
         </main>
 
         <footer>
-            <p>Copyright &copy; Library Management System. @DateTime.Now.Year. All Rights Reserved.</p>
+            <p>Copyright &copy; <a href="/">@ViewBag.System</a>. @DateTime.Now.Year. All Rights Reserved.</p>
         </footer>
 
         <script src="jquery.min.js">
