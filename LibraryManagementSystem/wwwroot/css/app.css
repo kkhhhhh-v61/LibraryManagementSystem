@@ -418,7 +418,7 @@ body {
 }
 
 .sitemap-column__link:hover {
-    opacity: 0.7;
+    opacity: 0.5;
 }
 
 .sitemap-column__list-item:last-child {
