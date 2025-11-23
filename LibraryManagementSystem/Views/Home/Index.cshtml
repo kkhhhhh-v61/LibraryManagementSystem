@@ -1,55 +1,57 @@
 ﻿@{
     ViewBag.Title = "Home";
 }
-<div id="banner-wrapper">
+<div class="banner">
     <div id="banner-showcase">
         @* TODO: Dynamically load banner images *@
-        <img src="/images/assets/placeholder-1.png" alt="Banner Image 1" />
-        <img src="/images/assets/placeholder-2.png" alt="Banner Image 2" />
-        <img src="/images/assets/placeholder-1.png" alt="Banner Image 3" />
-        <img src="/images/assets/placeholder-2.png" alt="Banner Image 4" />
-        <img src="/images/assets/placeholder-1.png" alt="Banner Image 5" />
+        <img class="banner__image" src="/images/assets/placeholder-1.png" alt="Banner Image 1" />
+        <img class="banner__image" src="/images/assets/placeholder-2.png" alt="Banner Image 2" />
+        <img class="banner__image" src="/images/assets/placeholder-1.png" alt="Banner Image 3" />
+        <img class="banner__image" src="/images/assets/placeholder-2.png" alt="Banner Image 4" />
+        <img class="banner__image" src="/images/assets/placeholder-1.png" alt="Banner Image 5" />
     </div>
-    <div id="banner-nav"></div>
+    <div class="banner__nav"></div>
 </div>
 
 @* TODO: Add dynamic sections such as Featured, Recommended, Trending, New, etc. *@
 
-<div id="sitemap">
+<hr class="horizontal-separator" />
+
+<section class="sitemap">
     <div class="sitemap-column">
-        <a href="/" class="sitemap-logo">
-            <img src="/images/icons/favicon.svg" alt="Logo" />
-            <h3>@ViewBag.System</h3>
+        <a href="/" class="sitemap__logo">
+            <img class="sitemap__logo-image" src="/images/icons/favicon.svg" alt="Logo" />
+            <h3 class="sitemap-column__title">@ViewBag.System</h3>
         </a>
     </div>
     <div class="sitemap-column">
-        <h3>Navigate</h3>
-        <ul>
-            <li><a href="/">Home</a></li>
-            <li><a href="/">Catalogue</a></li>
-            <li><a href="/">Facilities</a></li>
+        <h3 class="sitemap-column__title">Navigate</h3>
+        <ul class="sitemap-column__list">
+            <li class="sitemap-column__list-item"><a class="sitemap-column__link" href="/">Home</a></li>
+            <li class="sitemap-column__list-item"><a class="sitemap-column__link" href="/">Catalogue</a></li>
+            <li class="sitemap-column__list-item"><a class="sitemap-column__link" href="/">Facilities</a></li>
         </ul>
     </div>
     <div class="sitemap-column">
-        <h3>Services</h3>
-        <ul>
-            <li><a href="/">Borrowing Services</a></li>
-            <li><a href="/">Membership</a></li>
-            <li><a href="/">Fines & Charges</a></li>
+        <h3 class="sitemap-column__title">Services</h3>
+        <ul class="sitemap-column__list">
+            <li class="sitemap-column__list-item"><a class="sitemap-column__link" href="/">Borrowing Services</a></li>
+            <li class="sitemap-column__list-item"><a class="sitemap-column__link" href="/">Membership</a></li>
+            <li class="sitemap-column__list-item"><a class="sitemap-column__link" href="/">Fines & Charges</a></li>
         </ul>
     </div>
     <div class="sitemap-column">
-        <h3>About Us</h3>
-        <ul>
-            <li><a href="/">About The Library</a></li>
-            <li><a href="/">Opening Hours</a></li>
-            <li><a href="/">Contact Us</a></li>
+        <h3 class="sitemap-column__title">About Us</h3>
+        <ul class="sitemap-column__list">
+            <li class="sitemap-column__list-item"><a class="sitemap-column__link" href="/">About The Library</a></li>
+            <li class="sitemap-column__list-item"><a class="sitemap-column__link" href="/">Opening Hours</a></li>
+            <li class="sitemap-column__list-item"><a class="sitemap-column__link" href="/">Contact Us</a></li>
         </ul>
-        <h3>Our Location</h3>
+        <h3 class="sitemap-column__title">Our Location</h3>
         <div class="map-container">
-            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d12089.569965540519!2d-73.99964006044922!3d40.7533914!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c259002ab69b77%3A0xf9916f6f226ff92c!2sNew%20York%20Public%20Library!5e0!3m2!1sen!2sus!4v1763888213601!5m2!1sen!2sus" 
+            <iframe class="map-container__iframe" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d12089.569965540519!2d-73.99964006044922!3d40.7533914!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c259002ab69b77%3A0xf9916f6f226ff92c!2sNew%20York%20Public%20Library!5e0!3m2!1sen!2sus!4v1763888213601!5m2!1sen!2sus" 
                     width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" 
                     referrerpolicy="no-referrer-when-downgrade"></iframe>
         </div>
     </div>
-</div>
+</section>

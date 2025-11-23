@@ -1,5 +1,5 @@
 ﻿/* ==========================================================================
-   1. Design System & Variables
+   1. CORE: Design System & Variables
    ========================================================================== */
 :root {
     /* Colors */
@@ -26,7 +26,7 @@
 }
 
 /* ==========================================================================
-   2. Base & Global Styles
+   2. CORE: Base & Global Styles
    ========================================================================== */
 * {
     margin: 0;
@@ -35,8 +35,8 @@
 }
 
 html {
-    font-size: 16px;
     background-color: var(--background-outer);
+    font-size: 16px;
 }
 
 body {
@@ -50,44 +50,47 @@ body {
 }
 
 /* ==========================================================================
-   3. Header & Logo
+   3. LAYOUT: Site Header
    ========================================================================== */
-header {
+.site-header {
     width: 100%;
     height: 10%;
-    padding: var(--fixed-space-sm);
     display: flex;
     flex-direction: row;
     align-items: center;
-}
-
-#logo {
-    width: 12.5%;
-    height: 100%;
-    padding: 0 var(--fixed-space-sm);
-    display: flex;
-    align-items: center;
-    text-decoration: none;
-}
-
-#logo img {
-    height: calc(100% - var(--fixed-space-xxl));
-    aspect-ratio: 1;
-    display: block;
-}
-
-#logo h1 {
-    flex: 1;
-    color: var(--text-primary);
-    font-size: var(--fixed-font-size-md);
-    font-weight: 700;
-    text-align: center;
+    padding: var(--fixed-space-sm);
 }
 
 /* ==========================================================================
-   4. Main Navigation
+   4. COMPONENT: Logo
    ========================================================================== */
-#main-nav {
+.logo {
+    width: 12.5%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    padding: 0 var(--fixed-space-sm);
+}
+
+.logo__image {
+    display: block;
+    height: calc(100% - var(--fixed-space-xxl));
+    aspect-ratio: 1;
+}
+
+.logo__text {
+    flex: 1;
+    text-align: center;
+    color: var(--text-primary);
+    font-size: var(--fixed-font-size-md);
+    font-weight: 700;
+}
+
+/* ==========================================================================
+   5. COMPONENT: Main Navigation
+   ========================================================================== */
+.main-nav {
     width: 75%;
     height: 100%;
     display: flex;
@@ -95,82 +98,81 @@ header {
     justify-content: center;
 }
 
-#main-nav ul {
+.main-nav__list {
     display: flex;
-    flex-direction: row;
     gap: var(--fixed-space-xl);
     list-style: none;
+    overflow: auto;
 }
 
-#main-nav ul li {
+.main-nav__item {
+    position: relative;
     color: var(--text-primary);
     font-size: var(--fixed-font-size-md);
     transition: opacity 0.3s ease-in-out;
 }
 
-#main-nav ul li a {
+.main-nav__link {
     position: relative;
+    display: block;
     overflow: hidden;
     text-decoration: none;
     color: #000;
 }
 
-#main-nav ul li a::after {
+.main-nav__link::after {
     content: "";
     position: absolute;
     bottom: 0;
     left: 50%;
+    transform: translateX(-50%);
     width: 0;
     height: var(--fixed-space-xxs);
     background-color: var(--text-primary);
-    transform: translateX(-50%);
     transition: width 0.3s ease-in-out;
 }
 
-#main-nav ul li a:hover::after {
+.main-nav__link:hover::after {
     width: 100%;
 }
 
-#main-nav ul:hover > li {
+/* Interaction: Fade out other items on hover */
+.main-nav__list:hover > .main-nav__item {
     opacity: 0.5;
 }
 
-#main-nav ul:hover > li:hover {
+.main-nav__list:hover > .main-nav__item:hover {
     opacity: 1;
 }
 
 /* ==========================================================================
-   5. Utility Navigation
+   6. COMPONENT: Utility Navigation
    ========================================================================== */
-#util-nav {
+.util-nav {
     width: 12.5%;
     height: 100%;
-    padding: 0 var(--fixed-space-sm);
     display: flex;
     align-items: center;
     justify-content: flex-end;
     gap: var(--fixed-space-lg);
+    padding: 0 var(--fixed-space-sm);
 }
 
-#util-nav .util-item {
+.util-nav__item {
+    position: relative;
     height: calc(100% - var(--fixed-space-xxl));
     aspect-ratio: 1;
     cursor: pointer;
 }
 
-#util-nav .util-item img {
+.util-nav__icon {
     height: 100%;
     aspect-ratio: 1;
     display: block;
     object-fit: contain;
 }
 
-#profile-dropdown {
-    margin-right: var(--fixed-space-sm);
-    position: relative;
-}
-
-#util-nav .dropdown-menu {
+.dropdown-menu {
     opacity: 0;
     visibility: hidden;
     transform: scaleY(0);
@@ -178,8 +180,9 @@ header {
     transform-origin: top;
     position: absolute;
     top: 120%;
-    right: 0;
+    left: 0;
     background-color: var(--background-outer);
+    width: calc(var(--fixed-font-size-sm) * 10);
     border: var(--fixed-space-xxs) solid var(--border-color);
     border-radius: var(--fixed-space-xs);
     box-shadow: 0 0 var(--fixed-space-xs) var(--fixed-space-xxs)
@@ -187,48 +190,54 @@ header {
     list-style: none;
     padding: var(--fixed-space-sm) 0;
     margin: 0;
-    width: var(--fixed-font-size-sm) * 10;
     z-index: 1000;
 }
 
-#profile-dropdown:hover .dropdown-menu {
+/* Reposition dropdown for utility nav since it's on the right */
+.util-nav__item .dropdown-menu {
+    left: auto;
+    right: 0;
+}
+
+.main-nav__item:hover .dropdown-menu,
+.util-nav__item:hover .dropdown-menu {
     opacity: 1;
     visibility: visible;
     transform: scaleY(1);
     transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-#util-nav .dropdown-menu li a {
+.dropdown-menu__link {
     display: flex;
     align-items: center;
     gap: var(--fixed-space-sm);
     padding: var(--fixed-space-sm) var(--fixed-space-md);
     color: var(--text-primary);
-    font-size: var(--fixed-font-size-sm);
     text-decoration: none;
+    font-size: var(--fixed-font-size-sm);
 }
 
-#util-nav .dropdown-menu li a img {
+.dropdown-menu__icon {
+    display: block;
     height: calc(var(--fixed-font-size-sm) * 1.25);
     aspect-ratio: 1;
-    display: block;
     object-fit: contain;
 }
 
-#util-nav .dropdown-menu li a:hover {
+.dropdown-menu li a:hover {
     background-color: var(--hover-background);
 }
 
-#util-nav .dropdown-menu li.separator {
+.dropdown-menu__separator {
     height: var(--fixed-space-xxs);
-    background-color: var(--border-color);
     margin: var(--fixed-space-xs) var(--fixed-space-sm);
+    background-color: var(--border-color);
 }
 
 /* ==========================================================================
-   6. Main Content Area
+   7. LAYOUT: Main Content Area
    ========================================================================== */
-main {
+.main-content {
     width: calc(100% - var(--fixed-space-xl));
     height: 85%;
     margin: 0 var(--fixed-space-md);
@@ -273,9 +282,9 @@ main {
 }
 
 /* ==========================================================================
-   7. Footer
+   8. LAYOUT: Site Footer
    ========================================================================== */
-footer {
+.site-footer {
     width: 100%;
     height: 5%;
     display: flex;
@@ -283,23 +292,24 @@ footer {
     justify-content: center;
 }
 
-footer p {
+.site-footer__text {
     font-size: var(--fixed-font-size-sm);
     color: var(--text-primary);
 }
 
-footer p a {
+.site-footer__link {
     text-decoration: none;
     color: var(--text-primary);
 }
 
 /* ==========================================================================
-   8. Banner Showcase
+   9. COMPONENT: Banner Showcase
    ========================================================================== */
-#banner-wrapper {
+.banner {
     position: relative;
     height: max(30vw, 30vh);
     border-radius: var(--fixed-space-sm);
+    margin-bottom: var(--fixed-space-lg);
 }
 
 #banner-showcase {
@@ -323,7 +333,7 @@ footer p a {
     display: none;
 }
 
-#banner-showcase img {
+.banner__image {
     width: 100%;
     height: 100%;
     flex-shrink: 0;
@@ -331,7 +341,7 @@ footer p a {
     object-position: center;
 }
 
-#banner-nav {
+.banner__nav {
     position: absolute;
     bottom: var(--fixed-space-md);
     left: 50%;
@@ -341,7 +351,7 @@ footer p a {
     z-index: 10;
 }
 
-.banner-nav-item {
+.banner__nav-item {
     width: calc(var(--fixed-space-xxl) * 2);
     height: var(--fixed-space-sm);
     background-color: rgba(255, 255, 255, 0.5);
@@ -351,74 +361,71 @@ footer p a {
     transition: background-color 0.3s ease;
 }
 
-.banner-nav-item:hover {
+.banner__nav-item:hover {
     background-color: rgba(255, 255, 255, 0.8);
 }
 
-.banner-nav-item.active {
+.banner__nav-item.active {
     background-color: white;
 }
 
 /* ==========================================================================
-   9. Sitemap
+   10. COMPONENT: Sitemap
    ========================================================================== */
-#sitemap {
+.sitemap {
     display: flex;
-    flex-direction: row;
     justify-content: space-around;
-    padding: var(--fixed-space-xl) 0;
-    margin-top: var(--fixed-space-lg);
-    border-top: var(--fixed-space-xxs) solid var(--border-color);
+    padding: var(--fixed-space-md) 0;
 }
 
 .sitemap-column {
     flex: 1;
-    padding: 0 var(--fixed-space-lg);
     display: flex;
     flex-direction: column;
     gap: var(--fixed-space-md);
+    padding: 0 var(--fixed-space-lg);
 }
 
 .sitemap-column:first-child,
 .sitemap-column:last-child {
     flex-grow: 0;
-    flex-basis: 25%;
+    flex-basis: 25%; /* Give less space to the logo/map columns */
 }
 
-.sitemap-column h3 {
+.sitemap-column__title {
     font-size: var(--fixed-font-size-md);
     font-weight: 700;
     color: var(--text-primary);
     margin-bottom: var(--fixed-space-xxs);
 }
 
-.sitemap-column ul {
+.sitemap-column__list {
     list-style: none;
     display: flex;
     flex-direction: column;
     gap: var(--fixed-space-sm);
 }
 
-.sitemap-column ul li {
+.sitemap-column__list-item {
     line-height: var(--fixed-space-xl);
 }
 
-.sitemap-column ul li a {
+.sitemap-column__link {
     font-size: var(--fixed-font-size-sm);
     color: var(--text-primary);
     text-decoration: none;
     transition: opacity 0.3s ease;
 }
 
-.sitemap-column ul li a:hover {
+.sitemap-column__link:hover {
     opacity: 0.7;
 }
 
-.sitemap-column ul li:last-child {
+.sitemap-column__list-item:last-child {
     margin-bottom: var(--fixed-space-md);
 }
 
-.sitemap-logo {
+.sitemap__logo {
     display: flex;
     align-items: center;
     gap: var(--fixed-space-sm);
@@ -426,7 +433,7 @@ footer p a {
     margin-bottom: var(--fixed-space-sm);
 }
 
-.sitemap-logo img {
+.sitemap__logo-image {
     height: calc(var(--fixed-font-size-md) * 1);
     aspect-ratio: 1;
 }
@@ -440,7 +447,18 @@ footer p a {
         rgba(0, 0, 0, 0.1);
 }
 
-.map-container iframe {
+.map-container__iframe {
     width: 100%;
     height: 100%;
+}
+
+/* ==========================================================================
+   11. UTILITIES
+   ========================================================================== */
+.horizontal-separator {
+    width: 100%;
+    height: var(--fixed-space-xxs);
+    background-color: var(--border-color);
+    border: 0;
+    margin: var(--fixed-space-lg) 0;
 }

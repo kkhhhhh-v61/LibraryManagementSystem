@@ -1,20 +1,23 @@
 ﻿document.addEventListener("DOMContentLoaded", function () {
-    const banner = document.getElementById("banner-showcase");
-    const bannerNav = document.getElementById("banner-nav");
-    const bannerWrapper = document.getElementById("banner-wrapper");
+    /* ==========================================================================
+        1. BANNER SHOWCASE
+        ========================================================================== */
+    const bannerShowcase = document.getElementById("banner-showcase");
+    const bannerNav = document.querySelector(".banner__nav");
+    const bannerWrapper = document.querySelector(".banner");
 
-    if (!banner || !bannerNav || !bannerWrapper) {
+    if (!bannerShowcase || !bannerNav || !bannerWrapper) {
         return;
     }
 
-    const images = banner.querySelectorAll("img");
+    const images = bannerShowcase.querySelectorAll(".banner__image");
     let currentIndex = 0;
     let autoScrollInterval;
     let manualNavTimeout;
     const scrollInterval = 5000;
 
     function updateNav(index) {
-        const navItems = bannerNav.querySelectorAll(".banner-nav-item");
+        const navItems = bannerNav.querySelectorAll(".banner__nav-item");
         navItems.forEach((item, i) => {
             if (i === index) {
                 item.classList.add("active");
@@ -29,7 +32,7 @@
         if (image) {
             const scrollLeft = image.offsetLeft;
 
-            banner.scrollLeft = scrollLeft;
+            bannerShowcase.scrollLeft = scrollLeft;
             currentIndex = index;
             updateNav(index);
         }
@@ -49,7 +52,7 @@
 
     images.forEach((_, index) => {
         const navItem = document.createElement("div");
-        navItem.classList.add("banner-nav-item");
+        navItem.classList.add("banner__nav-item");
         navItem.addEventListener("click", () => {
             scrollToImage(index);
             stopAutoScroll();

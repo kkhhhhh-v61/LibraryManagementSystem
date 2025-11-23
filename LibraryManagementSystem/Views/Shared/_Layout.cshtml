@@ -13,50 +13,50 @@
         @RenderSection("head", false)
     </head>
     <body>
-        <header>
-            <a href="/" id="logo">
-                <img src="/images/icons/favicon.svg" alt="Logo" />
-                <h1>@ViewBag.System</h1>
+        <header class="site-header">
+            <a href="/" class="logo">
+                <img class="logo__image" src="/images/icons/favicon.svg" alt="Logo" />
+                <h1 class="logo__text">@ViewBag.System</h1>
             </a>
 
-            <nav id="main-nav">
-                <ul>
-                    <li><a href="/">Home</a></li>
-                    <li><a href="/">Catalogue</a></li>
-                    <li><a href="/">Facility</a></li>
-                    <li><a asp-controller="RoomCategories" asp-action="Index">Room Setup</a></li>
-                    <li><a asp-controller="RoomBooking" asp-action="StaffDashboard">Staff Dashboard</a></li>
+            <nav class="main-nav">
+                <ul class="main-nav__list">
+                    <li class="main-nav__item"><a class="main-nav__link" href="/">Home</a></li>
+                    <li class="main-nav__item"><a class="main-nav__link" href="/">Catalogue</a></li>
+                    <li class="main-nav__item"><a class="main-nav__link" href="/">Facility</a></li>
+                    <li class="main-nav__item"><a class="main-nav__link" asp-controller="RoomCategories" asp-action="Index">Room Setup</a></li>
+                    <li class="main-nav__item"><a class="main-nav__link" asp-controller="RoomBooking" asp-action="StaffDashboard">Staff Dashboard</a></li>
                 </ul>
             </nav>
 
-            <nav id="util-nav">
-                <div class="util-item">
-                    <img src="/images/icons/shelf.svg" alt="Shelf" />
+            <nav class="util-nav">
+                <div class="util-nav__item">
+                    <img class="util-nav__icon" src="/images/icons/shelf.svg" alt="Shelf" />
                     @* <span class="badge">0</span> *@
                 </div>
-                <div class="util-item">
-                    <img src="/images/icons/basket.svg" alt="Basket" />
+                <div class="util-nav__item">
+                    <img class="util-nav__icon" src="/images/icons/basket.svg" alt="Basket" />
                     @* <span class="badge">0</span> *@
                 </div>
-                <div id="profile-dropdown" class="util-item">
-                    <img src="/images/icons/profile.svg" alt="Profile" />
+                <div class="util-nav__item">
+                    <img class="util-nav__icon" src="/images/icons/profile.svg" alt="Profile" />
                     <ul class="dropdown-menu">
-                        <li><a href="/"><img src="/images/icons/login.svg" alt="" />Log In</a></li>
-                        <li class="separator"></li>
-                        <li><a href="/"><img src="/images/icons/register.svg" alt="" />Register</a></li>
+                        <li><a class="dropdown-menu__link" href="/"><img class="dropdown-menu__icon" src="/images/icons/login.svg" alt="" />Log In</a></li>
+                        <li class="dropdown-menu__separator"></li>
+                        <li><a class="dropdown-menu__link" href="/"><img class="dropdown-menu__icon" src="/images/icons/register.svg" alt="" />Register</a></li>
                     </ul>
                 </div>
             </nav>
         </header>
 
-        <main>
+        <main class="main-content">
             <div class="main-content-wrapper">
                 @RenderBody()
             </div>
         </main>
 
-        <footer>
-            <p>Copyright &copy; <a href="/">@ViewBag.System</a>. @DateTime.Now.Year. All Rights Reserved.</p>
+        <footer class="site-footer">
+            <p class="site-footer__text">Copyright &copy; <a class="site-footer__link" href="/">@ViewBag.System</a>. @DateTime.Now.Year. All Rights Reserved.</p>
         </footer>
 
         <script src="jquery.min.js">
