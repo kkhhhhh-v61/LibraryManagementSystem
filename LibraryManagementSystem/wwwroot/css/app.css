@@ -275,7 +275,7 @@ footer p a {
     flex-direction: row;
     align-items: center;
     overflow-x: scroll;
-    border-radius: var(--fixed-space-lg);
+    border-radius: var(--fixed-space-sm);
     box-shadow: 0 0 var(--fixed-space-xs) var(--fixed-space-xxs)
         rgba(0, 0, 0, 0.1);
     scroll-behavior: smooth;
