@@ -1,8 +1,33 @@
-﻿:root {
+﻿/* ==========================================================================
+   1. Design System & Variables
+   ========================================================================== */
+:root {
+    /* Colors */
     --background-outer: #fff;
     --background-inner: #f0f0f0;
+    --text-primary: #000;
+    --border-color: #ddd;
+    --shadow-color: #a0a0a0;
+    --hover-background: #f5f5f5;
+
+    /* Typography */
+    --font-family-main: "Nunito Sans", sans-serif;
+    --font-size-sm: max(1vw, 1vh);
+    --font-size-md: max(1.5vw, 1.5vh);
+
+    /* Spacing */
+    --space-xxs: max(0.1vw, 0.1vh);
+    --space-xs: max(0.25vw, 0.25vh);
+    --space-sm: max(0.5vw, 0.5vh);
+    --space-md: max(0.75vw, 0.75vh);
+    --space-lg: max(1vw, 1vh);
+    --space-xl: max(1.5vw, 1.5vh);
+    --space-xxl: max(2vw, 2vh);
 }
 
+/* ==========================================================================
+   2. Base & Global Styles
+   ========================================================================== */
 * {
     margin: 0;
     padding: 0;
@@ -17,17 +42,20 @@ html {
 body {
     width: 100vw;
     height: 100vh;
-    font-family: "Nunito Sans", sans-serif;
+    font-family: var(--font-family-main);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
 }
 
+/* ==========================================================================
+   3. Header & Logo
+   ========================================================================== */
 header {
     width: 100%;
     height: 10%;
-    padding: max(0.5vw, 0.5vh);
+    padding: var(--space-sm);
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -36,26 +64,29 @@ header {
 #logo {
     width: 12.5%;
     height: 100%;
-    padding: 0 max(0.5vw, 0.5vh);
+    padding: 0 var(--space-sm);
     display: flex;
     align-items: center;
     text-decoration: none;
 }
 
 #logo img {
-    height: calc(100% - max(2vw, 2vh));
+    height: calc(100% - var(--space-xxl));
     aspect-ratio: 1;
     display: block;
 }
 
 #logo h1 {
     flex: 1;
-    color: #000;
-    font-size: max(1.5vw, 1.5vh);
+    color: var(--text-primary);
+    font-size: var(--font-size-md);
     font-weight: 700;
     text-align: center;
 }
 
+/* ==========================================================================
+   4. Main Navigation
+   ========================================================================== */
 #main-nav {
     width: 75%;
     height: 100%;
@@ -67,13 +98,13 @@ header {
 #main-nav ul {
     display: flex;
     flex-direction: row;
-    gap: max(1.5vw, 1.5vh);
+    gap: var(--space-xl);
     list-style: none;
 }
 
 #main-nav ul li {
-    color: #000;
-    font-size: max(1.5vw, 1.5vh);
+    color: var(--text-primary);
+    font-size: var(--font-size-md);
     transition: opacity 0.3s ease-in-out;
 }
 
@@ -91,7 +122,7 @@ header {
     left: 50%;
     width: 0;
     height: 2px;
-    background-color: #000;
+    background-color: var(--text-primary);
     transform: translateX(-50%);
     transition: width 0.3s ease-in-out;
 }
@@ -108,19 +139,23 @@ header {
     opacity: 1;
 }
 
+/* ==========================================================================
+   5. Utility Navigation
+   ========================================================================== */
 #util-nav {
     width: 12.5%;
     height: 100%;
-    padding: 0 max(0.5vw, 0.5vh);
+    padding: 0 var(--space-sm);
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: max(1vw, 1vh);
+    gap: var(--space-lg);
 }
 
 #util-nav .util-item {
-    height: calc(100% - max(2vw, 2vh));
+    height: calc(100% - var(--space-xxl));
     aspect-ratio: 1;
+    cursor: pointer;
 }
 
 #util-nav .util-item img {
@@ -128,11 +163,10 @@ header {
     aspect-ratio: 1;
     display: block;
     object-fit: contain;
-    cursor: pointer;
 }
 
-#util-nav #profile-dropdown {
-    margin-right: max(0.5vw, 0.5vh);
+#profile-dropdown {
+    margin-right: var(--space-sm);
     position: relative;
 }
 
@@ -145,60 +179,66 @@ header {
     position: absolute;
     top: 120%;
     right: 0;
-    background-color: #fff;
-    border: max(0.1vw, 0.1vh) solid #ddd;
-    border-radius: max(0.25vw, 0.25vh);
-    box-shadow: 0 0 max(0.25vw, 0.25vh) max(0.05vw, 0.05vh) rgba(0, 0, 0, 0.1);
+    background-color: var(--background-outer);
+    border: var(--space-xxs) solid var(--border-color);
+    border-radius: var(--space-xs);
+    box-shadow: 0 0 var(--space-xs) var(--space-xxs) rgba(0, 0, 0, 0.1);
     list-style: none;
-    padding: max(0.5vw, 0.5vh) 0;
+    padding: var(--space-sm) 0;
     margin: 0;
-    width: max(10vw, 10vh);
+    width: var(--font-size-sm) * 10;
     z-index: 1000;
 }
 
-#util-nav #profile-dropdown:hover .dropdown-menu {
+#profile-dropdown:hover .dropdown-menu {
     opacity: 1;
     visibility: visible;
     transform: scaleY(1);
-    transition-delay: 0s;
+    transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 #util-nav .dropdown-menu li a {
     display: flex;
     align-items: center;
-    gap: max(0.5vw, 0.5vh);
-    padding: max(0.5vw, 0.5vh) max(0.75vw, 0.75vh);
-    color: #000;
-    font-size: max(1vw, 1vh);
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
     text-decoration: none;
 }
 
 #util-nav .dropdown-menu li a img {
-    height: max(1.25vw, 1.25vh);
+    height: calc(var(--font-size-sm) * 1.25);
     aspect-ratio: 1;
     display: block;
     object-fit: contain;
 }
 
 #util-nav .dropdown-menu li a:hover {
-    background-color: #f5f5f5;
+    background-color: var(--hover-background);
 }
 
 #util-nav .dropdown-menu li.separator {
-    height: max(0.1vw, 0.1vh);
-    background-color: #ddd;
-    margin: max(0.25vw, 0.25vh) max(0.5vw, 0.5vh);
+    height: var(--space-xxs);
+    background-color: var(--border-color);
+    margin: var(--space-xs) var(--space-sm);
 }
 
+/* ==========================================================================
+   6. Main Content Area
+   ========================================================================== */
 main {
-    width: calc(100% - max(1.5vw, 1.5vh));
+    width: calc(100% - var(--space-xl));
     height: 85%;
-    margin: 0 max(0.75vw, 0.75vh);
+    margin: 0 var(--space-md);
     background-color: var(--background-inner);
-    border-radius: max(1vw, 1vh);
-    box-shadow: inset 0 0 max(0.25vw, 0.25vh) max(0.05vw, 0.05vh) #a0a0a0;
+    border-radius: var(--space-lg);
+    box-shadow: inset 0 0 var(--space-xs) var(--space-xxs) var(--shadow-color);
 }
 
+/* ==========================================================================
+   7. Footer
+   ========================================================================== */
 footer {
     width: 100%;
     height: 5%;
@@ -208,11 +248,11 @@ footer {
 }
 
 footer p {
-    font-size: max(1vw, 1vh);
-    color: #000;
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
 }
 
 footer p a {
     text-decoration: none;
-    color: #000;
+    color: var(--text-primary);
 }
