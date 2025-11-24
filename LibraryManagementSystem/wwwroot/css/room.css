@@ -1,46 +1,46 @@
 ﻿/* Buttons */
 .btn {
-    padding: var(--fixed-space-sm) var(--fixed-space-lg);
+    padding: var(--fixed-size-sm) var(--fixed-size-lg);
     border: none;
-    border-radius: var(--fixed-space-xs);
+    border-radius: var(--fixed-size-xs);
     font-family: var(--font-family-main);
-    font-size: var(--fixed-font-size-sm);
+    font-size: var(--fixed-size-lg);
     cursor: pointer;
     transition: all 0.2s ease;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
-    gap: var(--fixed-space-xs);
+    gap: var(--fixed-size-xs);
     font-weight: 600;
 }
 
 .btn-primary {
     background-color: var(--text-primary); /* Black */
-    color: var(--background-outer); /* White */
+    color: var(--color-white); /* White */
 }
 
 .btn-primary:hover {
-    background-color: #333;
+    background-color: var(--color-gray-600);
 }
 
 .btn-outline {
     background-color: transparent;
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--color-gray-200);
     color: var(--text-primary);
 }
 
 .btn-outline:hover {
-    background-color: var(--hover-background);
+    background-color: var(--color-gray-100);
 }
 
 .btn-danger {
     background-color: #ffebee;
-    color: #c62828;
+    color: var(--text-failure);
 }
 
 .btn-success {
     background-color: #e8f5e9;
-    color: #2e7d32;
+    color: var(--text-success);
 }
 
 /* Page Header */
@@ -48,21 +48,21 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--fixed-space-lg);
+    margin-bottom: var(--fixed-size-lg);
 }
 
 .page-header h2 {
-    font-size: var(--fixed-font-size-md);
+    font-size: var(--fixed-size-xl);
     color: var(--text-primary);
 }
 
 /* Cards (White containers on grey background) */
 .card {
-    background-color: var(--background-outer);
-    border-radius: var(--fixed-space-sm);
-    padding: var(--fixed-space-md);
+    background-color: var(--color-white);
+    border-radius: var(--fixed-size-sm);
+    padding: var(--fixed-size-md);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    margin-bottom: var(--fixed-space-md);
+    margin-bottom: var(--fixed-size-md);
 }
 
 /* Tables */
@@ -73,17 +73,17 @@
 
 .data-table th {
     text-align: left;
-    padding: var(--fixed-space-sm);
-    border-bottom: 2px solid var(--border-color);
+    padding: var(--fixed-size-sm);
+    border-bottom: 2px solid var(--color-gray-200);
     font-weight: 700;
-    color: #666;
-    font-size: var(--fixed-font-size-sm);
+    color: var(--color-gray-500);
+    font-size: var(--fixed-size-lg);
 }
 
 .data-table td {
-    padding: var(--fixed-space-sm);
-    border-bottom: 1px solid var(--border-color);
-    font-size: var(--fixed-font-size-sm);
+    padding: var(--fixed-size-sm);
+    border-bottom: 1px solid var(--color-gray-200);
+    font-size: var(--fixed-size-lg);
 }
 
 .data-table tr:last-child td {
@@ -100,42 +100,42 @@
 
 .status-available {
     background-color: #e8f5e9;
-    color: #2e7d32;
+    color: var(--text-success);
 }
 
 .status-maintenance {
     background-color: #fff3e0;
-    color: #ef6c00;
+    color: var(--text-warning);
 }
 
 .status-pending {
     background-color: #e3f2fd;
-    color: #1565c0;
+    color: #1565c0; /* No direct match in new variables, kept as is */
 }
 
 /* Grid Layout for Forms */
 .form-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: var(--fixed-space-md);
+    gap: var(--fixed-size-md);
 }
 
 .form-group {
-    margin-bottom: var(--fixed-space-sm);
+    margin-bottom: var(--fixed-size-sm);
 }
 
 .form-group label {
     display: block;
-    margin-bottom: var(--fixed-space-xs);
-    font-size: var(--fixed-font-size-sm);
+    margin-bottom: var(--fixed-size-xs);
+    font-size: var(--fixed-size-lg);
     font-weight: 600;
 }
 
 .form-control {
     width: 100%;
-    padding: var(--fixed-space-sm);
-    border: 1px solid var(--border-color);
-    border-radius: var(--fixed-space-xs);
+    padding: var(--fixed-size-sm);
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--fixed-size-xs);
     font-family: var(--font-family-main);
-    font-size: var(--fixed-font-size-sm);
+    font-size: var(--fixed-size-lg);
 }

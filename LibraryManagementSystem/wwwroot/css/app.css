@@ -2,27 +2,36 @@
    1. CORE: Design System & Variables
    ========================================================================== */
 :root {
-    /* Colors */
-    --background-outer: #fff;
-    --background-inner: #f0f0f0;
-    --text-primary: #000;
-    --border-color: #ddd;
-    --shadow-color: #a0a0a0;
-    --hover-background: #f5f5f5;
+    /* White & Black Palette */
+    --color-white: #ffffff;
+    --color-gray-100: #e0e0e0;
+    --color-gray-200: #c0c0c0;
+    --color-gray-300: #a0a0a0;
+    --color-gray-400: #808080;
+    --color-gray-500: #606060;
+    --color-gray-600: #404040;
+    --color-gray-700: #202020;
+    --color-black: #000000;
+
+    /* Text Colors */
+    --text-primary: var(--color-black);
+    --text-highlight: var(--color-gray-600);
+    --text-dimmed: var(--color-gray-400);
+    --text-success: #2e7d32;
+    --text-warning: #ef6c00;
+    --text-failure: #c62828;
 
     /* Typography */
     --font-family-main: "Nunito Sans", sans-serif;
-    --fixed-font-size-sm: max(1vw, 1vh);
-    --fixed-font-size-md: max(1.5vw, 1.5vh);
 
-    /* Spacing */
-    --fixed-space-xxs: max(0.1vw, 0.1vh);
-    --fixed-space-xs: max(0.25vw, 0.25vh);
-    --fixed-space-sm: max(0.5vw, 0.5vh);
-    --fixed-space-md: max(0.75vw, 0.75vh);
-    --fixed-space-lg: max(1vw, 1vh);
-    --fixed-space-xl: max(1.5vw, 1.5vh);
-    --fixed-space-xxl: max(2vw, 2vh);
+    /* Sizing Preset */
+    --fixed-size-xxs: max(0.1vw, 0.1vh);
+    --fixed-size-xs: max(0.25vw, 0.25vh);
+    --fixed-size-sm: max(0.5vw, 0.5vh);
+    --fixed-size-md: max(0.75vw, 0.75vh);
+    --fixed-size-lg: max(1vw, 1vh);
+    --fixed-size-xl: max(1.5vw, 1.5vh);
+    --fixed-size-xxl: max(2vw, 2vh);
 }
 
 /* ==========================================================================
@@ -35,7 +44,7 @@
 }
 
 html {
-    background-color: var(--background-outer);
+    background-color: var(--color-white);
     font-size: 16px;
 }
 
@@ -49,6 +58,30 @@ body {
     justify-content: center;
 }
 
+/* Custom Scrollbar */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-gray-300) var(--color-gray-100);
+}
+
+*::-webkit-scrollbar {
+    width: 8px;
+}
+
+*::-webkit-scrollbar-track {
+    background-color: var(--color-gray-100);
+}
+
+*::-webkit-scrollbar-thumb {
+    background-color: var(--color-gray-300);
+    border-radius: 10px;
+    border: 2px solid var(--color-gray-100);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background-color: #888;
+}
+
 /* ==========================================================================
    3. LAYOUT: Site Header
    ========================================================================== */
@@ -58,7 +91,7 @@ body {
     display: flex;
     flex-direction: row;
     align-items: center;
-    padding: var(--fixed-space-sm);
+    padding: var(--fixed-size-sm);
 }
 
 /* ==========================================================================
@@ -70,12 +103,12 @@ body {
     display: flex;
     align-items: center;
     text-decoration: none;
-    padding: 0 var(--fixed-space-sm);
+    padding: 0 var(--fixed-size-sm);
 }
 
 .logo__image {
     display: block;
-    height: calc(100% - var(--fixed-space-xxl));
+    height: calc(100% - var(--fixed-size-xxl));
     aspect-ratio: 1;
 }
 
@@ -83,7 +116,7 @@ body {
     flex: 1;
     text-align: center;
     color: var(--text-primary);
-    font-size: var(--fixed-font-size-md);
+    font-size: var(--fixed-size-xl);
     font-weight: 700;
 }
 
@@ -100,7 +133,7 @@ body {
 
 .main-nav__list {
     display: flex;
-    gap: var(--fixed-space-xl);
+    gap: var(--fixed-size-xl);
     list-style: none;
     overflow: auto;
 }
@@ -108,7 +141,7 @@ body {
 .main-nav__item {
     position: relative;
     color: var(--text-primary);
-    font-size: var(--fixed-font-size-md);
+    font-size: var(--fixed-size-xl);
     transition: opacity 0.3s ease-in-out;
 }
 
@@ -117,7 +150,7 @@ body {
     display: block;
     overflow: hidden;
     text-decoration: none;
-    color: #000;
+    color: var(--text-primary);
 }
 
 .main-nav__link::after {
@@ -127,7 +160,7 @@ body {
     left: 50%;
     transform: translateX(-50%);
     width: 0;
-    height: var(--fixed-space-xxs);
+    height: var(--fixed-size-xxs);
     background-color: var(--text-primary);
     transition: width 0.3s ease-in-out;
 }
@@ -154,13 +187,13 @@ body {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: var(--fixed-space-lg);
-    padding: 0 var(--fixed-space-sm);
+    gap: var(--fixed-size-lg);
+    padding: 0 var(--fixed-size-sm);
 }
 
 .util-nav__item {
     position: relative;
-    height: calc(100% - var(--fixed-space-xxl));
+    height: calc(100% - var(--fixed-size-xxl));
     aspect-ratio: 1;
     cursor: pointer;
 }
@@ -181,14 +214,14 @@ body {
     position: absolute;
     top: 120%;
     left: 0;
-    background-color: var(--background-outer);
-    width: calc(var(--fixed-font-size-sm) * 10);
-    border: var(--fixed-space-xxs) solid var(--border-color);
-    border-radius: var(--fixed-space-xs);
-    box-shadow: 0 0 var(--fixed-space-xs) var(--fixed-space-xxs)
+    background-color: var(--color-white);
+    width: calc(var(--fixed-size-lg) * 10);
+    border: var(--fixed-size-xxs) solid var(--color-gray-100);
+    border-radius: var(--fixed-size-xs);
+    box-shadow: 0 0 var(--fixed-size-xs) var(--fixed-size-xxs)
         rgba(0, 0, 0, 0.1);
     list-style: none;
-    padding: var(--fixed-space-sm) 0;
+    padding: var(--fixed-size-sm) 0; /* This was already correct */
     margin: 0;
     z-index: 1000;
 }
@@ -210,75 +243,49 @@ body {
 .dropdown-menu__link {
     display: flex;
     align-items: center;
-    gap: var(--fixed-space-sm);
-    padding: var(--fixed-space-sm) var(--fixed-space-md);
+    gap: var(--fixed-size-sm);
+    padding: var(--fixed-size-sm) var(--fixed-size-md);
     color: var(--text-primary);
     text-decoration: none;
-    font-size: var(--fixed-font-size-sm);
+    font-size: var(--fixed-size-lg);
 }
 
 .dropdown-menu__icon {
     display: block;
-    height: calc(var(--fixed-font-size-sm) * 1.25);
+    height: calc(var(--fixed-size-lg) * 1.25);
     aspect-ratio: 1;
     object-fit: contain;
 }
 
 .dropdown-menu li a:hover {
-    background-color: var(--hover-background);
+    background-color: var(--color-gray-100);
 }
 
 .dropdown-menu__separator {
-    height: var(--fixed-space-xxs);
-    margin: var(--fixed-space-xs) var(--fixed-space-sm);
-    background-color: var(--border-color);
+    height: var(--fixed-size-xxs);
+    margin: var(--fixed-size-xs) var(--fixed-size-sm);
+    background-color: var(--color-gray-100);
 }
 
 /* ==========================================================================
    7. LAYOUT: Main Content Area
    ========================================================================== */
 .main-content {
-    width: calc(100% - var(--fixed-space-xl));
+    width: calc(100% - var(--fixed-size-xl));
     height: 85%;
-    margin: 0 var(--fixed-space-md);
-    padding: var(--fixed-space-sm) var(--fixed-space-xs) var(--fixed-space-sm)
-        var(--fixed-space-sm);
-    background-color: var(--background-inner);
-    border-radius: var(--fixed-space-md);
-    box-shadow: inset 0 0 var(--fixed-space-xs) var(--fixed-space-xxs)
-        var(--shadow-color);
+    margin: 0 var(--fixed-size-md);
+    padding: var(--fixed-size-sm);
+    background-color: var(--color-gray-100);
+    border-radius: var(--fixed-size-md);
+    box-shadow: inset 0 0 var(--fixed-size-xs) var(--fixed-size-xxs)
+        var(--color-gray-300);
 }
 
 .main-content-wrapper {
     width: 100%;
     height: 100%;
     overflow: auto;
-    padding: var(--fixed-space-sm) var(--fixed-space-xs) var(--fixed-space-sm)
-        var(--fixed-space-sm);
-}
-
-/* Custom Scrollbar for main content */
-.main-content-wrapper {
-    scrollbar-width: thin;
-    scrollbar-color: var(--shadow-color) var(--background-inner);
-}
-
-.main-content-wrapper::-webkit-scrollbar {
-    width: 8px;
-}
-
-.main-content-wrapper::-webkit-scrollbar-track {
-    background-color: var(--background-inner);
-}
-
-.main-content-wrapper::-webkit-scrollbar-thumb {
-    background-color: var(--shadow-color);
-    border-radius: 10px;
-    border: 2px solid var(--background-inner);
-}
-
-.main-content-wrapper::-webkit-scrollbar-thumb:hover {
-    background-color: #888;
+    padding: var(--fixed-size-sm);
 }
 
 /* ==========================================================================
@@ -293,7 +300,7 @@ body {
 }
 
 .site-footer__text {
-    font-size: var(--fixed-font-size-sm);
+    font-size: var(--fixed-size-lg);
     color: var(--text-primary);
 }
 
@@ -307,9 +314,8 @@ body {
    ========================================================================== */
 .banner {
     position: relative;
-    height: max(30vw, 30vh);
-    border-radius: var(--fixed-space-sm);
-    margin-bottom: var(--fixed-space-lg);
+    height: 100%;
+    border-radius: var(--fixed-size-sm);
 }
 
 #banner-showcase {
@@ -319,8 +325,8 @@ body {
     flex-direction: row;
     align-items: center;
     overflow-x: scroll;
-    border-radius: var(--fixed-space-sm);
-    box-shadow: 0 0 var(--fixed-space-xs) var(--fixed-space-xxs)
+    border-radius: var(--fixed-size-sm);
+    box-shadow: 0 0 var(--fixed-size-xs) var(--fixed-size-xxs)
         rgba(0, 0, 0, 0.1);
     scroll-behavior: smooth;
     /* Hide scrollbar */
@@ -343,20 +349,19 @@ body {
 
 .banner__nav {
     position: absolute;
-    bottom: var(--fixed-space-md);
+    bottom: var(--fixed-size-md);
     left: 50%;
     transform: translateX(-50%);
     display: flex;
-    gap: var(--fixed-space-sm);
+    gap: var(--fixed-size-sm);
     z-index: 10;
 }
 
 .banner__nav-item {
-    width: calc(var(--fixed-space-xxl) * 2);
-    height: var(--fixed-space-sm);
+    width: calc(var(--fixed-size-xxl) * 2);
+    height: var(--fixed-size-sm);
     background-color: rgba(255, 255, 255, 0.5);
-    /* border: var(--fixed-space-xs) solid var(--border-color); */
-    border-radius: var(--fixed-space-sm);
+    border-radius: var(--fixed-size-sm);
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
@@ -367,98 +372,4 @@ body {
 
 .banner__nav-item.active {
     background-color: white;
-}
-
-/* ==========================================================================
-   10. COMPONENT: Sitemap
-   ========================================================================== */
-.sitemap {
-    display: flex;
-    justify-content: space-around;
-    padding: var(--fixed-space-md) 0;
-}
-
-.sitemap-column {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: var(--fixed-space-md);
-    padding: 0 var(--fixed-space-lg);
-}
-
-.sitemap-column:first-child,
-.sitemap-column:last-child {
-    flex-grow: 0;
-    flex-basis: 25%; /* Give less space to the logo/map columns */
-}
-
-.sitemap-column__title {
-    font-size: var(--fixed-font-size-md);
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: var(--fixed-space-xxs);
-}
-
-.sitemap-column__list {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: var(--fixed-space-sm);
-}
-
-.sitemap-column__list-item {
-    line-height: var(--fixed-space-xl);
-}
-
-.sitemap-column__link {
-    font-size: var(--fixed-font-size-sm);
-    color: var(--text-primary);
-    text-decoration: none;
-    transition: opacity 0.3s ease;
-}
-
-.sitemap-column__link:hover {
-    opacity: 0.5;
-}
-
-.sitemap-column__list-item:last-child {
-    margin-bottom: var(--fixed-space-md);
-}
-
-.sitemap__logo {
-    display: flex;
-    align-items: center;
-    gap: var(--fixed-space-sm);
-    text-decoration: none;
-    margin-bottom: var(--fixed-space-sm);
-}
-
-.sitemap__logo-image {
-    height: calc(var(--fixed-font-size-md) * 1);
-    aspect-ratio: 1;
-}
-
-.map-container {
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    border-radius: var(--fixed-space-sm);
-    overflow: hidden;
-    box-shadow: inset 0 0 var(--fixed-space-xs) var(--fixed-space-xxs)
-        rgba(0, 0, 0, 0.1);
-}
-
-.map-container__iframe {
-    width: 100%;
-    height: 100%;
-}
-
-/* ==========================================================================
-   11. UTILITIES
-   ========================================================================== */
-.horizontal-separator {
-    width: 100%;
-    height: var(--fixed-space-xxs);
-    background-color: var(--border-color);
-    border: 0;
-    margin: var(--fixed-space-lg) 0;
 }
