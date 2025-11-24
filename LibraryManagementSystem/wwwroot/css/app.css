@@ -1,5 +1,5 @@
 ﻿/* ==========================================================================
-   1. CORE: Design System & Variables
+   CORE: Design System & Variables
    ========================================================================== */
 :root {
     /* White & Black Palette */
@@ -35,7 +35,7 @@
 }
 
 /* ==========================================================================
-   2. CORE: Base & Global Styles
+   CORE: Base & Global Styles
    ========================================================================== */
 * {
     margin: 0;
@@ -83,7 +83,7 @@ body {
 }
 
 /* ==========================================================================
-   3. LAYOUT: Site Header
+   LAYOUT: Site Header
    ========================================================================== */
 .site-header {
     width: 100%;
@@ -95,7 +95,7 @@ body {
 }
 
 /* ==========================================================================
-   4. COMPONENT: Logo
+   COMPONENT: Logo
    ========================================================================== */
 .logo {
     width: 12.5%;
@@ -121,7 +121,7 @@ body {
 }
 
 /* ==========================================================================
-   5. COMPONENT: Main Navigation
+   COMPONENT: Main Navigation
    ========================================================================== */
 .main-nav {
     width: 75%;
@@ -133,9 +133,9 @@ body {
 
 .main-nav__list {
     display: flex;
-    gap: var(--fixed-size-xl);
+    gap: var(--fixed-size-xxl);
     list-style: none;
-    overflow: auto;
+    overflow: visible;
 }
 
 .main-nav__item {
@@ -168,18 +168,8 @@ body {
 .main-nav__link:hover::after {
     width: 100%;
 }
-
-/* Interaction: Fade out other items on hover */
-.main-nav__list:hover > .main-nav__item {
-    opacity: 0.5;
-}
-
-.main-nav__list:hover > .main-nav__item:hover {
-    opacity: 1;
-}
-
 /* ==========================================================================
-   6. COMPONENT: Utility Navigation
+   COMPONENT: Utility Navigation
    ========================================================================== */
 .util-nav {
     width: 12.5%;
@@ -208,20 +198,18 @@ body {
 .dropdown-menu {
     opacity: 0;
     visibility: hidden;
-    transform: scaleY(0);
-    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+    transform: translateY(-10px);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
     transform-origin: top;
     position: absolute;
     top: 120%;
     left: 0;
     background-color: var(--color-white);
-    width: calc(var(--fixed-size-lg) * 10);
-    border: var(--fixed-size-xxs) solid var(--color-gray-100);
-    border-radius: var(--fixed-size-xs);
-    box-shadow: 0 0 var(--fixed-size-xs) var(--fixed-size-xxs)
-        rgba(0, 0, 0, 0.1);
+    min-width: 200px;
+    border-radius: var(--fixed-size-sm);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     list-style: none;
-    padding: var(--fixed-size-sm) 0; /* This was already correct */
+    padding: var(--fixed-size-sm);
     margin: 0;
     z-index: 1000;
 }
@@ -236,15 +224,14 @@ body {
 .util-nav__item:hover .dropdown-menu {
     opacity: 1;
     visibility: visible;
-    transform: scaleY(1);
-    transition: opacity 0.3s ease, transform 0.3s ease;
+    transform: translateY(0);
 }
 
 .dropdown-menu__link {
     display: flex;
     align-items: center;
     gap: var(--fixed-size-sm);
-    padding: var(--fixed-size-sm) var(--fixed-size-md);
+    padding: var(--fixed-size-sm);
     color: var(--text-primary);
     text-decoration: none;
     font-size: var(--fixed-size-lg);
@@ -258,7 +245,8 @@ body {
 }
 
 .dropdown-menu li a:hover {
-    background-color: var(--color-gray-100);
+    background-color: var(--color-gray-100); /* This was already correct */
+    border-radius: var(--fixed-size-xs);
 }
 
 .dropdown-menu__separator {
@@ -268,7 +256,7 @@ body {
 }
 
 /* ==========================================================================
-   7. LAYOUT: Main Content Area
+   LAYOUT: Main Content Area
    ========================================================================== */
 .main-content {
     width: calc(100% - var(--fixed-size-xl));
@@ -289,7 +277,7 @@ body {
 }
 
 /* ==========================================================================
-   8. LAYOUT: Site Footer
+   LAYOUT: Site Footer
    ========================================================================== */
 .site-footer {
     width: 100%;
@@ -310,7 +298,7 @@ body {
 }
 
 /* ==========================================================================
-   9. COMPONENT: Banner Showcase
+   COMPONENT: Banner Showcase
    ========================================================================== */
 .banner {
     position: relative;

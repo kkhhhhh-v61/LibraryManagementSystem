@@ -1,6 +1,6 @@
 ﻿document.addEventListener("DOMContentLoaded", function () {
     /* ==========================================================================
-        1. BANNER SHOWCASE
+        HOME: Banner Showcase
         ========================================================================== */
     const bannerShowcase = document.getElementById("banner-showcase");
     const bannerNav = document.querySelector(".banner__nav");
