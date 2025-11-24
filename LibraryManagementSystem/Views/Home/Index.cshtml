@@ -14,3 +14,66 @@
 </div>
 
 @* TODO: Add dynamic sections such as Featured, Recommended, Trending, New, etc. *@
+
+<div class="book-showcase">
+    <div class="book-showcase__header">
+        <h2 class="book-showcase__title">Featured</h2>
+        <a href="#" class="book-showcase__view-all">View All</a>
+    </div>
+    <div class="book-showcase__list">
+        @for (int i = 1; i <= 10; i++)
+        {
+            <a href="#" class="book-card">
+                <div class="book-card__image-wrapper">
+                    <img class="book-card__image" src="/images/assets/placeholder-book.png" alt="Book Title" />
+                </div>
+                <div class="book-card__info">
+                    <h3 class="book-card__title">Title @i</h3>
+                    <p class="book-card__author">Author @i</p>
+                </div>
+            </a>
+        }
+    </div>
+</div>
+
+<div class="book-showcase">
+    <div class="book-showcase__header">
+        <h2 class="book-showcase__title">Trending</h2>
+        <a href="#" class="book-showcase__view-all">View All</a>
+    </div>
+    <div class="book-showcase__list">
+        @for (int i = 1; i <= 10; i++)
+        {
+            <a href="#" class="book-card">
+                <div class="book-card__image-wrapper">
+                    <img class="book-card__image" src="/images/assets/placeholder-book.png" alt="Book Title" />
+                </div>
+                <div class="book-card__info">
+                    <h3 class="book-card__title">Title @i</h3>
+                    <p class="book-card__author">Author @i</p>
+                </div>
+            </a>
+        }
+    </div>
+</div>
+
+<div class="book-showcase">
+    <div class="book-showcase__header">
+        <h2 class="book-showcase__title">New Arrivals</h2>
+        <a href="#" class="book-showcase__view-all">View All</a>
+    </div>
+    <div class="book-showcase__list">
+        @for (int i = 1; i <= 10; i++)
+        {
+            <a href="#" class="book-card">
+                <div class="book-card__image-wrapper">
+                    <img class="book-card__image" src="/images/assets/placeholder-book.png" alt="Book Title" />
+                </div>
+                <div class="book-card__info">
+                    <h3 class="book-card__title">Title @i</h3>
+                    <p class="book-card__author">Author @i</p>
+                </div>
+            </a>
+        }
+    </div>
+</div>

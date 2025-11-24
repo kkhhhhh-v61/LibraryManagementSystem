@@ -13,7 +13,6 @@
     const images = bannerShowcase.querySelectorAll(".banner__image");
     let currentIndex = 0;
     let autoScrollInterval;
-    let manualNavTimeout;
     const scrollInterval = 5000;
 
     function updateNav(index) {
@@ -56,8 +55,6 @@
         navItem.addEventListener("click", () => {
             scrollToImage(index);
             stopAutoScroll();
-            clearTimeout(manualNavTimeout);
-            manualNavTimeout = setTimeout(startAutoScroll, scrollInterval); // Restart after a delay
         });
         bannerNav.appendChild(navItem);
     });
