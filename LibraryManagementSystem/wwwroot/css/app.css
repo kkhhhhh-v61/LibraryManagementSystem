@@ -24,6 +24,8 @@
     /* Typography */
     --font-family-main: "Nunito Sans", sans-serif;
 
+    /* ! DO NOT use these for main content elements.
+       ! These are only meant for fixed layouts. */
     /* Sizing Preset */
     --fixed-size-xxs: max(0.1vw, 0.1vh);
     --fixed-size-xs: max(0.25vw, 0.25vh);
@@ -91,7 +93,7 @@ body {
     display: flex;
     flex-direction: row;
     align-items: center;
-    padding: var(--fixed-size-sm);
+    padding: var(--fixed-size-sm) var(--fixed-size-xl);
 }
 
 /* ==========================================================================
@@ -218,7 +220,6 @@ body {
     z-index: 1000;
 }
 
-/* Reposition dropdown for utility nav since it's on the right */
 .util-nav__item .dropdown-menu {
     left: auto;
     right: 0;
@@ -249,7 +250,7 @@ body {
 }
 
 .dropdown-menu li a:hover {
-    background-color: var(--color-gray-100); /* This was already correct */
+    background-color: var(--color-gray-100);
     border-radius: var(--fixed-size-xs);
 }
 
@@ -321,12 +322,10 @@ body {
     box-shadow: 0 0 var(--fixed-size-xs) var(--fixed-size-xxs)
         rgba(0, 0, 0, 0.1);
     scroll-behavior: smooth;
-    /* Hide scrollbar */
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 
-/* Hide scrollbar for Chrome, Safari and Opera */
 #banner-showcase::-webkit-scrollbar {
     display: none;
 }

@@ -9,10 +9,10 @@
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap">
         <link rel="stylesheet" href="/css/app.css" asp-append-version="true"/>
-        <link rel="stylesheet" href="/css/room.css" asp-append-version="true" />
         @RenderSection("head", false)
     </head>
     <body>
+        @* TODO: Make the entire header display navigations dynamically *@
         <header class="site-header">
             <a href="/" class="logo">
                 <img class="logo__image" src="/images/icons/favicon.svg" alt="Logo" />
@@ -35,12 +35,7 @@
 
             <nav class="util-nav">
                 <div class="util-nav__item">
-                    <img class="util-nav__icon" src="/images/icons/shelf.svg" alt="Shelf" />
-                    @* <span class="badge">0</span> *@
-                </div>
-                <div class="util-nav__item">
-                    <img class="util-nav__icon" src="/images/icons/basket.svg" alt="Basket" />
-                    @* <span class="badge">0</span> *@
+                    <img class="util-nav__icon" src="/images/icons/wishlist.svg" alt="Wishlist" />
                 </div>
                 <div class="util-nav__item">
                     <img class="util-nav__icon" src="/images/icons/profile.svg" alt="Profile" />
