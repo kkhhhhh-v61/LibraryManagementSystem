@@ -1,0 +1,254 @@
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace LibraryManagementSystem.Models;
+
+#nullable disable warnings
+
+public class LMSDB(DbContextOptions options) : DbContext(options)
+{
+    public DbSet<User> Users { get; set; }
+    public DbSet<Book> Books { get; set; }
+    public DbSet<Genre> Genres { get; set; }
+    public DbSet<Author> Authors { get; set; }
+    public DbSet<Copy> Copies { get; set; }
+    public DbSet<Review> Reviews { get; set; }
+    public DbSet<Loan> Loans { get; set; }
+    public DbSet<Reservation> Reservations { get; set; }
+    public DbSet<Wishlist> Wishlists { get; set; }
+    public DbSet<Room> Rooms { get; set; }
+    public DbSet<RoomCategory> RoomCategories { get; set; }
+    public DbSet<Facility> Facilities { get; set; }
+    public DbSet<Payment> Payments { get; set; }
+    public DbSet<Fine> Fines { get; set; }
+    public DbSet<Booking> Bookings { get; set; }
+
+}
+
+public class User
+{
+    public enum UserRole
+    {
+
+    }
+
+    public enum UserStatus
+    {
+
+    }
+
+    public string Id { get; set; }
+    public string Username { get; set; }
+    public string PasswordHash { get; set; }
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+    public string Email { get; set; }
+    public string ContactNo { get; set; }
+    public UserRole Role { get; set; }
+    public UserStatus Status { get; set; }
+}
+
+public class Book
+{
+    public string Id { get; set; }
+    public string Title { get; set; }
+    public string Description { get; set; }
+    public string ISBN { get; set; }
+    public DateTime PublicationYear { get; set; }
+    public int Edition { get; set; }
+    public string ImageURL { get; set; }
+    
+    public List<Genre> Genres { get; set; } = [];
+    public List<Author> Authors { get; set; } = [];
+}
+
+public class Genre
+{
+    public string Id { get; set; }
+    public string Name { get; set; }
+}
+
+public class Author
+{
+    public string Id { get; set; }
+    public string Name { get; set; }
+}
+
+public class Copy
+{
+    public enum CopyStatus
+    {
+        AVAILABLE,
+        RESERVED,
+        BORROWED
+    }
+
+    public string Id { get; set; }
+    public int barcode { get; set; }
+    public CopyStatus Status { get; set; }
+    public string BookId { get; set; }
+
+    public Book Book { get; set; }
+}
+
+public class Review
+{
+    public string Id { get; set; }
+    public int Rating { get; set; }
+    public string? Comment { get; set; }
+    public DateTime ReviewDate { get; set; }
+    public string LoanId { get; set; }
+
+    public Loan Loan { get; set; }
+}
+
+public class Loan
+{
+    public enum LoanStatus
+    {
+        RESERVED,   // Set when User borrows a book (either directly or by reservation)
+        EXPIRED,    // Set when User doesn't pickup the book before due date
+        IN_LOAN,    // Set after User picks up the book in person
+        RETURNED,   // Set after User returns the book
+        OVERDUE     // Set when User doesn't return the book by due date
+    }
+
+    public string Id { get; set; }
+    public string UserId { get; set; }
+    public string CopyId { get; set; }
+    public DateTime LoanDate { get; set; }
+    public DateTime PickupDue { get; set; }
+    public DateTime? PickupDate { get; set; }
+    public DateTime LoanDue { get; set; }
+    public DateTime? ReturnDate { get; set; }
+    public LoanStatus Status { get; set; }
+
+    public Copy Copy { get; set; }
+    public User User { get; set; }
+    public Review? Review { get; set; }
+}
+
+public class Reservation
+{
+    public enum ReservationStatus
+    {
+        PENDING,    // Set when User's reservation is still waiting in line
+        READY,      // Set when a copy of the book is available and reserved for the User
+        CANCELLED,  // Set when User manually cancels the reservation after a copy is available
+        EXPIRED     // Set when User doesn't perform any action (Borrow or Cancel) in time
+    }
+
+    public string Id { get; set; }
+    public string UserId { get; set; }
+    public string BookId { get; set; }
+    public string? CopyId { get; set; }
+    public DateTime ReservationDate { get; set; }
+    public DateTime? ReservationDue { get; set; }
+    public ReservationStatus Status { get; set; }
+}
+
+[PrimaryKey(nameof(UserId), nameof(BookId))]    // Composite key
+public class Wishlist
+{
+    public string UserId { get; set; }
+    public string BookId { get; set; }
+    public DateTime DateAdded { get; set; }
+
+    public User User { get; set; }
+    public Book Book { get; set; }
+}
+
+public class Room
+{
+    public enum RoomStatus
+    {
+
+    }
+    
+    public string Id { get; set; }
+    public string Name { get; set; }
+    public string Location { get; set; }
+    public int Capacity { get; set; }
+    public RoomStatus Status { get; set; }
+    public string ImageURL { get; set; }
+    public string RoomCategoryId { get; set; }
+
+    public RoomCategory RoomCategory { get; set; }
+}
+
+public class RoomCategory
+{
+    public string Id { get; set; }
+    public string Name { get; set; }
+    public string Decsription { get; set; }
+    public float HourlyRate { get; set; }
+}
+
+public class Facility
+{
+    public string Id { get; set; }
+    public string Name { get; set; }
+}
+
+public class Payment
+{
+    public enum PaymentStatus
+    {
+
+    }
+
+    public enum PaymentType
+    {
+        FINE,
+        BOOKING
+    }
+
+    public enum PaymentMethod
+    {
+
+    }
+
+    public string Id { get; set; }
+    public PaymentType Type { get; set; }
+    public PaymentMethod Method { get; set; }
+    public PaymentStatus Status { get; set; }
+    public DateTime Date { get; set; }
+    public string FineId { get; set; }
+    public string BookingId { get; set; }
+
+    public Fine Fine { get; set; }
+    public Booking Booking { get; set; }
+}
+
+public class Fine
+{
+    public string Id { get; set; }
+    public float Amount { get; set; }
+    public DateTime IssuedDate { get; set; }
+    public DateTime NotificationDate { get; set; }
+    public DateTime DueDate { get; set; }
+    public float OverdueRate { get; set; }
+    public bool isPaid { get; set; }
+    public string LoanId { get; set; }
+
+    public Loan Loan { get; set; }
+}
+
+public class Booking
+{
+    public enum BookingStatus
+    {
+
+    }
+
+    public string Id { get; set; }
+    public string RoomId { get; set; }
+    public string? UserId { get; set; }
+    public string? GuestName { get; set; }
+    public string? GuestContact { get; set; }
+    public DateTime BookingDate { get; set; }
+    public DateTime StartTime { get; set; }
+    public DateTime EndTime { get; set; }
+    public string Reason { get; set; }
+    public float TotalPrice { get; set; }
+    public BookingStatus Status { get; set; }
+}
