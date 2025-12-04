@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace LibraryManagementSystem.Models;
 
@@ -24,11 +26,15 @@ public class LMSDB(DbContextOptions options) : DbContext(options)
 
 }
 
+/* ------------------------------ LAI CHEE KIT ------------------------------ */
+
 public class User
 {
     public enum UserRole
     {
-
+        ADMIN,
+        STAFF,
+        MEMBER
     }
 
     public enum UserStatus
@@ -36,41 +42,83 @@ public class User
 
     }
 
+    [Key]
+    [MaxLength(6)]
     public string Id { get; set; }
+
     public string Username { get; set; }
+
     public string PasswordHash { get; set; }
+
     public string FirstName { get; set; }
+
     public string LastName { get; set; }
+
     public string Email { get; set; }
+
     public string ContactNo { get; set; }
+
     public UserRole Role { get; set; }
+
     public UserStatus Status { get; set; }
+
+    public string ImageURL { get; set; }
 }
+
+
+
+
+/* ------------------------------ TAN KAI HAO ------------------------------ */
 
 public class Book
 {
+    [Key]
+    [MaxLength(6)]
     public string Id { get; set; }
+
+    [MaxLength(255)]
     public string Title { get; set; }
+
+    [MaxLength(2000)]
     public string Description { get; set; }
+
+    [MaxLength(13)]
     public string ISBN { get; set; }
-    public DateTime PublicationYear { get; set; }
+
+    public int PublicationYear { get; set; }
+
     public int Edition { get; set; }
-    public string ImageURL { get; set; }
-    
+
+    [MaxLength(100)]
+    public string? ImageURL { get; set; }
+
     public List<Genre> Genres { get; set; } = [];
+
     public List<Author> Authors { get; set; } = [];
 }
 
 public class Genre
 {
+    [Key]
+    [MaxLength(6)]
     public string Id { get; set; }
+    
+    [MaxLength(50)]
     public string Name { get; set; }
+
+    public List<Book> Books { get; set; } = [];
 }
 
 public class Author
 {
+    [Key]
+    [MaxLength(6)]
     public string Id { get; set; }
+    
+    [MaxLength(100)]
     public string Name { get; set; }
+
+    public List<Book> Books { get; set; } = [];
 }
 
 public class Copy
@@ -82,9 +130,16 @@ public class Copy
         BORROWED
     }
 
+    [Key]
+    [MaxLength(6)]
     public string Id { get; set; }
-    public int barcode { get; set; }
+    
+    [MaxLength(20)]
+    public string Barcode { get; set; }
+    
     public CopyStatus Status { get; set; }
+    
+    [MaxLength(6)]
     public string BookId { get; set; }
 
     public Book Book { get; set; }
@@ -92,10 +147,18 @@ public class Copy
 
 public class Review
 {
+    [Key]
+    [MaxLength(6)]
     public string Id { get; set; }
+    
     public int Rating { get; set; }
+    
+    [MaxLength(2000)]
     public string? Comment { get; set; }
+    
     public DateTime ReviewDate { get; set; }
+    
+    [MaxLength(6)]
     public string LoanId { get; set; }
 
     public Loan Loan { get; set; }
@@ -112,20 +175,54 @@ public class Loan
         OVERDUE     // Set when User doesn't return the book by due date
     }
 
+    [Key]
+    [MaxLength(6)]
     public string Id { get; set; }
+    
+    [MaxLength(6)]
     public string UserId { get; set; }
+    
+    [MaxLength(6)]
     public string CopyId { get; set; }
+    
     public DateTime LoanDate { get; set; }
+    
     public DateTime PickupDue { get; set; }
+    
     public DateTime? PickupDate { get; set; }
+    
     public DateTime LoanDue { get; set; }
+    
     public DateTime? ReturnDate { get; set; }
+    
     public LoanStatus Status { get; set; }
 
     public Copy Copy { get; set; }
+    
     public User User { get; set; }
+    
     public Review? Review { get; set; }
 }
+
+[PrimaryKey("UserId", "BookId")]    // Composite key
+public class Wishlist
+{
+    [MaxLength(6)]
+    public string UserId { get; set; }  // PK
+
+    [MaxLength(6)]
+    public string BookId { get; set; }  // PK
+
+    public DateTime DateAdded { get; set; }
+
+    public User User { get; set; }
+
+    public Book Book { get; set; }
+}
+
+
+
+/* ------------------------------ JASON TYE HONG YI ------------------------------ */
 
 public class Reservation
 {
@@ -137,56 +234,24 @@ public class Reservation
         EXPIRED     // Set when User doesn't perform any action (Borrow or Cancel) in time
     }
 
+    [Key]
+    [MaxLength(6)]
     public string Id { get; set; }
+
+    [MaxLength(6)]
     public string UserId { get; set; }
+
+    [MaxLength(6)]
     public string BookId { get; set; }
+
+    [MaxLength(6)]
     public string? CopyId { get; set; }
+
     public DateTime ReservationDate { get; set; }
+
     public DateTime? ReservationDue { get; set; }
+
     public ReservationStatus Status { get; set; }
-}
-
-[PrimaryKey(nameof(UserId), nameof(BookId))]    // Composite key
-public class Wishlist
-{
-    public string UserId { get; set; }
-    public string BookId { get; set; }
-    public DateTime DateAdded { get; set; }
-
-    public User User { get; set; }
-    public Book Book { get; set; }
-}
-
-public class Room
-{
-    public enum RoomStatus
-    {
-
-    }
-    
-    public string Id { get; set; }
-    public string Name { get; set; }
-    public string Location { get; set; }
-    public int Capacity { get; set; }
-    public RoomStatus Status { get; set; }
-    public string ImageURL { get; set; }
-    public string RoomCategoryId { get; set; }
-
-    public RoomCategory RoomCategory { get; set; }
-}
-
-public class RoomCategory
-{
-    public string Id { get; set; }
-    public string Name { get; set; }
-    public string Decsription { get; set; }
-    public float HourlyRate { get; set; }
-}
-
-public class Facility
-{
-    public string Id { get; set; }
-    public string Name { get; set; }
 }
 
 public class Payment
@@ -207,30 +272,105 @@ public class Payment
 
     }
 
+    [Key]
+    [MaxLength(6)]
     public string Id { get; set; }
-    public PaymentType Type { get; set; }
-    public PaymentMethod Method { get; set; }
-    public PaymentStatus Status { get; set; }
-    public DateTime Date { get; set; }
-    public string FineId { get; set; }
-    public string BookingId { get; set; }
 
-    public Fine Fine { get; set; }
-    public Booking Booking { get; set; }
+    public PaymentType Type { get; set; }
+
+    public PaymentMethod Method { get; set; }
+
+    public PaymentStatus Status { get; set; }
+
+    public DateTime Date { get; set; }
+
+    [MaxLength(6)]
+    public string? FineId { get; set; }
+
+    [MaxLength(6)]
+    public string? BookingId { get; set; }
+
+    public Fine? Fine { get; set; }
+
+    public Booking? Booking { get; set; }
 }
 
 public class Fine
 {
+    [Key]
+    [MaxLength(6)]
     public string Id { get; set; }
+    
     public float Amount { get; set; }
+    
     public DateTime IssuedDate { get; set; }
+    
     public DateTime NotificationDate { get; set; }
+    
     public DateTime DueDate { get; set; }
+    
     public float OverdueRate { get; set; }
+    
     public bool isPaid { get; set; }
+    
+    [MaxLength(6)]
     public string LoanId { get; set; }
 
     public Loan Loan { get; set; }
+}
+
+
+
+
+/* ------------------------------ BRIAN OOI SHU YI ------------------------------ */
+
+public class Room
+{
+    public enum RoomStatus
+    {
+
+    }
+
+    [Key]
+    [MaxLength(6)]
+    public string Id { get; set; }
+
+    public string Name { get; set; }
+
+    public string Location { get; set; }
+
+    public int Capacity { get; set; }
+
+    public RoomStatus Status { get; set; }
+
+    public string ImageURL { get; set; }
+
+    [MaxLength(6)]
+    public string RoomCategoryId { get; set; }
+
+    public RoomCategory RoomCategory { get; set; }
+}
+
+public class RoomCategory
+{
+    [Key]
+    [MaxLength(6)]
+    public string Id { get; set; }
+    
+    public string Name { get; set; }
+    
+    public string Decsription { get; set; }
+    
+    public float HourlyRate { get; set; }
+}
+
+public class Facility
+{
+    [Key]
+    [MaxLength(6)]
+    public string Id { get; set; }
+
+    public string Name { get; set; }
 }
 
 public class Booking
@@ -240,15 +380,29 @@ public class Booking
 
     }
 
+    [Key]
+    [MaxLength(6)]
     public string Id { get; set; }
+
+    [MaxLength(6)]
     public string RoomId { get; set; }
+
+    [MaxLength(6)]
     public string? UserId { get; set; }
+
     public string? GuestName { get; set; }
+
     public string? GuestContact { get; set; }
+
     public DateTime BookingDate { get; set; }
+
     public DateTime StartTime { get; set; }
+
     public DateTime EndTime { get; set; }
+
     public string Reason { get; set; }
+
     public float TotalPrice { get; set; }
+
     public BookingStatus Status { get; set; }
 }
