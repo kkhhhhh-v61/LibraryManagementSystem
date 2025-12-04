@@ -16,65 +16,58 @@
 
 @* TODO: Make the sections load dynamically. *@
 
-<div class="book-showcase">
-    <div class="book-showcase__header">
-        <h2 class="book-showcase__title">Featured</h2>
-        <a href="#" class="book-showcase__view-all">View All</a>
-    </div>
-    <div class="book-showcase__list">
-        @for (int i = 1; i <= 10; i++)
-        {
-            <a href="#" class="book-card">
-                <div class="book-card__image-wrapper">
-                    <img class="book-card__image" src="/images/assets/placeholder-book.png" alt="Book Title" />
-                </div>
-                <div class="book-card__info">
-                    <h3 class="book-card__title">Title @i</h3>
-                    <p class="book-card__author">Author @i</p>
-                </div>
-            </a>
-        }
-    </div>
-</div>
+<section class="book-showcase">
+    <nav class="book-showcase__nav">
+        <button class="book-showcase__nav-button active" data-tab="featured">Featured</button>
+        <button class="book-showcase__nav-button" data-tab="trending">Trending</button>
+        <button class="book-showcase__nav-button" data-tab="new-arrivals">New Arrivals</button>
+    </nav>
 
-<div class="book-showcase">
-    <div class="book-showcase__header">
-        <h2 class="book-showcase__title">Trending</h2>
-        <a href="#" class="book-showcase__view-all">View All</a>
-    </div>
-    <div class="book-showcase__list">
+    <div id="featured" class="book-showcase__grid active">
         @for (int i = 1; i <= 10; i++)
         {
             <a href="#" class="book-card">
-                <div class="book-card__image-wrapper">
-                    <img class="book-card__image" src="/images/assets/placeholder-book.png" alt="Book Title" />
-                </div>
-                <div class="book-card__info">
-                    <h3 class="book-card__title">Title @i</h3>
-                    <p class="book-card__author">Author @i</p>
+                <img class="book-card__image" src="/images/assets/placeholder-book.png" alt="Book Title" />
+                <div class="book-card__overlay">
+                    <h3 class="book-card__title">Featured Book @i</h3>
+                    <p class="book-card__author">Author Name</p>
+                    <div class="book-card__rating">
+                        <span>★★★★☆</span>
+                    </div>
                 </div>
             </a>
         }
     </div>
-</div>
 
-<div class="book-showcase">
-    <div class="book-showcase__header">
-        <h2 class="book-showcase__title">New Arrivals</h2>
-        <a href="#" class="book-showcase__view-all">View All</a>
-    </div>
-    <div class="book-showcase__list">
+    <div id="trending" class="book-showcase__grid">
         @for (int i = 1; i <= 10; i++)
         {
             <a href="#" class="book-card">
-                <div class="book-card__image-wrapper">
-                    <img class="book-card__image" src="/images/assets/placeholder-book.png" alt="Book Title" />
-                </div>
-                <div class="book-card__info">
-                    <h3 class="book-card__title">Title @i</h3>
-                    <p class="book-card__author">Author @i</p>
+                <img class="book-card__image" src="/images/assets/placeholder-book.png" alt="Book Title" />
+                <div class="book-card__overlay">
+                    <h3 class="book-card__title">Trending Book @i</h3>
+                    <p class="book-card__author">Author Name</p>
+                    <div class="book-card__rating">
+                        <span>★★★★☆</span>
+                    </div>
                 </div>
             </a>
         }
     </div>
-</div>
+
+    <div id="new-arrivals" class="book-showcase__grid">
+        @for (int i = 1; i <= 10; i++)
+        {
+            <a href="#" class="book-card">
+                <img class="book-card__image" src="/images/assets/placeholder-book.png" alt="Book Title" />
+                <div class="book-card__overlay">
+                    <h3 class="book-card__title">New Book @i</h3>
+                    <p class="book-card__author">Author Name</p>
+                    <div class="book-card__rating">
+                        <span>★★★★☆</span>
+                    </div>
+                </div>
+            </a>
+        }
+    </div>
+</section>
