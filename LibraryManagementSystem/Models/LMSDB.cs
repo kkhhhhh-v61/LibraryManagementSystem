@@ -19,7 +19,6 @@ public class LMSDB(DbContextOptions options) : DbContext(options)
     public DbSet<Wishlist> Wishlists { get; set; }
     public DbSet<Room> Rooms { get; set; }
     public DbSet<RoomCategory> RoomCategories { get; set; }
-    public DbSet<Facility> Facilities { get; set; }
     public DbSet<Payment> Payments { get; set; }
     public DbSet<Fine> Fines { get; set; }
     public DbSet<Booking> Bookings { get; set; }
@@ -328,15 +327,19 @@ public class Room
 {
     public enum RoomStatus
     {
-
+        AVAILABLE,      // The room that user can select
+        MAINTENANCE,    // The room are in maintenance
+        UNAVAILABLE     // The room that user cant select
     }
 
     [Key]
-    [MaxLength(6)]
+    [MaxLength(3)]
     public string Id { get; set; }
 
+    [MaxLength(10)]
     public string Name { get; set; }
 
+    [MaxLength(20)]
     public string Location { get; set; }
 
     public int Capacity { get; set; }
@@ -345,7 +348,7 @@ public class Room
 
     public string ImageURL { get; set; }
 
-    [MaxLength(6)]
+    [MaxLength(3)]
     public string RoomCategoryId { get; set; }
 
     public RoomCategory RoomCategory { get; set; }
@@ -354,44 +357,43 @@ public class Room
 public class RoomCategory
 {
     [Key]
-    [MaxLength(6)]
+    [MaxLength(3)]
     public string Id { get; set; }
     
+    [MaxLength(25)]
     public string Name { get; set; }
     
+    [MaxLength(40)]
     public string Decsription { get; set; }
-    
-    public float HourlyRate { get; set; }
-}
 
-public class Facility
-{
-    [Key]
-    [MaxLength(6)]
-    public string Id { get; set; }
-
-    public string Name { get; set; }
+    [Precision(2, 1)]
+    public decimal HourlyRate { get; set; }
 }
 
 public class Booking
 {
     public enum BookingStatus
     {
-
+        PENDING,        // The user still making payment
+        CONFIRMED,      // The user done making payment
+        COMPLETED,      // The status confirmed change to completed after the booking time and no be cancel
+        CANCELLED       // The user cancel  the booking after make payment(making refund)
     }
 
     [Key]
     [MaxLength(6)]
     public string Id { get; set; }
 
-    [MaxLength(6)]
+    [MaxLength(3)]
     public string RoomId { get; set; }
 
     [MaxLength(6)]
     public string? UserId { get; set; }
 
+    [MaxLength(30)]
     public string? GuestName { get; set; }
 
+    [MaxLength(12)]
     public string? GuestContact { get; set; }
 
     public DateTime BookingDate { get; set; }
@@ -402,7 +404,8 @@ public class Booking
 
     public string Reason { get; set; }
 
-    public float TotalPrice { get; set; }
+    [Precision(6, 2)]
+    public decimal TotalPrice { get; set; }
 
     public BookingStatus Status { get; set; }
 }
