@@ -36,31 +36,32 @@ public class User
         MEMBER
     }
 
-    public enum UserStatus
-    {
-
-    }
 
     [Key]
     [MaxLength(6)]
     public string Id { get; set; }
 
+    [MaxLength(50)]
     public string Username { get; set; }
 
+    [MaxLength(255)]
     public string PasswordHash { get; set; }
 
+    [MaxLength(50)]
     public string FirstName { get; set; }
 
+    [MaxLength(50)]
     public string LastName { get; set; }
 
+    [MaxLength(255)]
     public string Email { get; set; }
 
+    [MaxLength(20)]
     public string ContactNo { get; set; }
 
     public UserRole Role { get; set; }
 
-    public UserStatus Status { get; set; }
-
+    [MaxLength(255)]
     public string ImageURL { get; set; }
 }
 
