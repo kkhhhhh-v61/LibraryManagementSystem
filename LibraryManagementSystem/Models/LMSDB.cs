@@ -55,7 +55,7 @@ public class User
     [MaxLength(255)]
     public string Email { get; set; }
 
-    [MaxLength(20)]
+    [MaxLength(15)]
     public string ContactNo { get; set; }
 
     public UserRole Role { get; set; }
@@ -257,7 +257,9 @@ public class Payment
 {
     public enum PaymentStatus
     {
-
+        SUCCESS,
+        PENDING,
+        CANCELLED
     }
 
     public enum PaymentType
@@ -268,7 +270,9 @@ public class Payment
 
     public enum PaymentMethod
     {
-
+        E_WALLET,
+        CREDIT_CARD,
+        BANKING
     }
 
     [Key]
@@ -299,8 +303,9 @@ public class Fine
     [Key]
     [MaxLength(6)]
     public string Id { get; set; }
-    
-    public float Amount { get; set; }
+
+    [Precision(8,2)]
+    public decimal Amount { get; set; }
     
     public DateTime IssuedDate { get; set; }
     
@@ -308,7 +313,8 @@ public class Fine
     
     public DateTime DueDate { get; set; }
     
-    public float OverdueRate { get; set; }
+    [Precision(8,2)]
+    public decimal OverdueRate { get; set; }
     
     public bool isPaid { get; set; }
     
