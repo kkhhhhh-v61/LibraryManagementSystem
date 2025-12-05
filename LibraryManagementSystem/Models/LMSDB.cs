@@ -336,22 +336,25 @@ public class Room
     [MaxLength(3)]
     public string Id { get; set; }
 
-    [MaxLength(10)]
+    [MaxLength(50)]
     public string Name { get; set; }
 
-    [MaxLength(20)]
+    [MaxLength(100)]
     public string Location { get; set; }
 
     public int Capacity { get; set; }
 
     public RoomStatus Status { get; set; }
 
+    [MaxLength(100)]
     public string ImageURL { get; set; }
 
     [MaxLength(3)]
     public string RoomCategoryId { get; set; }
 
     public RoomCategory RoomCategory { get; set; }
+
+    public List<Booking> Bookings { get; set; } = [];
 }
 
 public class RoomCategory
@@ -360,14 +363,16 @@ public class RoomCategory
     [MaxLength(3)]
     public string Id { get; set; }
     
-    [MaxLength(25)]
+    [MaxLength(50)]
     public string Name { get; set; }
     
-    [MaxLength(40)]
-    public string Decsription { get; set; }
-
-    [Precision(2, 1)]
+    [MaxLength(500)]
+    public string Description { get; set; }
+        
+    [Precision(8, 2)]
     public decimal HourlyRate { get; set; }
+
+    public List<Room> Rooms { get; set; } = [];
 }
 
 public class Booking
@@ -387,13 +392,17 @@ public class Booking
     [MaxLength(3)]
     public string RoomId { get; set; }
 
+    public Room Room { get; set; }
+
     [MaxLength(6)]
     public string? UserId { get; set; }
 
-    [MaxLength(30)]
+    public User? User { get; set; }
+
+    [MaxLength(100)]
     public string? GuestName { get; set; }
 
-    [MaxLength(12)]
+    [MaxLength(15)]
     public string? GuestContact { get; set; }
 
     public DateTime BookingDate { get; set; }
@@ -402,10 +411,13 @@ public class Booking
 
     public DateTime EndTime { get; set; }
 
-    public string Reason { get; set; }
-
-    [Precision(6, 2)]
+    [Precision(8, 2)]
     public decimal TotalPrice { get; set; }
 
     public BookingStatus Status { get; set; }
+
+    [MaxLength(250)]
+    public string? CancellationReason { get; set; }
+
+    public DateTime? CancelledAt { get; set; }
 }
