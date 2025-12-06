@@ -22,7 +22,7 @@
     --text-failure: #c62828;
 
     /* Typography */
-    --font-family-main: "Nunito Sans", sans-serif;
+    --font-family-main: "", sans-serif;
 
     /* ! DO NOT use these for main content elements.
        ! These are only meant for fixed layouts. */
@@ -212,12 +212,13 @@ body {
     position: absolute;
     top: 120%;
     left: 0;
+    width: max-content;
     background-color: var(--color-white);
-    min-width: 200px;
-    border-radius: var(--fixed-size-xs);
+    min-width: 10rem;
+    border-radius: 0.5rem;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
     list-style: none;
-    padding: var(--fixed-size-xs);
+    padding: 0.5rem;
     margin: 0;
     z-index: 1000;
 }
@@ -237,28 +238,28 @@ body {
 .dropdown-menu__link {
     display: flex;
     align-items: center;
-    gap: var(--fixed-size-xs);
-    padding: var(--fixed-size-xs);
+    gap: 0.5rem;
+    padding: 0.5rem;
     color: var(--text-primary);
     text-decoration: none;
-    font-size: var(--fixed-size-md);
+    font-size: 1.25rem;
 }
 
 .dropdown-menu__icon {
     display: block;
-    height: calc(var(--fixed-size-md) * 1.25);
+    height: 1.25rem;
     aspect-ratio: 1;
     object-fit: contain;
 }
 
 .dropdown-menu li a:hover {
     background-color: var(--color-gray-100);
-    border-radius: var(--fixed-size-xxs);
+    border-radius: 0.25rem;
 }
 
 .dropdown-menu__separator {
-    height: var(--fixed-size-xxxs);
-    margin: var(--fixed-size-xxs) var(--fixed-size-xs);
+    height: 1px;
+    margin: 0.25rem 0.5rem;
     background-color: var(--color-gray-100);
 }
 
@@ -491,7 +492,7 @@ body {
     overflow-x: auto;
     flex-wrap: nowrap;
     gap: 1rem;
-    padding-bottom: 1rem; /* Add some space for the scrollbar */
+    padding-bottom: 1rem;
 }
 
 .book-card {
@@ -502,7 +503,7 @@ body {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     text-decoration: none;
-    flex: 0 0 160px; /* Prevent shrinking and set a base width */
+    flex: 0 0 160px;
     width: 160px;
 }
 

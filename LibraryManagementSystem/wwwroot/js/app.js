@@ -76,9 +76,6 @@
         startAutoScroll();
     });
 
-    bannerWrapper.addEventListener("mouseenter", stopAutoScroll);
-    bannerWrapper.addEventListener("mouseleave", startAutoScroll);
-
     showSlide(0);
     startAutoScroll();
 });
