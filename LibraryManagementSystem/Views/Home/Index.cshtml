@@ -24,13 +24,11 @@
 @* TODO: Make the sections load dynamically. *@
 
 <section class="book-showcase">
-    <nav class="book-showcase__nav">
-        <button class="book-showcase__nav-button active" data-tab="featured">Featured</button>
-        <button class="book-showcase__nav-button" data-tab="trending">Trending</button>
-        <button class="book-showcase__nav-button" data-tab="new-arrivals">New Arrivals</button>
-    </nav>
-
-    <div id="featured" class="book-showcase__grid active">
+    <div class="book-showcase__header">
+        <h2 class="book-showcase__title">Featured</h2>
+        <a href="#" class="book-showcase__view-all">View All</a>
+    </div>
+    <div class="book-showcase__content">
         @for (int i = 1; i <= 10; i++)
         {
             <a href="#" class="book-card">
@@ -45,8 +43,14 @@
             </a>
         }
     </div>
+</section>
 
-    <div id="trending" class="book-showcase__grid">
+<section class="book-showcase">
+    <div class="book-showcase__header">
+        <h2 class="book-showcase__title">Trending</h2>
+        <a href="#" class="book-showcase__view-all">View All</a>
+    </div>
+    <div class="book-showcase__content">
         @for (int i = 1; i <= 10; i++)
         {
             <a href="#" class="book-card">
@@ -61,8 +65,14 @@
             </a>
         }
     </div>
+</section>
 
-    <div id="new-arrivals" class="book-showcase__grid">
+<section class="book-showcase">
+    <div class="book-showcase__header">
+        <h2 class="book-showcase__title">New Arrivals</h2>
+        <a href="#" class="book-showcase__view-all">View All</a>
+    </div>
+    <div class="book-showcase__content">
         @for (int i = 1; i <= 10; i++)
         {
             <a href="#" class="book-card">
