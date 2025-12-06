@@ -1,7 +1,7 @@
 ﻿document.addEventListener("DOMContentLoaded", function () {
     /* ==========================================================================
-        HOME: Banner Showcase
-        ========================================================================== */
+       HOME: Banner Showcase
+       ========================================================================== */
     const bannerShowcase = document.getElementById("banner-showcase");
     const bannerNav = document.querySelector(".banner__nav");
     const bannerWrapper = document.querySelector(".banner");
@@ -83,8 +83,8 @@
     startAutoScroll();
 
     /* ==========================================================================
-        HOME: Book Showcase
-        ========================================================================== */
+       HOME: Book Showcase
+       ========================================================================== */
     const navButtons = document.querySelectorAll(".book-showcase__nav-button");
     const grids = document.querySelectorAll(".book-showcase__grid");
 

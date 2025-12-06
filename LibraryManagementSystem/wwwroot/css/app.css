@@ -26,14 +26,16 @@
 
     /* ! DO NOT use these for main content elements.
        ! These are only meant for fixed layouts. */
-    /* Sizing Preset */
-    --fixed-size-xxs: max(0.1vw, 0.1vh);
-    --fixed-size-xs: max(0.25vw, 0.25vh);
-    --fixed-size-sm: max(0.5vw, 0.5vh);
-    --fixed-size-md: max(0.75vw, 0.75vh);
-    --fixed-size-lg: max(1vw, 1vh);
+    /* Fixed Sizing Preset */
+    --fixed-size-xxxs: max(0.1vw, 0.1vh);
+    --fixed-size-xxs: max(0.25vw, 0.25vh);
+    --fixed-size-xs: max(0.5vw, 0.5vh);
+    --fixed-size-sm: max(0.75vw, 0.75vh);
+    --fixed-size-md: max(1vw, 1vh);
+    --fixed-size-lg: max(1.25vw, 1.25vh);
     --fixed-size-xl: max(1.5vw, 1.5vh);
-    --fixed-size-xxl: max(2vw, 2vh);
+    --fixed-size-xxl: max(1.75vw, 1.75vh);
+    --fixed-size-xxxl: max(2vw, 2vh);
 }
 
 /* ==========================================================================
@@ -93,7 +95,7 @@ body {
     display: flex;
     flex-direction: row;
     align-items: center;
-    padding: var(--fixed-size-sm) var(--fixed-size-xl);
+    padding: var(--fixed-size-xs) var(--fixed-size-xl);
 }
 
 /* ==========================================================================
@@ -105,12 +107,12 @@ body {
     display: flex;
     align-items: center;
     text-decoration: none;
-    padding: 0 var(--fixed-size-sm);
+    padding: 0 var(--fixed-size-xs);
 }
 
 .logo__image {
     display: block;
-    height: calc(100% - var(--fixed-size-xxl));
+    height: calc(100% - var(--fixed-size-xxxl));
     aspect-ratio: 1;
 }
 
@@ -135,7 +137,7 @@ body {
 
 .main-nav__list {
     display: flex;
-    gap: var(--fixed-size-xxl);
+    gap: var(--fixed-size-xxxl);
     list-style: none;
     overflow: visible;
 }
@@ -162,7 +164,7 @@ body {
     left: 50%;
     transform: translateX(-50%);
     width: 0;
-    height: var(--fixed-size-xxs);
+    height: var(--fixed-size-xxxs);
     background-color: var(--text-primary);
     transition: width 0.3s ease-in-out;
 }
@@ -180,8 +182,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: var(--fixed-size-lg);
-    padding: 0 var(--fixed-size-sm);
+    gap: var(--fixed-size-md);
+    padding: 0 var(--fixed-size-xs);
 }
 
 .util-nav__item {
@@ -212,10 +214,10 @@ body {
     left: 0;
     background-color: var(--color-white);
     min-width: 200px;
-    border-radius: var(--fixed-size-sm);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: var(--fixed-size-xs);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
     list-style: none;
-    padding: var(--fixed-size-sm);
+    padding: var(--fixed-size-xs);
     margin: 0;
     z-index: 1000;
 }
@@ -235,28 +237,28 @@ body {
 .dropdown-menu__link {
     display: flex;
     align-items: center;
-    gap: var(--fixed-size-sm);
-    padding: var(--fixed-size-sm);
+    gap: var(--fixed-size-xs);
+    padding: var(--fixed-size-xs);
     color: var(--text-primary);
     text-decoration: none;
-    font-size: var(--fixed-size-lg);
+    font-size: var(--fixed-size-md);
 }
 
 .dropdown-menu__icon {
     display: block;
-    height: calc(var(--fixed-size-lg) * 1.25);
+    height: calc(var(--fixed-size-md) * 1.25);
     aspect-ratio: 1;
     object-fit: contain;
 }
 
 .dropdown-menu li a:hover {
     background-color: var(--color-gray-100);
-    border-radius: var(--fixed-size-xs);
+    border-radius: var(--fixed-size-xxs);
 }
 
 .dropdown-menu__separator {
-    height: var(--fixed-size-xxs);
-    margin: var(--fixed-size-xs) var(--fixed-size-sm);
+    height: var(--fixed-size-xxxs);
+    margin: var(--fixed-size-xxs) var(--fixed-size-xs);
     background-color: var(--color-gray-100);
 }
 
@@ -266,11 +268,11 @@ body {
 .main-content {
     width: calc(100% - var(--fixed-size-xl));
     height: 85%;
-    margin: 0 var(--fixed-size-md);
-    padding: var(--fixed-size-sm);
+    margin: 0 var(--fixed-size-sm);
+    padding: var(--fixed-size-xs);
     background-color: var(--color-gray-100);
-    border-radius: var(--fixed-size-md);
-    box-shadow: inset 0 0 var(--fixed-size-xs) var(--fixed-size-xxs)
+    border-radius: var(--fixed-size-sm);
+    box-shadow: inset 0 0 var(--fixed-size-xxs) var(--fixed-size-xxxs)
         var(--color-gray-300);
 }
 
@@ -278,7 +280,7 @@ body {
     width: 100%;
     height: 100%;
     overflow: auto;
-    padding: var(--fixed-size-sm);
+    padding: var(--fixed-size-xs);
 }
 
 /* ==========================================================================
@@ -293,7 +295,7 @@ body {
 }
 
 .site-footer__text {
-    font-size: var(--fixed-size-lg);
+    font-size: var(--fixed-size-md);
     color: var(--text-primary);
 }
 

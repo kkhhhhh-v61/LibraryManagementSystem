@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LibraryManagementSystem.Migrations
 {
     [DbContext(typeof(LMSDB))]
-    [Migration("20251205065213_CreateLMSDB")]
+    [Migration("20251206034501_CreateLMSDB")]
     partial class CreateLMSDB
     {
         /// <inheritdoc />
@@ -93,6 +93,9 @@ namespace LibraryManagementSystem.Migrations
                     b.Property<string>("ImageURL")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("IsFeatured")
+                        .HasColumnType("bit");
 
                     b.Property<int>("PublicationYear")
                         .HasColumnType("int");
@@ -201,6 +204,9 @@ namespace LibraryManagementSystem.Migrations
                     b.Property<DateTime>("DueDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsPaid")
+                        .HasColumnType("bit");
+
                     b.Property<DateTime>("IssuedDate")
                         .HasColumnType("datetime2");
 
@@ -215,9 +221,6 @@ namespace LibraryManagementSystem.Migrations
                     b.Property<decimal>("OverdueRate")
                         .HasPrecision(8, 2)
                         .HasColumnType("decimal(8,2)");
-
-                    b.Property<bool>("isPaid")
-                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 
