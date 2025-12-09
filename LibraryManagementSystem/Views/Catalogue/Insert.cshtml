@@ -1,3 +1,25 @@
-﻿@{
+﻿@model BookInsertVM;
+
+@{
     ViewBag.Title = "Insert";
 }
+
+@section head {
+    <link rel="stylesheet" href="/css/catalogue.css" asp-append-version="true" />
+}
+
+@* TODO: Add dynamic preview of what users see when inserting book. *@
+
+<section class="book-preview"></section>
+
+<section class="book-insert">
+    <form class="book-insert__form">
+        <div asp-validation-summary="ModelOnly"></div>
+
+        <div class=book-insert__field-item>
+            <label class="book-insert__label" asp-for="Title"></label>
+            <input class="book-insert__input" asp-for="Title" data-trim autofocus />
+            <span class="book-insert__validation-error" asp-validation-for="Title"></span>
+        </div>
+    </form>
+</section>

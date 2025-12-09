@@ -7,29 +7,7 @@ builder.Services.AddSqlServer<LMSDB>($@"
     AttachDbFilename={builder.Environment.ContentRootPath}\LMSDB.mdf;
 ");
 
-builder.Services.AddWebOptimizer(pipeline =>
-{
-    pipeline.AddCssBundle(
-        "/bundle.css",
-        "/css/app.css",
-        "/css/booking.css",
-        "/css/catalogue.css",
-        "/css/room.css"
-    );
-
-    pipeline.AddJavaScriptBundle(
-        "/bundle.js",
-        "/js/app.js",
-        "/js/catalogue.js",
-        "/js/jquery.min.js",
-        "/js/jquery.unobtrusive-ajax.min.js",
-        "/js/jquery.validate.min.js",
-        "/js/jquery.validate.unobtrusive.min.js"
-    );
-});
-
 var app = builder.Build();
-app.UseWebOptimizer();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.MapDefaultControllerRoute();

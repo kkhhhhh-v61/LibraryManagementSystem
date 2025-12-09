@@ -1,1 +1,66 @@
-﻿
+﻿/* ============================================================
+   LAYOUT: Override
+   ============================================================ */
+.main-content-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ============================================================
+   COMPONENT: Book Insert
+   ============================================================ */
+.book-insert {
+    flex: 1;
+    height: 100%;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-white);
+    border-radius: 0.5rem;
+    box-shadow: 0 0.25rem 0.75rem var(--color-black-t-10);
+}
+
+.book-insert__field-item {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.book-insert__label {
+    margin: 0.25rem 0.5rem;
+    font-size: 1.75rem;
+    font-weight: 700;
+}
+
+.book-insert__input {
+    width: 600px;
+    height: 50px;
+    padding: 0.25rem 0.5rem;
+    border: 2px solid var(--color-gray-300);
+    border-radius: 0.25rem;
+    outline: none;
+    font-size: 1.5rem;
+    transition: border 0.3s ease;
+}
+
+.book-insert__input:focus {
+    border: 2px solid var(--color-black);
+}
+
+.book-insert__validation-error {
+    margin: 0.25rem 0.5rem;
+    color: var(--text-failure);
+    font-size: 1.25rem;
+}
+
+.book-insert__field-item:has(.input-validation-error) .book-insert__label {
+    color: var(--text-failure);
+}
+
+.book-insert__input.input-validation-error {
+    border-color: var(--text-failure);
+}
