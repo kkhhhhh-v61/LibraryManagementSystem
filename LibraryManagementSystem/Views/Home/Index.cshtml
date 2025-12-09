@@ -31,7 +31,7 @@
     <div class="book-showcase__content">
         @for (int i = 1; i <= 10; i++)
         {
-            <a href="#" class="book-card">
+            <a asp-controller="Catalogue" asp-action="Detail" class="book-card">
                 <img class="book-card__image" src="/images/assets/placeholder-book.png" alt="Book Title" />
                 <div class="book-card__overlay">
                     <h3 class="book-card__title">Featured Book @i</h3>
@@ -53,7 +53,7 @@
     <div class="book-showcase__content">
         @for (int i = 1; i <= 10; i++)
         {
-            <a href="#" class="book-card">
+            <a asp-controller="Catalogue" asp-action="Detail" class="book-card">
                 <img class="book-card__image" src="/images/assets/placeholder-book.png" alt="Book Title" />
                 <div class="book-card__overlay">
                     <h3 class="book-card__title">Trending Book @i</h3>
@@ -75,7 +75,7 @@
     <div class="book-showcase__content">
         @for (int i = 1; i <= 10; i++)
         {
-            <a href="#" class="book-card">
+            <a asp-controller="Catalogue" asp-action="Detail" class="book-card">
                 <img class="book-card__image" src="/images/assets/placeholder-book.png" alt="Book Title" />
                 <div class="book-card__overlay">
                     <h3 class="book-card__title">New Book @i</h3>
