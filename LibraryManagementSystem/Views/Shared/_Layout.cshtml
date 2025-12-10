@@ -7,7 +7,8 @@
         <link rel="icon" type="image/x-icon" href="/images/icons/favicon.svg" />
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sansation:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap">
         <link rel="stylesheet" href="/css/app.css" asp-append-version="true"/>
         @RenderSection("head", false)
     </head>
@@ -22,9 +23,15 @@
             <nav class="main-nav">
                 <ul class="main-nav__list">
                     <li class="main-nav__item"><a class="main-nav__link" href="/">Home</a></li>
-                    <li class="main-nav__item"><a class="main-nav__link" asp-controller="Catalogue" asp-action="Browse">Catalogue</a></li>
                     <li class="main-nav__item">
-                        <a class="main-nav__link" href="/">Facility</a>
+                        <a class="main-nav__link" asp-controller="Catalogue" asp-action="Browse">Catalogue</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-menu__link" asp-controller="Catalogue" asp-action="Browse">Browse</a></li>
+                            <li><a class="dropdown-menu__link" asp-controller="Catalogue" asp-action="Insert">Insert</a></li>
+                        </ul>
+                    </li>
+                    <li class="main-nav__item">
+                        <a class="main-nav__link" href="#">Facility</a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-menu__link" asp-controller="RoomCategories" asp-action="Index">Room Setup</a></li>
                             <li><a class="dropdown-menu__link" asp-controller="RoomBooking" asp-action="StaffDashboard">Staff Dashboard</a></li>
@@ -58,10 +65,10 @@
             <p class="site-footer__text">Copyright &copy; <a class="site-footer__link" href="/">@ViewBag.System</a>. @DateTime.Now.Year. All Rights Reserved.</p>
         </footer>
 
-        <script src="jquery.min.js">
-        <script src="jquery.unobtrusive-ajax.min.js"></script>
-        <script src="jquery.validate.min.js"></script>
-        <script src="jquery.validate.unobtrusive.min.js"></script>
+        <script src="/js/jquery.min.js" asp-append-version="true"></script>
+        <script src="/js/jquery.unobtrusive-ajax.min.js" asp-append-version="true"></script>
+        <script src="/js/jquery.validate.min.js" asp-append-version="true"></script>
+        <script src="/js/jquery.validate.unobtrusive.min.js" asp-append-version="true"></script>
         <script src="/js/app.js" asp-append-version="true"></script>
         @RenderSection("foot", false)
     </body>

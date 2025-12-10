@@ -1,6 +1,6 @@
-﻿/* ==========================================================================
+﻿/* ============================================================
    CORE: Design System & Variables
-   ========================================================================== */
+   ============================================================ */
 :root {
     /* White & Black Palette */
     --color-white: #ffffff;
@@ -13,6 +13,21 @@
     --color-gray-700: #202020;
     --color-black: #000000;
 
+    /* Brand & Accent Colors */
+    --color-accent-yellow: #ffc107;
+
+    /* Opacity/Transparent Colors */
+    --color-transparent: rgba(0, 0, 0, 0);
+    --color-black-t-10: rgba(0, 0, 0, 0.1);
+    --color-black-t-20: rgba(0, 0, 0, 0.2);
+    --color-black-t-40: rgba(0, 0, 0, 0.4);
+    --color-black-t-50: rgba(0, 0, 0, 0.5);
+    --color-black-t-60: rgba(0, 0, 0, 0.6);
+    --color-black-t-70: rgba(0, 0, 0, 0.7);
+    --color-black-t-80: rgba(0, 0, 0, 0.8);
+    --color-white-t-50: rgba(255, 255, 255, 0.5);
+    --color-white-t-80: rgba(255, 255, 255, 0.8);
+
     /* Text Colors */
     --text-primary: var(--color-black);
     --text-highlight: var(--color-gray-600);
@@ -22,23 +37,25 @@
     --text-failure: #c62828;
 
     /* Typography */
-    --font-family-main: "Nunito Sans", sans-serif;
+    --font-family-main: "Sansation", "Nunito", sans-serif;
 
     /* ! DO NOT use these for main content elements.
        ! These are only meant for fixed layouts. */
-    /* Sizing Preset */
-    --fixed-size-xxs: max(0.1vw, 0.1vh);
-    --fixed-size-xs: max(0.25vw, 0.25vh);
-    --fixed-size-sm: max(0.5vw, 0.5vh);
-    --fixed-size-md: max(0.75vw, 0.75vh);
-    --fixed-size-lg: max(1vw, 1vh);
+    /* Fixed Sizing Preset */
+    --fixed-size-xxxs: max(0.1vw, 0.1vh);
+    --fixed-size-xxs: max(0.25vw, 0.25vh);
+    --fixed-size-xs: max(0.5vw, 0.5vh);
+    --fixed-size-sm: max(0.75vw, 0.75vh);
+    --fixed-size-md: max(1vw, 1vh);
+    --fixed-size-lg: max(1.25vw, 1.25vh);
     --fixed-size-xl: max(1.5vw, 1.5vh);
-    --fixed-size-xxl: max(2vw, 2vh);
+    --fixed-size-xxl: max(1.75vw, 1.75vh);
+    --fixed-size-xxxl: max(2vw, 2vh);
 }
 
-/* ==========================================================================
+/* ============================================================
    CORE: Base & Global Styles
-   ========================================================================== */
+   ============================================================ */
 * {
     margin: 0;
     padding: 0;
@@ -81,36 +98,36 @@ body {
 }
 
 *::-webkit-scrollbar-thumb:hover {
-    background-color: #888;
+    background-color: var(--color-gray-400);
 }
 
-/* ==========================================================================
+/* ============================================================
    LAYOUT: Site Header
-   ========================================================================== */
+   ============================================================ */
 .site-header {
     width: 100%;
     height: 10%;
     display: flex;
     flex-direction: row;
     align-items: center;
-    padding: var(--fixed-size-sm) var(--fixed-size-xl);
+    padding: var(--fixed-size-xs) var(--fixed-size-xl);
 }
 
-/* ==========================================================================
+/* ============================================================
    COMPONENT: Logo
-   ========================================================================== */
+   ============================================================ */
 .logo {
     width: 12.5%;
     height: 100%;
     display: flex;
     align-items: center;
     text-decoration: none;
-    padding: 0 var(--fixed-size-sm);
+    padding: 0 var(--fixed-size-xs);
 }
 
 .logo__image {
     display: block;
-    height: calc(100% - var(--fixed-size-xxl));
+    height: calc(100% - var(--fixed-size-xxxl));
     aspect-ratio: 1;
 }
 
@@ -122,9 +139,9 @@ body {
     font-weight: 700;
 }
 
-/* ==========================================================================
+/* ============================================================
    COMPONENT: Main Navigation
-   ========================================================================== */
+   ============================================================ */
 .main-nav {
     width: 75%;
     height: 100%;
@@ -135,7 +152,7 @@ body {
 
 .main-nav__list {
     display: flex;
-    gap: var(--fixed-size-xxl);
+    gap: var(--fixed-size-xxxl);
     list-style: none;
     overflow: visible;
 }
@@ -162,7 +179,7 @@ body {
     left: 50%;
     transform: translateX(-50%);
     width: 0;
-    height: var(--fixed-size-xxs);
+    height: var(--fixed-size-xxxs);
     background-color: var(--text-primary);
     transition: width 0.3s ease-in-out;
 }
@@ -171,17 +188,17 @@ body {
     width: 100%;
 }
 
-/* ==========================================================================
+/* ============================================================
    COMPONENT: Utility Navigation
-   ========================================================================== */
+   ============================================================ */
 .util-nav {
     width: 12.5%;
     height: 100%;
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: var(--fixed-size-lg);
-    padding: 0 var(--fixed-size-sm);
+    gap: var(--fixed-size-md);
+    padding: 0 var(--fixed-size-xs);
 }
 
 .util-nav__item {
@@ -198,9 +215,9 @@ body {
     object-fit: contain;
 }
 
-/* ==========================================================================
+/* ============================================================
    COMPONENT: Dropdown Menu
-   ========================================================================== */
+   ============================================================ */
 .dropdown-menu {
     opacity: 0;
     visibility: hidden;
@@ -210,12 +227,13 @@ body {
     position: absolute;
     top: 120%;
     left: 0;
+    width: max-content;
     background-color: var(--color-white);
-    min-width: 200px;
-    border-radius: var(--fixed-size-sm);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    min-width: 10rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.25rem 0.75rem var(--color-black-t-50);
     list-style: none;
-    padding: var(--fixed-size-sm);
+    padding: 0.5rem;
     margin: 0;
     z-index: 1000;
 }
@@ -235,42 +253,43 @@ body {
 .dropdown-menu__link {
     display: flex;
     align-items: center;
-    gap: var(--fixed-size-sm);
-    padding: var(--fixed-size-sm);
-    color: var(--text-primary);
+    gap: 0.5rem;
+    padding: 0.5rem;
+    color: var(--text-dimmed);
     text-decoration: none;
-    font-size: var(--fixed-size-lg);
+    font-size: 1.25rem;
 }
 
 .dropdown-menu__icon {
     display: block;
-    height: calc(var(--fixed-size-lg) * 1.25);
+    height: 1.25rem;
     aspect-ratio: 1;
     object-fit: contain;
 }
 
 .dropdown-menu li a:hover {
     background-color: var(--color-gray-100);
-    border-radius: var(--fixed-size-xs);
+    border-radius: 0.25rem;
+    color: var(--text-primary);
 }
 
 .dropdown-menu__separator {
-    height: var(--fixed-size-xxs);
-    margin: var(--fixed-size-xs) var(--fixed-size-sm);
+    height: 1px;
+    margin: 0.25rem 0.5rem;
     background-color: var(--color-gray-100);
 }
 
-/* ==========================================================================
+/* ============================================================
    LAYOUT: Main Content Area
-   ========================================================================== */
+   ============================================================ */
 .main-content {
     width: calc(100% - var(--fixed-size-xl));
     height: 85%;
-    margin: 0 var(--fixed-size-md);
-    padding: var(--fixed-size-sm);
+    margin: 0 var(--fixed-size-sm);
+    padding: var(--fixed-size-xs);
     background-color: var(--color-gray-100);
-    border-radius: var(--fixed-size-md);
-    box-shadow: inset 0 0 var(--fixed-size-xs) var(--fixed-size-xxs)
+    border-radius: var(--fixed-size-sm);
+    box-shadow: inset 0 0 var(--fixed-size-xxs) var(--fixed-size-xxxs)
         var(--color-gray-300);
 }
 
@@ -278,12 +297,12 @@ body {
     width: 100%;
     height: 100%;
     overflow: auto;
-    padding: var(--fixed-size-sm);
+    padding: var(--fixed-size-xs);
 }
 
-/* ==========================================================================
+/* ============================================================
    LAYOUT: Site Footer
-   ========================================================================== */
+   ============================================================ */
 .site-footer {
     width: 100%;
     height: 5%;
@@ -293,7 +312,7 @@ body {
 }
 
 .site-footer__text {
-    font-size: var(--fixed-size-lg);
+    font-size: var(--fixed-size-md);
     color: var(--text-primary);
 }
 
@@ -302,16 +321,16 @@ body {
     color: var(--text-primary);
 }
 
-/* ==========================================================================
+/* ============================================================
    COMPONENT: Banner Showcase
-   ========================================================================== */
+   ============================================================ */
 .banner {
     position: relative;
     height: 100%;
     width: 100%;
     border-radius: 0.5rem;
     overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0.25rem 0.75rem var(--color-black-t-10);
 }
 
 #banner-showcase {
@@ -350,7 +369,7 @@ body {
     left: 0;
     width: 100%;
     height: 60%;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
+    background: linear-gradient(to top, var(--color-black-t-60), transparent);
     z-index: 2;
     transition: opacity 0.8s ease-in-out;
 }
@@ -395,8 +414,8 @@ body {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    background-color: rgba(0, 0, 0, 0.4);
-    color: white;
+    background-color: var(--color-black-t-40);
+    color: var(--color-white);
     border: none;
     font-size: 2rem;
     padding: 0.5rem 1rem;
@@ -406,7 +425,7 @@ body {
 }
 
 .banner__arrow:hover {
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: var(--color-black-t-70);
 }
 
 .banner__arrow--prev {
@@ -432,77 +451,64 @@ body {
 .banner__nav-item {
     width: 2.5rem;
     height: 0.5rem;
-    background-color: rgba(255, 255, 255, 0.5);
+    background-color: var(--color-white-t-50);
     border-radius: 0.25rem;
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
 
 .banner__nav-item:hover {
-    background-color: rgba(255, 255, 255, 0.8);
+    background-color: var(--color-white-t-80);
 }
 
 .banner__nav-item.active {
-    background-color: white;
+    background-color: var(--color-white);
 }
 
-/* ==========================================================================
+/* ============================================================
    COMPONENT: Book Showcase
-   ========================================================================== */
+   ============================================================ */
 .book-showcase {
     margin-top: 2rem;
     width: 100%;
     position: relative;
 }
 
-.book-showcase__nav {
+.book-showcase__header {
     display: flex;
-    gap: 1rem;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 1rem;
     border-bottom: 1px solid var(--color-gray-200);
+    padding-bottom: 0.5rem;
 }
 
-.book-showcase__nav-button {
-    padding: 0.5rem 1rem;
-    font-size: 1.25rem;
+.book-showcase__title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 0;
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.book-showcase__view-all {
+    font-size: 1rem;
     font-weight: 600;
-    border: none;
-    background-color: transparent;
-    cursor: pointer;
-    color: var(--text-dimmed);
-    position: relative;
+    color: var(--text-highlight);
+    text-decoration: none;
     transition: color 0.3s ease;
 }
 
-.book-showcase__nav-button::after {
-    content: "";
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background-color: var(--text-highlight);
-    transform: scaleX(0);
-    transition: transform 0.3s ease;
-}
-
-.book-showcase__nav-button.active,
-.book-showcase__nav-button:hover {
+.book-showcase__view-all:hover {
     color: var(--text-primary);
 }
 
-.book-showcase__nav-button.active::after {
-    transform: scaleX(1);
-}
-
-.book-showcase__grid {
-    display: none;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+.book-showcase__content {
+    display: flex;
+    overflow-x: auto;
+    flex-wrap: nowrap;
     gap: 1rem;
-}
-
-.book-showcase__grid.active {
-    display: grid;
+    padding-bottom: 1rem;
 }
 
 .book-card {
@@ -510,14 +516,16 @@ body {
     aspect-ratio: 2 / 3;
     border-radius: 0.25rem;
     overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0.25rem 0.75rem var(--color-black-t-10);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     text-decoration: none;
+    flex: 0 0 10rem;
+    width: 10rem;
 }
 
 .book-card:hover {
     transform: translateY(-8px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 0.5rem 1.25rem var(--color-black-t-20);
 }
 
 .book-card__image {
@@ -536,8 +544,8 @@ body {
     inset: 0;
     background: linear-gradient(
         to top,
-        rgba(0, 0, 0, 0.8) 25%,
-        rgba(0, 0, 0, 0) 100%
+        var(--color-black-t-80) 25%,
+        var(--color-transparent) 100%
     );
     color: var(--color-white);
     padding: 0.75rem;
@@ -562,7 +570,7 @@ body {
 
 .book-card__rating {
     font-size: 0.9rem;
-    color: #ffc107;
+    color: var(--color-accent-yellow);
 }
 
 .book-card:hover .book-card__overlay {

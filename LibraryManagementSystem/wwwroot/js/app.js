@@ -1,7 +1,7 @@
 ﻿document.addEventListener("DOMContentLoaded", function () {
-    /* ==========================================================================
-        HOME: Banner Showcase
-        ========================================================================== */
+    /* ============================================================
+       HOME: Banner Showcase
+       ============================================================ */
     const bannerShowcase = document.getElementById("banner-showcase");
     const bannerNav = document.querySelector(".banner__nav");
     const bannerWrapper = document.querySelector(".banner");
@@ -76,32 +76,6 @@
         startAutoScroll();
     });
 
-    bannerWrapper.addEventListener("mouseenter", stopAutoScroll);
-    bannerWrapper.addEventListener("mouseleave", startAutoScroll);
-
     showSlide(0);
     startAutoScroll();
-
-    /* ==========================================================================
-        HOME: Book Showcase
-        ========================================================================== */
-    const navButtons = document.querySelectorAll(".book-showcase__nav-button");
-    const grids = document.querySelectorAll(".book-showcase__grid");
-
-    if (navButtons.length > 0 && grids.length > 0) {
-        navButtons.forEach((button) => {
-            button.addEventListener("click", function () {
-                navButtons.forEach((btn) => btn.classList.remove("active"));
-                this.classList.add("active");
-
-                const tab = this.getAttribute("data-tab");
-                grids.forEach((grid) => {
-                    grid.classList.remove("active");
-                    if (grid.id === tab) {
-                        grid.classList.add("active");
-                    }
-                });
-            });
-        });
-    }
 });

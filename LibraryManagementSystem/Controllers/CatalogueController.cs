@@ -8,4 +8,14 @@ public class CatalogueController : Controller
     {
         return View();
     }
+
+    public IActionResult Detail()
+    {
+        return View();
+    }
+
+    public IActionResult Insert()
+    {
+        return View();
+    }
 }

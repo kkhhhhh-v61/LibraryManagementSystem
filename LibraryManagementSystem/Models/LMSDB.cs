@@ -91,6 +91,8 @@ public class Book
     [MaxLength(100)]
     public string? ImageURL { get; set; }
 
+    public bool IsFeatured { get; set; }
+
     public List<Genre> Genres { get; set; } = [];
 
     public List<Author> Authors { get; set; } = [];
@@ -316,7 +318,7 @@ public class Fine
     [Precision(8,2)]
     public decimal OverdueRate { get; set; }
     
-    public bool isPaid { get; set; }
+    public bool IsPaid { get; set; }
     
     [MaxLength(6)]
     public string LoanId { get; set; }
@@ -401,15 +403,9 @@ public class Booking
     public Room Room { get; set; }
 
     [MaxLength(6)]
-    public string? UserId { get; set; }
+    public string UserId { get; set; }
 
-    public User? User { get; set; }
-
-    [MaxLength(100)]
-    public string? GuestName { get; set; }
-
-    [MaxLength(15)]
-    public string? GuestContact { get; set; }
+    public User User { get; set; }
 
     public DateTime BookingDate { get; set; }
 
