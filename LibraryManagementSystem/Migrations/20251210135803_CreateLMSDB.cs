@@ -256,9 +256,7 @@ namespace LibraryManagementSystem.Migrations
                 {
                     Id = table.Column<string>(type: "nvarchar(6)", maxLength: 6, nullable: false),
                     RoomId = table.Column<string>(type: "nvarchar(3)", maxLength: 3, nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(6)", maxLength: 6, nullable: true),
-                    GuestName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    GuestContact = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: true),
+                    UserId = table.Column<string>(type: "nvarchar(6)", maxLength: 6, nullable: false),
                     BookingDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     StartTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EndTime = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -280,7 +278,8 @@ namespace LibraryManagementSystem.Migrations
                         name: "FK_Bookings_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(

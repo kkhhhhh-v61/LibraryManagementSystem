@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LibraryManagementSystem.Migrations
 {
     [DbContext(typeof(LMSDB))]
-    [Migration("20251206034501_CreateLMSDB")]
+    [Migration("20251210135803_CreateLMSDB")]
     partial class CreateLMSDB
     {
         /// <inheritdoc />
@@ -129,14 +129,6 @@ namespace LibraryManagementSystem.Migrations
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("GuestContact")
-                        .HasMaxLength(15)
-                        .HasColumnType("nvarchar(15)");
-
-                    b.Property<string>("GuestName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
                     b.Property<string>("RoomId")
                         .IsRequired()
                         .HasMaxLength(3)
@@ -153,6 +145,7 @@ namespace LibraryManagementSystem.Migrations
                         .HasColumnType("decimal(8,2)");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .HasMaxLength(6)
                         .HasColumnType("nvarchar(6)");
 
@@ -559,7 +552,9 @@ namespace LibraryManagementSystem.Migrations
 
                     b.HasOne("LibraryManagementSystem.Models.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Room");
 
