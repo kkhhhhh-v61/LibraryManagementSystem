@@ -18,4 +18,10 @@ public class CatalogueController : Controller
     {
         return View();
     }
+
+    [HttpPost]
+    public IActionResult Insert(BookInsertVM vm)
+    {
+        return View(vm);
+    }
 }

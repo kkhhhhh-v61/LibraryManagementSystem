@@ -1,7 +1,19 @@
-﻿document.addEventListener("DOMContentLoaded", function () {
-    /* ============================================================
-       HOME: Banner Showcase
-       ============================================================ */
+﻿/* ============================================================
+   GLOBAL: Common Functions
+   ============================================================ */
+$("[data-trim]").on("change", (e) => {
+    e.target.value = e.target.value.trim();
+});
+
+$("[type=reset]").on("click", (e) => {
+    e.preventDefault();
+    location = location;
+});
+
+/* ============================================================
+   HOME: Banner Showcase
+   ============================================================ */
+document.addEventListener("DOMContentLoaded", function () {
     const bannerShowcase = document.getElementById("banner-showcase");
     const bannerNav = document.querySelector(".banner__nav");
     const bannerWrapper = document.querySelector(".banner");

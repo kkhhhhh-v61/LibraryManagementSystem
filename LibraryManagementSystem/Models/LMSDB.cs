@@ -93,6 +93,8 @@ public class Book
 
     public bool IsFeatured { get; set; }
 
+    public bool IsArchived { get; set; }
+
     public List<Genre> Genres { get; set; } = [];
 
     public List<Author> Authors { get; set; } = [];
