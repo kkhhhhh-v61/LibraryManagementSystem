@@ -24,4 +24,10 @@ public class BookInsertVM
     [Required(ErrorMessage = "{0} is required.")]
     [Range(1450, 2100, ErrorMessage = "{0} must be between 1450 and 2100.")]
     public int PublicationYear { get; set; }
+
+    [Required(ErrorMessage = "{0} is required.")]
+    [Range(1, 100, ErrorMessage = "{0} must be between 1 and 100.")]
+    public int Edition { get; set; }
+
+    public IFormFile? Image { get; set; }
 }
