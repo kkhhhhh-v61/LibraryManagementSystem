@@ -74,6 +74,7 @@ body {
     background-color: var(--color-gray-100);
     width: 100%;
     height: 100%;
+    overflow-x: hidden;
 }
 
 /*  ===========================================================================
@@ -153,7 +154,7 @@ body {
     flex: 1;
     flex-direction: column;
     padding: 0 var(--spacing-xl);
-    overflow-y: auto;
+    overflow: visible;
 }
 
 .sidebar-nav__group {
@@ -224,6 +225,82 @@ body {
 
 .sidebar-nav__separator {
     margin: var(--spacing-lg) 0;
+    background-color: var(--color-gray-200);
+    height: 2px;
+}
+
+/* Sidebar Flyout */
+.sidebar-nav__item {
+    position: relative;
+}
+
+.sidebar-nav__arrow {
+    opacity: 0.5;
+    transition: transform 0.3s ease;
+    margin-left: auto;
+}
+
+.sidebar-subnav {
+    position: absolute;
+    top: 0;
+    left: 100%;
+    transform: translateX(-10px);
+    visibility: hidden;
+    opacity: 0;
+    z-index: 100;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--spacing-sm);
+    background-color: var(--color-white);
+    padding: var(--spacing-sm);
+    width: 220px;
+}
+
+.sidebar-nav__item:hover .sidebar-subnav {
+    transform: translate(10px);
+    visibility: visible;
+    opacity: 1;
+}
+
+.sidebar-nav__item:hover .sidebar-nav__link {
+    background-color: var(--color-gray-100);
+    color: var(--color-gray-900);
+}
+
+.sidebar-nav__item:hover .sidebar-nav__arrow {
+    transform: translateX(4px) rotate(180deg);
+}
+
+.sidebar-subnav__link {
+    display: block;
+    transition: background 0.3s ease;
+    border-radius: var(--spacing-xs);
+    padding: var(--spacing-md) var(--spacing-md);
+    color: var(--color-gray-700);
+    font-size: var(--text-md);
+    text-decoration: none;
+}
+
+.sidebar-subnav__link:hover {
+    transform: translateX(4px);
+    background-color: var(--color-gray-100);
+    color: var(--color-gray-900);
+}
+
+.sidebar-subnav__link--active {
+    background-color: transparent;
+    color: var(--color-primary-base);
+    font-weight: var(--weight-bold);
+}
+
+.sidebar-subnav__link--active:hover {
+    background-color: var(--color-gray-100);
+    color: var(--color-primary-dark);
+}
+
+.sidebar-subnav__separator {
+    margin: var(--spacing-xs) 0;
     background-color: var(--color-gray-200);
     height: 2px;
 }
