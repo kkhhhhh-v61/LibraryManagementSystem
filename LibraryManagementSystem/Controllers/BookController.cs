@@ -2,7 +2,7 @@
 
 namespace LibraryManagementSystem.Controllers;
 
-public class CatalogueController : Controller
+public class BookController : Controller
 {
     public IActionResult Browse()
     {
