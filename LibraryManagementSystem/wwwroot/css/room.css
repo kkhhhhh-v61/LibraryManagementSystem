@@ -332,25 +332,76 @@
 }
 
 /* =========================================
-   Utility Buttons for Table
+   UPDATE PAGE SPECIFIC STYLES (Appended)
    ========================================= */
-.btn-icon {
-    border: 1px solid var(--border);
-    background: white;
-    padding: 6px 10px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s;
-    color: var(--text-main);
+
+/* 1. Full Screen Vertical Container (Top-Bottom Layout) */
+/* This container stacks elements vertically and fills the screen height */
+.update-page-container {
+    height: calc(100vh - 100px); /* Subtract header height (approx 100px) to prevent scrollbars */
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex; /* Enable Flexbox */
+    flex-direction: column; /* Stack children vertically */
+    gap: 20px; /* Space between panels */
+    max-width: 1600px; /* Limit max width for better readability on huge screens */
+    margin: 0 auto; /* Center the container */
 }
 
-    .btn-icon:hover {
-        background: #f3f4f6;
-        border-color: #d1d5db;
+/* 2. Top Panel (Form) */
+/* flex-shrink: 0 ensures this panel maintains its natural height and isn't squashed */
+.panel-top {
+    flex-shrink: 0;
+    background-color: var(--bg-surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+/* 3. Bottom Panel (Room List) */
+/* flex: 1 forces this panel to expand and fill ALL remaining vertical space */
+.panel-bottom-fill {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Hide overflow here so the internal table container handles scrolling */
+    background-color: var(--bg-surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+/* 4. Horizontal Compact Form Grid */
+/* Arranges ID, Name, Rate, and Status in a single row to save vertical space */
+.form-horizontal-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr 1fr; /* Proportional column widths */
+    gap: 1.5rem;
+    align-items: start;
+}
+
+/* Helper for fields that need the full row width (like Description) */
+.form-full-width {
+    grid-column: 1 / -1; /* Spans from first to last column */
+    margin-top: 0.5rem;
+}
+
+/* 5. Navigation Bar (Back Button area) */
+.nav-back-bar {
+    flex-shrink: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Responsive: Stack elements on smaller screens (Tablets/Mobile) */
+@media (max-width: 1024px) {
+    .update-page-container {
+        height: auto; /* Allow full page scrolling */
     }
 
-.btn-delete:hover {
-    background: #fef2f2;
-    color: #ef4444;
-    border-color: #fecaca;
+    .form-horizontal-grid {
+        grid-template-columns: 1fr 1fr; /* Switch to 2 columns */
+    }
 }
