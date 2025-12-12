@@ -1,141 +1,356 @@
-﻿/* Buttons */
-.btn {
-    padding: var(--fixed-size-sm) var(--fixed-size-lg);
-    border: none;
-    border-radius: var(--fixed-size-xs);
-    font-family: var(--font-family-main);
-    font-size: var(--fixed-size-lg);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: var(--fixed-size-xs);
-    font-weight: 600;
+﻿/* =========================================
+   1. Global Variables
+   ========================================= */
+:root {
+    --primary: #4f46e5;
+    --primary-hover: #4338ca;
+    --bg-page: #f3f4f6; /* Light gray background */
+    --bg-surface: #ffffff; /* White panels */
+    --border: #e5e7eb;
+    --text-main: #111827;
+    --text-muted: #6b7280;
+    --radius: 12px; /* Rounded corners */
 }
 
-.btn-primary {
-    background-color: var(--text-primary); /* Black */
-    color: var(--color-white); /* White */
+/* =========================================
+   2. Full Screen Layout Container
+   ========================================= */
+.dashboard-container {
+    /* CRITICAL: This calculation makes the container fill the screen height,
+       subtracting roughly the height of your top navigation bar (approx 80px).
+       Adjust '80px' if your top nav is taller/shorter.
+    */
+    height: calc(100vh - 100px);
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+    display: grid;
+    /* Left side fills space, Right side is fixed 420px */
+    grid-template-columns: 1fr 420px;
+    gap: 20px;
 }
 
-.btn-primary:hover {
-    background-color: var(--color-gray-600);
+/* =========================================
+   3. Panel Styling (Left & Right)
+   ========================================= */
+.panel {
+    background-color: var(--bg-surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    /* This ensures both panels stretch to the full height of the container */
+    height: 100%;
+    overflow: hidden; /* Prevents overflow from breaking rounded corners */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
-.btn-outline {
-    background-color: transparent;
-    border: 1px solid var(--color-gray-200);
-    color: var(--text-primary);
-}
-
-.btn-outline:hover {
-    background-color: var(--color-gray-100);
-}
-
-.btn-danger {
-    background-color: #ffebee;
-    color: var(--text-failure);
-}
-
-.btn-success {
-    background-color: #e8f5e9;
-    color: var(--text-success);
-}
-
-/* Page Header */
-.page-header {
+/* Header inside the panel */
+.panel-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--fixed-size-lg);
+    background: #fff;
+    flex-shrink: 0; /* Header stays fixed size */
 }
 
-.page-header h2 {
-    font-size: var(--fixed-size-xl);
-    color: var(--text-primary);
+.panel-title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-main);
 }
 
-/* Cards (White containers on grey background) */
-.card {
-    background-color: var(--color-white);
-    border-radius: var(--fixed-size-sm);
-    padding: var(--fixed-size-md);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    margin-bottom: var(--fixed-size-md);
+/* Body content that can scroll */
+.panel-body {
+    padding: 1.5rem;
+    overflow-y: auto; /* Internal scrollbar if content is too long */
+    flex-grow: 1; /* Fills the remaining height */
 }
 
-/* Tables */
-.data-table {
+/* =========================================
+   4. Left Side: Table Styling
+   ========================================= */
+.modern-table {
     width: 100%;
     border-collapse: collapse;
 }
 
-.data-table th {
-    text-align: left;
-    padding: var(--fixed-size-sm);
-    border-bottom: 2px solid var(--color-gray-200);
-    font-weight: 700;
-    color: var(--color-gray-500);
-    font-size: var(--fixed-size-lg);
-}
+    .modern-table th {
+        position: sticky; /* Keeps header visible when scrolling */
+        top: 0;
+        background: #fff; /* Covers content when scrolling */
+        z-index: 10;
+        text-align: left;
+        padding: 1rem;
+        color: var(--text-muted);
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        border-bottom: 2px solid var(--bg-page);
+    }
 
-.data-table td {
-    padding: var(--fixed-size-sm);
-    border-bottom: 1px solid var(--color-gray-200);
-    font-size: var(--fixed-size-lg);
-}
+    .modern-table td {
+        padding: 1.25rem 1rem;
+        border-bottom: 1px solid var(--border);
+        color: var(--text-main);
+        vertical-align: middle;
+    }
 
-.data-table tr:last-child td {
-    border-bottom: none;
-}
+    .modern-table tr:hover {
+        background-color: #f9fafb;
+    }
 
-/* Status Badges */
-.status-badge {
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-size: 0.8rem;
+/* Action Button */
+.btn-action {
+    color: var(--primary);
+    background: #eef2ff;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
     font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s;
 }
 
-.status-available {
-    background-color: #e8f5e9;
-    color: var(--text-success);
+    .btn-action:hover {
+        background: var(--primary);
+        color: white;
+    }
+
+/* =========================================
+   5. Right Side: Form Styling
+   ========================================= */
+.form-section {
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px dashed var(--border);
 }
 
-.status-maintenance {
-    background-color: #fff3e0;
-    color: var(--text-warning);
+    .form-section:last-child {
+        border-bottom: none;
+    }
+
+.section-label {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-.status-pending {
-    background-color: #e3f2fd;
-    color: #1565c0; /* No direct match in new variables, kept as is */
-}
-
-/* Grid Layout for Forms */
 .form-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--fixed-size-md);
+    grid-template-columns: 1fr 1fr; /* Side-by-side inputs */
+    gap: 15px;
 }
 
 .form-group {
-    margin-bottom: var(--fixed-size-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
-.form-group label {
-    display: block;
-    margin-bottom: var(--fixed-size-xs);
-    font-size: var(--fixed-size-lg);
+.full-width {
+    grid-column: span 2;
+}
+
+.form-label {
+    font-size: 0.85rem;
     font-weight: 600;
+    color: var(--text-main);
 }
 
-.form-control {
+.form-input {
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.95rem;
     width: 100%;
-    padding: var(--fixed-size-sm);
-    border: 1px solid var(--color-gray-200);
-    border-radius: var(--fixed-size-xs);
-    font-family: var(--font-family-main);
-    font-size: var(--fixed-size-lg);
+    box-sizing: border-box;
+}
+
+    .form-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+.btn-save {
+    width: 100%;
+    padding: 0.85rem;
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+    .btn-save:hover {
+        background-color: var(--primary-hover);
+    }
+
+/* =========================================
+   6. Responsive
+   ========================================= */
+@media (max-width: 1024px) {
+    .dashboard-container {
+        display: block; /* Stack on small screens */
+        height: auto;
+    }
+
+    .panel {
+        margin-bottom: 20px;
+        height: auto; /* Auto height on mobile */
+    }
+}
+/* =========================================
+   NEW: Edit Page Layout (Vertical Stack)
+   ========================================= */
+.edit-container {
+    max-width: 1000px; /* Limit width for better readability */
+    margin: 0 auto;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem; /* Space between Category Form and Room List */
+}
+
+/* Section Headers */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* =========================================
+   NEW: Modal / Popup Styles
+   ========================================= */
+/* The dark background overlay */
+.modal-overlay {
+    display: none; /* Hidden by default */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+    z-index: 1000;
+    backdrop-filter: blur(2px); /* Blur effect */
+    animation: fadeIn 0.2s ease-out;
+}
+
+/* The white box in the center */
+.modal-box {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    padding: 2rem;
+    width: 90%;
+    max-width: 450px;
+    border-radius: 16px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    animation: slideUp 0.3s ease-out;
+}
+
+/* Modal Header */
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1rem;
+}
+
+    .modal-header h3 {
+        margin: 0;
+        font-size: 1.2rem;
+        color: var(--text-main);
+    }
+
+/* Close Button (X) */
+.btn-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-muted);
+}
+
+    .btn-close:hover {
+        color: var(--text-main);
+    }
+
+/* Modal Buttons */
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 2rem;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translate(-50%, -40%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translate(-50%, -50%);
+        opacity: 1;
+    }
+}
+
+/* =========================================
+   Utility Buttons for Table
+   ========================================= */
+.btn-icon {
+    border: 1px solid var(--border);
+    background: white;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--text-main);
+}
+
+    .btn-icon:hover {
+        background: #f3f4f6;
+        border-color: #d1d5db;
+    }
+
+.btn-delete:hover {
+    background: #fef2f2;
+    color: #ef4444;
+    border-color: #fecaca;
 }
