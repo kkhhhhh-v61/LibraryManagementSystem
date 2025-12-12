@@ -1,6 +1,5 @@
 ﻿/*  ===========================================================================
-    SECTION: DESIGN TOKENS
-    Description: Global variables for colors, typography, spacing, and layout.
+    CORE: VARIABLES
     =========================================================================== */
 
 :root {
@@ -85,6 +84,9 @@ body {
     flex-direction: column;
     background-color: var(--color-white);
     width: 256px;
+    position: relative;
+    z-index: 50;
+    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .layout__main {
@@ -92,6 +94,7 @@ body {
     flex: 1;
     flex-direction: column;
     min-width: 0;
+    transition: padding 0.3s ease;
 }
 
 .layout__header {
@@ -121,7 +124,7 @@ body {
 }
 
 /*  ===========================================================================
-    SECTION: COMPONENTS
+    SECTION: SIDEBAR
     =========================================================================== */
 
 /* Logo */
@@ -133,6 +136,7 @@ body {
     height: 100px;
     color: var(--color-primary-base);
     text-decoration: none;
+    transition: all 0.3s ease;
 }
 
 .logo__image {
@@ -172,6 +176,7 @@ body {
     height: 48px;
     color: var(--color-gray-500);
     text-decoration: none;
+    transition: all 0.3s ease;
 }
 
 .sidebar-nav__link:hover {
@@ -238,6 +243,7 @@ body {
     opacity: 0.5;
     transition: transform 0.3s ease;
     margin-left: auto;
+    fill: var(--color-gray-600);
 }
 
 .sidebar-subnav {
@@ -248,7 +254,8 @@ body {
     visibility: hidden;
     opacity: 0;
     z-index: 100;
-    transition: all 0.3s ease-in-out;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease,
+        visibility 0.3s ease, transform 0.3s ease;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     border: 1px solid var(--color-gray-200);
     border-radius: var(--spacing-sm);
@@ -264,17 +271,19 @@ body {
 }
 
 .sidebar-nav__item:hover .sidebar-nav__link {
+    border-radius: var(--spacing-sm);
     background-color: var(--color-gray-100);
     color: var(--color-gray-900);
 }
 
 .sidebar-nav__item:hover .sidebar-nav__arrow {
     transform: translateX(4px) rotate(180deg);
+    fill: var(--color-gray-900);
 }
 
 .sidebar-subnav__link {
     display: block;
-    transition: background 0.3s ease;
+    transition: all 0.3s ease;
     border-radius: var(--spacing-xs);
     padding: var(--spacing-md) var(--spacing-md);
     color: var(--color-gray-700);
@@ -304,6 +313,58 @@ body {
     background-color: var(--color-gray-200);
     height: 2px;
 }
+
+/* Mini Sidebar */
+
+.layout--collapsed .layout__sidebar {
+    width: 90px;
+}
+
+.layout--collapsed .logo {
+    justify-content: center;
+    padding: var(--spacing-xl) 0;
+}
+
+.layout--collapsed .logo__text {
+    display: none;
+}
+
+.layout--collapsed .logo__image {
+    width: 32px;
+    height: 32px;
+}
+
+.layout--collapsed .sidebar-nav__link {
+    justify-content: center;
+    padding: var(--spacing-md) 0;
+}
+
+.layout--collapsed .sidebar-nav__text {
+    display: none;
+}
+
+.layout--collapsed .sidebar-nav__arrow {
+    display: none;
+}
+
+.layout--collapsed .sidebar__nav-icon {
+    width: 28px;
+    height: 28px;
+    margin: 0;
+}
+
+.layout--collapsed .sidebar-subnav {
+    left: 90px;
+    top: 0;
+}
+
+.layout--collapsed .sidebar-nav__item:hover .sidebar-subnav {
+    transform: translateX(2px);
+}
+
+/*  ===========================================================================
+    SECTION: MAIN HEADER
+    =========================================================================== */
 
 /* Main Header */
 .header-main {
@@ -395,6 +456,54 @@ body {
     =========================================================================== */
 
 /* TODO: Adjust breakpoint later as needed */
+@media (max-width: 1024px) {
+    .layout__sidebar {
+        width: 90px;
+    }
+
+    .logo {
+        justify-content: center;
+        padding: var(--spacing-xl) 0;
+    }
+
+    .logo__text {
+        display: none;
+    }
+
+    .logo__image {
+        width: 32px;
+        height: 32px;
+    }
+
+    .sidebar-nav__link {
+        justify-content: center;
+        padding: var(--spacing-md) 0;
+    }
+
+    .sidebar-nav__text {
+        display: none;
+    }
+
+    .sidebar-nav__arrow {
+        display: none;
+    }
+
+    .sidebar__nav-icon {
+        width: 28px;
+        height: 28px;
+        margin: 0;
+    }
+
+    .sidebar-subnav {
+        left: 90px;
+        top: 0;
+    }
+
+    .sidebar-nav__item:hover .sidebar-subnav {
+        transform: translate(2px);
+    }
+}
+
 @media (max-width: 768px) {
     .layout__sidebar,
     .layout__details {

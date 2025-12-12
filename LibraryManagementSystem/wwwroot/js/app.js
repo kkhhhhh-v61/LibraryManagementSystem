@@ -1,93 +1,16 @@
-﻿/* ============================================================
-   GLOBAL: Common Functions
-   ============================================================ */
-$("[data-trim]").on("change", (e) => {
-    e.target.value = e.target.value.trim();
-});
+﻿$(document).ready(function () {
+    const $body = $("body");
+    const $logo = $(".logo");
 
-$("[type=reset]").on("click", (e) => {
-    e.preventDefault();
-    location = location;
-});
-
-/* ============================================================
-   HOME: Banner Showcase
-   ============================================================ */
-document.addEventListener("DOMContentLoaded", function () {
-    const bannerShowcase = document.getElementById("banner-showcase");
-    const bannerNav = document.querySelector(".banner__nav");
-    const bannerWrapper = document.querySelector(".banner");
-
-    if (!bannerShowcase || !bannerNav || !bannerWrapper) {
-        return;
+    const isCollapsed = localStorage.getItem("sidebar-collapsed") === "true";
+    if (isCollapsed) {
+        $body.addClass("layout--collapsed");
     }
 
-    const slides = bannerShowcase.querySelectorAll(".banner__slide");
-    const prevButton = document.querySelector(".banner__arrow--prev");
-    const nextButton = document.querySelector(".banner__arrow--next");
-    let currentIndex = 0;
-    let autoScrollInterval;
-    const scrollInterval = 5500;
-
-    function updateNav(index) {
-        const navItems = bannerNav.querySelectorAll(".banner__nav-item");
-        navItems.forEach((item, i) => {
-            if (i === index) {
-                item.classList.add("active");
-            } else {
-                item.classList.remove("active");
-            }
-        });
-    }
-
-    function showSlide(index) {
-        slides.forEach((slide, i) => {
-            slide.classList.remove("active");
-        });
-        if (slides[index]) {
-            slides[index].classList.add("active");
-            updateNav(index);
-        }
-    }
-
-    function startAutoScroll() {
-        stopAutoScroll(); // Ensure no multiple intervals are running
-        autoScrollInterval = setInterval(() => {
-            currentIndex = (currentIndex + 1) % slides.length;
-            showSlide(currentIndex);
-        }, scrollInterval);
-    }
-
-    function stopAutoScroll() {
-        clearInterval(autoScrollInterval);
-    }
-
-    slides.forEach((_, index) => {
-        const navItem = document.createElement("div");
-        navItem.classList.add("banner__nav-item");
-        navItem.addEventListener("click", () => {
-            currentIndex = index;
-            showSlide(index);
-            stopAutoScroll();
-            startAutoScroll();
-        });
-        bannerNav.appendChild(navItem);
+    $logo.on("click", function (e) {
+        e.preventDefault();
+        $body.toggleClass("layout--collapsed");
+        const hasClass = $body.hasClass("layout--collapsed");
+        localStorage.setItem("sidebar-collapsed", hasClass);
     });
-
-    prevButton.addEventListener("click", () => {
-        currentIndex = (currentIndex - 1 + slides.length) % slides.length;
-        showSlide(currentIndex);
-        stopAutoScroll();
-        startAutoScroll();
-    });
-
-    nextButton.addEventListener("click", () => {
-        currentIndex = (currentIndex + 1) % slides.length;
-        showSlide(currentIndex);
-        stopAutoScroll();
-        startAutoScroll();
-    });
-
-    showSlide(0);
-    startAutoScroll();
 });
