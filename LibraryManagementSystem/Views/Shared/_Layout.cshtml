@@ -47,7 +47,7 @@
 
                         <div class="sidebar-subnav__separator"></div>
 
-                        <a href="#" class="sidebar-subnav__link">Add New Book</a>
+                        <a asp-controller="Catalogue" asp-action="Insert" class="sidebar-subnav__link @Html.IsActive("Catalogue", "Insert", "sidebar-subnav__link--active")">Insert Book</a>
                     </div>
                 </div>
 

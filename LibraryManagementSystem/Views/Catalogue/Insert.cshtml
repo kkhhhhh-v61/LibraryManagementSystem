@@ -8,59 +8,6 @@
     <link rel="stylesheet" href="/css/catalogue.css" asp-append-version="true" />
 }
 
-@* TODO: Add dynamic preview of what users see when inserting book. *@
-
-<section class="book-preview"></section>
-
-<section class="book-insert">
-    <form class="book-insert__form" method="post">
-        <div asp-validation-summary="ModelOnly"></div>
-
-        <div class=book-insert__field-item>
-            <label class="book-insert__label" asp-for="Title"></label>
-            <input class="book-insert__input" asp-for="Title" data-trim autofocus />
-            <span class="book-insert__error" asp-validation-for="Title"></span>
-        </div>
-        <div class=book-insert__field-item>
-            <label class="book-insert__label" asp-for="Description"></label>
-            <textarea class="book-insert__input" asp-for="Description" data-trim></textarea>
-            <span class="book-insert__error" asp-validation-for="Description"></span>
-        </div>
-        <div class=book-insert__field-item>
-            <label class="book-insert__label" asp-for="ISBN"></label>
-            <input class="book-insert__input" asp-for="ISBN" data-trim />
-            <span class="book-insert__error" asp-validation-for="ISBN"></span>
-        </div>
-        <div class=book-insert__field-row>
-            <div class="book-insert__field-item book-insert__row-item">
-                <label class="book-insert__label" asp-for="PublicationYear"></label>
-                <input class="book-insert__input" asp-for="PublicationYear" type="number" min="1450" max="2100" step="1" value="@DateTime.Now.Year" data-trim />
-                <span class="book-insert__error" asp-validation-for="PublicationYear"></span>
-            </div>
-            <div class="book-insert__field-item book-insert__row-item">
-                <label class="book-insert__label" asp-for="Edition"></label>
-                <input class="book-insert__input" asp-for="Edition" type="number" min="1" max="100" step="1" value="1" data-trim />
-                <span class="book-insert__error" asp-validation-for="Edition"></span>
-            </div>
-        </div>
-        <div class=book-insert__field-item>
-            <label class="book-insert__label" asp-for="Image"></label>
-            <label class="book-insert__input book-insert__input--file">
-                <small class="book-insert__input-text">Choose File</small>
-                <input id="imageUpload" asp-for="Image" type="file" accept="image/jpeg, image/png" hidden />
-                <img class="book-insert__input-icon" src="/images/icons/upload.svg" alt="Upload Icon" />
-                <img id="imagePreview" class="book-insert__image-preview" hidden />
-            </label>
-            <span class="book-insert__error" asp-validation-for="Image"></span>
-        </div>
-
-        <section class="book-insert__button-container">
-            <button class="book-insert__button book-insert__button--reset" type="reset">Reset</button>
-            <button class="book-insert__button book-insert__button--submit" type="submit">Submit</button>
-        </section>
-    </form>
-</section>
-
 @section foot {
     <script src="/js/catalogue.js" asp-append-version="true"></script>
 }
