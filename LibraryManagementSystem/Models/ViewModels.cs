@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using static LibraryManagementSystem.Models.Room;
 
 namespace LibraryManagementSystem.Models;
 
