@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using static LibraryManagementSystem.Models.Room;
 
 namespace LibraryManagementSystem.Models;
 
@@ -29,5 +30,43 @@ public class BookInsertVM
     [Range(1, 100, ErrorMessage = "{0} must be between 1 and 100.")]
     public int Edition { get; set; }
 
+    public IFormFile? Image { get; set; }
+}
+
+public class RoomCategoryCreateVM
+{
+    [Required(ErrorMessage = "{0} is required.")]
+    [StringLength(50, ErrorMessage = "{0} must be between 1 and 50 characters.")]
+    public string Name { get; set; }
+
+    [Required(ErrorMessage = "{0} is required.")]
+    [StringLength(500, ErrorMessage = "{0} cannot exceed 500 characters.")]
+    public string Description { get; set; }
+
+    [DisplayName("Hourly Rate")]
+    [Required(ErrorMessage = "{0} is required.")]
+    [Range(0, 1000, ErrorMessage = "{0} must be between RM 0 and RM 1000.")]
+    public decimal HourlyRate { get; set; }
+}
+
+public class RoomCreateVM
+{
+    [Required(ErrorMessage = "{0} is required.")]
+    [StringLength(50, ErrorMessage = "{0} cannot exceed 50 characters.")]
+    public string Name { get; set; }
+
+    [Required(ErrorMessage = "{0} is required.")]
+    [StringLength(100, ErrorMessage = "{0} cannot exceed 100 characters.")]
+    public string Location { get; set; }
+
+    [Required(ErrorMessage = "{0} is required.")]
+    [Range(1, 30, ErrorMessage = "Capacity must be between 1 and 30.")]
+    public int Capacity { get; set; }
+
+    [DisplayName("Category")]
+    [Required(ErrorMessage = "Please select a category.")]
+    public string RoomCategoryId { get; set; }
+
+    [DisplayName("Room Image")]
     public IFormFile? Image { get; set; }
 }

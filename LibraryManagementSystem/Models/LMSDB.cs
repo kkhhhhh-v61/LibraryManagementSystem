@@ -332,6 +332,23 @@ public class Fine
 
 
 /* ------------------------------ BRIAN OOI SHU YI ------------------------------ */
+public class RoomCategory
+{
+    [Key]
+    [MaxLength(3)]
+    public string Id { get; set; }
+
+    [MaxLength(50)]
+    public string Name { get; set; }
+
+    [MaxLength(500)]
+    public string Description { get; set; }
+
+    [Precision(8, 2)]
+    public decimal HourlyRate { get; set; }
+
+    public List<Room> Rooms { get; set; } = [];
+}
 
 public class Room
 {
@@ -357,7 +374,7 @@ public class Room
     public RoomStatus Status { get; set; }
 
     [MaxLength(100)]
-    public string ImageURL { get; set; }
+    public string? ImageURL { get; set; }
 
     [MaxLength(3)]
     public string RoomCategoryId { get; set; }
@@ -365,24 +382,6 @@ public class Room
     public RoomCategory RoomCategory { get; set; }
 
     public List<Booking> Bookings { get; set; } = [];
-}
-
-public class RoomCategory
-{
-    [Key]
-    [MaxLength(3)]
-    public string Id { get; set; }
-    
-    [MaxLength(50)]
-    public string Name { get; set; }
-    
-    [MaxLength(500)]
-    public string Description { get; set; }
-        
-    [Precision(8, 2)]
-    public decimal HourlyRate { get; set; }
-
-    public List<Room> Rooms { get; set; } = [];
 }
 
 public class Booking

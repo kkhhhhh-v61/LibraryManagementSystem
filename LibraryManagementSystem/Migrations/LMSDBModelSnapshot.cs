@@ -389,7 +389,6 @@ namespace LibraryManagementSystem.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("ImageURL")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 

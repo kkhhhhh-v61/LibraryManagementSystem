@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LibraryManagementSystem.Migrations
 {
     [DbContext(typeof(LMSDB))]
-    [Migration("20251211003112_CreateLMSDB")]
+    [Migration("20251213091044_CreateLMSDB")]
     partial class CreateLMSDB
     {
         /// <inheritdoc />
@@ -392,7 +392,6 @@ namespace LibraryManagementSystem.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("ImageURL")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 

@@ -181,7 +181,7 @@ namespace LibraryManagementSystem.Migrations
                     Location = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Capacity = table.Column<int>(type: "int", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
-                    ImageURL = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    ImageURL = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     RoomCategoryId = table.Column<string>(type: "nvarchar(3)", maxLength: 3, nullable: false)
                 },
                 constraints: table =>
