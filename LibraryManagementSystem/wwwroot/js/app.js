@@ -1,4 +1,13 @@
-﻿$(document).ready(function () {
+﻿$("[type=reset]").on("click", (e) => {
+    e.preventDefault();
+    location = location;
+});
+
+$("[data-trim]").on("change", (e) => {
+    e.target.value = e.target.value.trim();
+});
+
+$(document).ready(function () {
     const $body = $("body");
     const $logo = $(".logo");
 

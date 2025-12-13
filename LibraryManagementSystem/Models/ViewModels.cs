@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using static LibraryManagementSystem.Models.Room;
 
 namespace LibraryManagementSystem.Models;
 
@@ -8,6 +7,8 @@ namespace LibraryManagementSystem.Models;
 
 public class BookInsertVM
 {
+    public IFormFile? Image { get; set; }
+    
     [Required(ErrorMessage = "{0} is required.")]
     [StringLength(255, ErrorMessage = "{0} must be between 1 and 255 characters.")]
     public string Title { get; set; }
@@ -29,8 +30,6 @@ public class BookInsertVM
     [Required(ErrorMessage = "{0} is required.")]
     [Range(1, 100, ErrorMessage = "{0} must be between 1 and 100.")]
     public int Edition { get; set; }
-
-    public IFormFile? Image { get; set; }
 }
 
 public class RoomCategoryCreateVM

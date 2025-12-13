@@ -5,9 +5,68 @@
 }
 
 @section head {
-    <link rel="stylesheet" href="/css/catalogue.css" asp-append-version="true" />
+    <link rel="stylesheet" href="/css/book.css" asp-append-version="true" />
 }
 
+<form class="book-insert__form" method="POST">
+    <h1 class="book-insert__title">Insert Book</h1>
+    <div class="form">
+        <div class="form__group form__group--left">
+            <div class="form__item">
+                <label asp-for="Image" class="form__label">Image</label>
+                <div class="form__upload-wrapper">
+                    <label for="book-cover-input" class="form__upload-zone" id="book-cover-zone">
+                        <div class="form__upload-placeholder">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="form__upload-icon">
+                                <path d="M440-320v-326L336-542l-56-58 200-200 200 200-56 58-104-104v326h-80ZM240-160q-33 0-56.5-23.5T160-240v-120h80v120h480v-120h80v120q0 33-23.5 56.5T720-160H240Z"/>
+                            </svg>
+                            <span class="form__upload-text">Choose File</span>
+                        </div>
+                        <img src="#" alt="Cover Preview" class="form__upload-preview" id="book-cover-preview" />
+                        <input asp-for="Image" class="form__file-input" id="book-cover-input" type="file" accept="image/jpeg, image/png" />
+                    </label>
+                </div>
+                <span asp-validation-for="Image" class="form__error"></span>
+            </div>
+        </div>
+
+        <div class="form__group form__group--right">
+            <div class="form__item">
+                <label asp-for="Title" class="form__label">Title</label>
+                <input asp-for="Title" class="form__input" data-trim autofocus />
+                <span asp-validation-for="Title"" class="form__error"></span>
+            </div>
+            <div class="form__item">
+                <label asp-for="Description" class="form__label">Description</label>
+                <textarea asp-for="Description" class="form__textarea" data-trim></textarea>
+                <span asp-validation-for="Description" class="form__error"></span>
+            </div>
+            <div class="form__item">
+                <label asp-for="ISBN" class="form__label">ISBN</label>
+                <input asp-for="ISBN"" class="form__input" data-trim />
+                <span asp-validation-for="ISBN" class="form__error"></span>
+            </div>
+            <div class="form__row">
+                <div class="form__row-item">
+                    <label asp-for="PublicationYear" class="form__label">Publication Year</label>
+                    <input asp-for="PublicationYear" class="form__input" type="number" min="1450" max="2100" step="1" value="@DateTime.Now.Year" data-trim />
+                    <span asp-validation-for="PublicationYear" class="form__error"></span>
+                </div>
+                <div class="form__row-item">
+                    <label asp-for="Edition" class="form__label">Edition</label>
+                    <input asp-for="Edition" class="form__input" type="number" min="1" max="100" step="1" value="1" data-trim />
+                    <span asp-validation-for="Edition" class="form__error"></span>
+
+                </div>
+            </div>
+            <div class="form__action">
+                <button class="form__button button--reset" type="reset">Reset</button>
+                <button class="form__button button--submit" type="submit">Submit</button>
+            </div>
+        </div>
+    </div>
+</form>
+
 @section foot {
-    <script src="/js/catalogue.js" asp-append-version="true"></script>
+    <script src="/js/book.js" asp-append-version="true"></script>
 }
