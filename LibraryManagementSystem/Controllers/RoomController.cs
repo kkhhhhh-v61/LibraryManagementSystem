@@ -30,6 +30,8 @@ namespace LibraryManagementSystem.Controllers
         {
             ModelState.Remove("RoomInput.Name");
             ModelState.Remove("RoomInput.Location");
+            ModelState.Remove("RoomInput.Capacity");
+            ModelState.Remove("RoomInput.RoomCategoryId");
 
             if (ModelState.IsValid)
             {
