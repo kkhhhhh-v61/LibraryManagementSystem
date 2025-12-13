@@ -41,13 +41,13 @@
                     </a>
 
                     <div class="sidebar-subnav">
-                        <a href="#" class="sidebar-subnav__link">Browse All</a>
-                        <a href="#" class="sidebar-subnav__link">New Arrivals</a>
-                        <a href="#" class="sidebar-subnav__link">Genres</a>
+                        <a asp-controller="Book" asp-action="" class="sidebar-subnav__link @Html.IsActive("Book", "Browse", "sidebar-subnav__link--active")">Browse All</a>
 
                         <div class="sidebar-subnav__separator"></div>
 
-                        <a asp-controller="Book" asp-action="Insert" class="sidebar-subnav__link @Html.IsActive("Book", "Insert", "sidebar-subnav__link--active")">Insert Book</a>
+                        <a asp-controller="Book" asp-action="InsertBook" class="sidebar-subnav__link @Html.IsActive("Book", "InsertBook", "sidebar-subnav__link--active")">Insert Book</a>
+                        <a asp-controller="Book" asp-action="InsertAuthor" class="sidebar-subnav__link @Html.IsActive("Book", "InsertAuthor", "sidebar-subnav__link--active")">Insert Author</a>
+                        <a asp-controller="Book" asp-action="InsertGenre" class="sidebar-subnav__link @Html.IsActive("Book", "InsertGenre", "sidebar-subnav__link--active")">Insert Genre</a>
                     </div>
                 </div>
 

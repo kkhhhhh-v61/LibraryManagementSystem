@@ -9,12 +9,7 @@ public class BookController : Controller
         return View();
     }
 
-    public IActionResult Detail()
-    {
-        return View();
-    }
-
-    public IActionResult Insert()
+    public IActionResult InsertBook()
     {
         return View();
     }
@@ -23,5 +18,15 @@ public class BookController : Controller
     public IActionResult Insert(BookInsertVM vm)
     {
         return View(vm);
+    }
+
+    public IActionResult InsertAuthor()
+    {
+        return View();
+    }
+
+    public IActionResult InsertGenre()
+    {
+        return View();
     }
 }
