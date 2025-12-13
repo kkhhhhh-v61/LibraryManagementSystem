@@ -1,4 +1,7 @@
-﻿@{
+﻿@using LibraryManagementSystem.Models
+@model RoomCategory
+
+@{
     ViewBag.Title = "Update Category";
 }
 
@@ -15,10 +18,10 @@
             </div>
             Back to Dashboard
         </a>
-        <span style="font-size:0.85rem; color:#9ca3af;">Last updated: Today, 10:42 AM</span>
+        <span style="font-size:0.85rem; color:#9ca3af;">Category ID: @Model.Id</span>
     </div>
 
-    <div class="panel-top">
+    <div class="panel panel-top">
         <div class="panel-header">
             <h2 class="panel-title" style="display:flex; align-items:center; gap:10px;">
                 <span style="background:#eef2ff; padding:6px; border-radius:8px; color:#4f46e5;">
@@ -28,113 +31,116 @@
             </h2>
 
             <div style="display:flex; gap:10px;">
-                <span style="background:#ecfdf5; color:#059669; padding:6px 12px; border-radius:20px; font-size:0.8rem; font-weight:700; border:1px solid #a7f3d0;">
-                    Active Status
-                </span>
+                <span class="badge badge-success">Active</span>
             </div>
         </div>
 
-        <div class="panel-body" style="padding-bottom: 1.5rem;">
+        <div class="panel-body">
             <form asp-action="Edit" method="post">
 
                 <div class="form-horizontal-grid">
 
                     <div class="form-group">
                         <label class="form-label">ID</label>
-                        <input type="text" name="Id" class="form-input" value="C01" readonly style="background:#f9fafb; color:#6b7280; font-family:monospace;">
+                        <input asp-for="Id" class="form-input" readonly style="background:#f8fafc; color:#6b7280; font-family:monospace;" />
                     </div>
 
                     <div class="form-group">
                         <label class="form-label">Category Name</label>
-                        <input type="text" name="Name" class="form-input" value="Discussion Room" style="font-weight:600;">
+                        <input asp-for="Name" class="form-input" style="font-weight:600;" />
+                        <span asp-validation-for="Name" class="text-danger" style="font-size:0.8rem; color:var(--danger);"></span>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label">Hourly Rate</label>
                         <div style="position:relative;">
                             <span style="position:absolute; left:12px; top:10px; color:#9ca3af; font-size:0.9rem;">RM</span>
-                            <input type="number" name="HourlyRate" class="form-input" value="5.00" step="0.01" style="padding-left:40px;">
+                            <input asp-for="HourlyRate" class="form-input" type="number" step="0.01" style="padding-left:40px;" />
                         </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Status</label>
-                        <select name="Status" class="form-input">
-                            <option selected>Active</option>
-                            <option>Inactive</option>
-                        </select>
+                        <span asp-validation-for="HourlyRate" class="text-danger" style="font-size:0.8rem; color:var(--danger);"></span>
                     </div>
 
                     <div class="form-group form-full-width">
                         <label class="form-label">Description & Amenities</label>
-                        <textarea name="Description" class="form-input" rows="2" style="resize:none;">Standard room for 4-6 pax with whiteboard setup.</textarea>
+                        <textarea asp-for="Description" class="form-input" rows="2"></textarea>
+                        <span asp-validation-for="Description" class="text-danger" style="font-size:0.8rem; color:var(--danger);"></span>
                     </div>
 
                 </div>
 
                 <div style="margin-top: 1.5rem; display:flex; justify-content:flex-end; gap:10px; border-top:1px solid #f3f4f6; padding-top:1rem;">
-                    <button type="button" class="btn-action" style="background:white; border:1px solid #e5e7eb; color:#374151; width:auto; padding:0.6rem 1.2rem;">Discard</button>
+                    <a href="/Room" class="btn-action">Discard</a>
                     <button type="submit" class="btn-save" style="width: auto; padding: 0.6rem 2rem; margin:0;">Save Changes</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <div class="panel-bottom-fill">
+    <div class="panel panel-bottom-fill">
         <div class="panel-header">
-            <div class="section-title" style="display:flex; align-items:center; font-weight:700; gap:10px;">
+            <div class="section-title">
                 🚪 Associated Rooms
-                <span style="font-size:0.8rem; background:#f3f4f6; color:#4b5563; padding:2px 8px; border-radius:6px; border:1px solid #e5e7eb;">
-                    4 Total
+                <span class="badge badge-neutral" style="margin-left:10px;">
+                    @Model.Rooms.Count Total
                 </span>
             </div>
-            <button class="btn-save" style="width:auto; padding: 6px 16px; font-size:0.85rem;" onclick="alert('Trigger Add Room Modal')">+ Add Room</button>
+            <button class="btn-save" style="width:auto; padding: 6px 16px; font-size:0.85rem;" onclick="alert('Use the Dashboard to add new rooms!')">+ Add Room</button>
         </div>
 
-        <div class="panel-body" style="padding:0;">
+        <div class="table-wrapper">
             <table class="modern-table">
                 <thead>
                     <tr>
-                        <th style="width: 20%; padding-left:1.5rem;">Room ID</th>
-                        <th style="width: 20%;">Capacity</th>
-                        <th style="width: 20%;">Current Status</th>
-                        <th style="width: 25%;">Next Booking</th>
-                        <th style="width: 15%; text-align: right; padding-right:1.5rem;">Actions</th>
+                        <th style="width: 10%;">ID</th>
+                        <th style="width: 20%;">Name</th>
+                        <th style="width: 20%;">Location</th>
+                        <th style="width: 10%;">Capacity</th>
+                        <th style="width: 15%;">Status</th>
+                        <th style="width: 15%;">Image</th>
+                        <th style="width: 10%; text-align: right;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td style="padding-left:1.5rem;"><strong>R-101</strong></td>
-                        <td style="color:#6b7280;">4 Pax</td>
-                        <td><span style="color:#059669; background:#ecfdf5; padding:4px 10px; border-radius:6px; font-size:0.75rem; font-weight:700;">Available</span></td>
-                        <td style="font-size:0.85rem; color:#6b7280;">Today, 2:00 PM</td>
-                        <td style="text-align: right; padding-right:1.5rem;">
-                            <button class="btn-icon" onclick="openEditModal('R-101', 4, 'Available')">✎</button>
-                            <button class="btn-icon btn-delete" style="color:#ef4444; border-color:#fee2e2;">🗑️</button>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td style="padding-left:1.5rem;"><strong>R-102</strong></td>
-                        <td style="color:#6b7280;">6 Pax</td>
-                        <td><span style="color:#b45309; background:#fffbeb; padding:4px 10px; border-radius:6px; font-size:0.75rem; font-weight:700;">Occupied</span></td>
-                        <td style="font-size:0.85rem; color:#6b7280;">Free at 4:00 PM</td>
-                        <td style="text-align: right; padding-right:1.5rem;">
-                            <button class="btn-icon" onclick="openEditModal('R-102', 6, 'Occupied')">✎</button>
-                            <button class="btn-icon btn-delete" style="color:#ef4444; border-color:#fee2e2;">🗑️</button>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td style="padding-left:1.5rem;"><strong>R-103</strong></td>
-                        <td style="color:#6b7280;">4 Pax</td>
-                        <td><span style="color:#6b7280; background:#f3f4f6; padding:4px 10px; border-radius:6px; font-size:0.75rem; font-weight:700;">Maintenance</span></td>
-                        <td style="font-size:0.85rem; color:#6b7280;">--</td>
-                        <td style="text-align: right; padding-right:1.5rem;">
-                            <button class="btn-icon" onclick="openEditModal('R-103', 4, 'Maintenance')">✎</button>
-                            <button class="btn-icon btn-delete" style="color:#ef4444; border-color:#fee2e2;">🗑️</button>
-                        </td>
-                    </tr>
+                    @foreach (var room in Model.Rooms)
+                    {
+                        <tr>
+                            <td><strong>@room.Id</strong></td>
+                            <td>@room.Name</td>
+                            <td>@room.Location</td>
+                            <td style="color:var(--text-body);">@room.Capacity Pax</td>
+                            <td>
+                                @if (room.Status.ToString() == "AVAILABLE")
+                                {
+                                    <span class="badge badge-success">Available</span>
+                                }
+                                else if (room.Status.ToString() == "MAINTENANCE")
+                                {
+                                    <span class="badge badge-warning">Maintenance</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-neutral">Occupied</span>
+                                }
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(room.ImageURL))
+                                {
+                                    <a href="/images/rooms/@room.ImageURL" target="_blank" style="font-size:0.85rem; color:var(--primary);">View Image</a>
+                                }
+                                else
+                                {
+                                    <span style="color:#ccc;">-</span>
+                                }
+                            </td>
+                            <td style="text-align: right;">
+                                <button class="btn-icon"
+                                        onclick="openEditModal('@room.Id', '@room.Name', '@room.Location', @room.Capacity, '@room.Status')">
+                                    ✎
+                                </button>
+                                <button class="btn-icon btn-delete">🗑️</button>
+                            </td>
+                        </tr>
+                    }
                 </tbody>
             </table>
         </div>
@@ -147,26 +153,40 @@
             <h3>Edit Room Details</h3>
             <button class="btn-close" onclick="closeEditModal()">&times;</button>
         </div>
-        <form asp-action="UpdateRoom" method="post">
+
+        <form asp-action="UpdateRoomDetails" method="post">
             <input type="hidden" id="modalRoomIdHidden" name="RoomId" />
+
             <div class="form-group" style="margin-bottom: 1rem;">
                 <label class="form-label">Room Number</label>
                 <input type="text" id="modalRoomIdDisplay" class="form-input" readonly style="background-color:#f9fafb;">
             </div>
+
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label class="form-label">Room Name</label>
+                <input type="text" id="modalRoomName" name="Name" class="form-input" required>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label class="form-label">Location</label>
+                <input type="text" id="modalRoomLocation" name="Location" class="form-input" required>
+            </div>
+
             <div class="form-group" style="margin-bottom: 1rem;">
                 <label class="form-label">Capacity (Pax)</label>
-                <input type="number" id="modalCapacity" name="Capacity" class="form-input">
+                <input type="number" id="modalCapacity" name="Capacity" class="form-input" required>
             </div>
+
             <div class="form-group" style="margin-bottom: 1rem;">
                 <label class="form-label">Status</label>
                 <select id="modalStatus" name="Status" class="form-input">
-                    <option value="Available">Available</option>
-                    <option value="Occupied">Occupied</option>
-                    <option value="Maintenance">Maintenance</option>
+                    <option value="AVAILABLE">Available</option>
+                    <option value="MAINTENANCE">Maintenance</option>
                 </select>
             </div>
+
             <div class="modal-actions">
-                <button type="button" class="btn-action" style="background:#fff; border:1px solid #ddd; color:#333; width:auto; padding:0.5rem 1rem;" onclick="closeEditModal()">Cancel</button>
+                <button type="button" class="btn-action" onclick="closeEditModal()">Cancel</button>
                 <button type="submit" class="btn-save" style="width: auto; margin:0;">Update</button>
             </div>
         </form>

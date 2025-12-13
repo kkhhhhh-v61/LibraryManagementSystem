@@ -136,11 +136,76 @@ namespace LibraryManagementSystem.Controllers
             return prefix + "99";
         }
 
+        // =========================================================
+        // 3. UPDATE PAGE 
+        // =========================================================
         public IActionResult Update(string id)
         {
             var category = db.RoomCategories.Include(c => c.Rooms).FirstOrDefault(c => c.Id == id);
-            if (category == null) return NotFound();
+
+            if (category == null)
+            {
+                TempData["Error"] = "Category not found.";
+                return RedirectToAction("Index");
+            }
+
             return View(category);
+        }
+
+        // =========================================================
+        // 4. UPDATE CATEGORY 
+        // =========================================================
+        [HttpPost]
+        public IActionResult Edit(RoomCategory category)
+        {
+            if (ModelState.IsValid)
+            {
+                var existingCategory = db.RoomCategories.FirstOrDefault(c => c.Id == category.Id);
+
+                if (existingCategory != null)
+                {
+                    existingCategory.Name = category.Name;
+                    existingCategory.HourlyRate = category.HourlyRate;
+                    existingCategory.Description = category.Description;
+
+                    db.SaveChanges();
+
+                    TempData["Success"] = "Category details updated!";
+
+                    return RedirectToAction("Update", new { id = category.Id });
+                }
+            }
+
+            TempData["Error"] = "Failed to update category.";
+
+            category.Rooms = db.Rooms.Where(r => r.RoomCategoryId == category.Id).ToList();
+            return View("Update", category);
+        }
+
+        // =========================================================
+        // 5. UPDATE ROOM DETAILS 
+        // =========================================================
+        [HttpPost]
+        public IActionResult UpdateRoomDetails(string roomId, string name, string location, int capacity, Room.RoomStatus status)
+        {
+            var room = db.Rooms.FirstOrDefault(r => r.Id == roomId);
+
+            if (room != null)
+            {
+                room.Name = name;
+                room.Location = location;
+                room.Capacity = capacity;
+                room.Status = status;
+
+                db.SaveChanges();
+
+                TempData["Success"] = $"Room {roomId} updated successfully!";
+
+                return RedirectToAction("Update", new { id = room.RoomCategoryId });
+            }
+
+            TempData["Error"] = "Room not found or update failed.";
+            return RedirectToAction("Index");
         }
     }
 }
