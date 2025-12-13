@@ -1,5 +1,5 @@
 ﻿/*  ===========================================================================
-    OVERRIDE
+    SECTION: OVERRIDES
     =========================================================================== */
 
 .layout__content {
@@ -16,7 +16,7 @@
 }
 
 /*  ===========================================================================
-    LAYOUT: INSERT FORM
+    SECTION: LAYOUT & CONTAINER
     =========================================================================== */
 
 .book-insert__title {
@@ -26,6 +26,7 @@
     text-align: center;
 }
 
+/* Form Container */
 .form {
     display: flex;
     justify-content: center;
@@ -38,128 +39,9 @@
     height: auto;
 }
 
+/* Layout Columns */
 .form__group--left {
     flex: 1;
-}
-
-.form__upload-wrapper {
-    position: relative;
-    width: 100%;
-}
-
-.form__upload-zone {
-    display: flex;
-    position: relative;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    transition: all 0.3s ease;
-    cursor: pointer;
-    border: 2px dashed var(--color-gray-300);
-    border-radius: var(--spacing-sm);
-    background-color: var(--color-gray-100);
-    aspect-ratio: 2 / 3;
-    width: 100%;
-    overflow: hidden;
-}
-
-.form__upload-zone:hover {
-    border-color: var(--color-primary-base);
-    background-color: #f0f8ff;
-}
-
-.form__upload-placeholder {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--spacing-sm);
-    transition: opacity 0.3s ease;
-    pointer-events: none;
-    color: var(--color-gray-500);
-}
-
-.form__upload-icon {
-    width: 48px;
-    height: 48px;
-    fill: var(--color-gray-400);
-    transition: fill 0.3s ease;
-}
-
-.form__upload-zone:hover .form__upload-icon {
-    fill: var(--color-primary-base);
-}
-
-.form__upload-text {
-    font-weight: var(--weight-medium);
-    font-size: var(--text-md);
-}
-
-.form__upload-zone:hover .form__upload-text {
-    color: var(--color-primary-base);
-}
-
-.form__upload-preview {
-    display: none;
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 10;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.form__file-input {
-    display: none;
-}
-
-.form__upload-zone.has-image {
-    border-style: solid;
-    border-color: var(--color-gray-200);
-}
-
-.form__upload-zone.has-image .form__upload-placeholder {
-    opacity: 0;
-}
-
-.form__upload-zone.has-image .form__upload-preview {
-    display: block;
-}
-
-.form__upload-remove {
-    display: flex;
-    position: absolute;
-    top: var(--spacing-sm);
-    right: var(--spacing-sm);
-    justify-content: center;
-    align-items: center;
-    transform: scale(0.8);
-    visibility: hidden;
-    opacity: 0;
-    z-index: 20;
-    transition: all 0.2s ease;
-    cursor: pointer;
-    border: none;
-    border-radius: 50%;
-    background-color: rgba(0, 0, 0, 0.6);
-    width: 32px;
-    height: 32px;
-}
-
-.form__upload-remove:hover {
-    transform: scale(1.1);
-    background-color: var(--color-error);
-}
-
-.form__upload-wrapper.has-file .form__upload-remove {
-    transform: scale(1);
-    visibility: visible;
-    opacity: 1;
-}
-
-.form__upload-zone.has-image {
-    border-style: solid;
-    border-color: var(--color-gray-200);
 }
 
 .form__group--right {
@@ -169,12 +51,31 @@
     gap: var(--spacing-md);
 }
 
+/* Layout Rows */
+.form__row {
+    display: flex;
+    gap: var(--spacing-md);
+}
+
+.form__row-item {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+/*  ===========================================================================
+    SECTION: FORM CONTROLS
+    =========================================================================== */
+
+/* Input Groups */
 .form__item {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-xs);
 }
 
+/* Labels */
 .form__label {
     display: block;
     margin-left: var(--spacing-xxs);
@@ -187,6 +88,7 @@
     color: var(--color-error);
 }
 
+/* Inputs & Textareas */
 .form__input,
 .form__textarea {
     outline: none;
@@ -220,18 +122,7 @@
     border-color: var(--color-primary-base);
 }
 
-.form__row {
-    display: flex;
-    gap: var(--spacing-md);
-}
-
-.form__row-item {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-}
-
+/* Validation States */
 .form__error {
     margin-left: var(--spacing-xxs);
     color: var(--color-error);
@@ -255,17 +146,166 @@
     color: var(--color-error);
 }
 
-.form__toggle-group {
-    display: flex;
-    gap: var(--spacing-lg);
-    margin-top: var(--spacing-xs);
+/*  ===========================================================================
+    SECTION: FILE UPLOAD COMPONENT
+    =========================================================================== */
+
+.form__upload-wrapper {
+    position: relative;
+    width: 100%;
 }
 
+.form__upload-zone {
+    display: flex;
+    position: relative;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 2px dashed var(--color-gray-300);
+    border-radius: var(--spacing-sm);
+    background-color: var(--color-gray-100);
+    aspect-ratio: 2 / 3;
+    width: 100%;
+    overflow: hidden;
+}
+
+.form__upload-zone:hover {
+    border-color: var(--color-primary-base);
+    background-color: #f0f8ff;
+}
+
+.form__upload-zone.has-image {
+    border-style: solid;
+    border-color: var(--color-gray-200);
+}
+
+/* Placeholder State */
+.form__upload-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-sm);
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    color: var(--color-gray-500);
+}
+
+.form__upload-zone.has-image .form__upload-placeholder {
+    opacity: 0;
+}
+
+.form__upload-icon {
+    width: 48px;
+    height: 48px;
+    fill: var(--color-gray-400);
+    transition: fill 0.3s ease;
+}
+
+.form__upload-zone:hover .form__upload-icon {
+    fill: var(--color-primary-base);
+}
+
+.form__upload-text {
+    font-weight: var(--weight-medium);
+    font-size: var(--text-md);
+}
+
+.form__upload-zone:hover .form__upload-text {
+    color: var(--color-primary-base);
+}
+
+/* Preview State */
+.form__upload-preview {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.form__upload-zone.has-image .form__upload-preview {
+    display: block;
+}
+
+/* Controls */
+.form__file-input {
+    display: none;
+}
+
+.form__upload-remove {
+    display: flex;
+    position: absolute;
+    top: var(--spacing-sm);
+    right: var(--spacing-sm);
+    justify-content: center;
+    align-items: center;
+    transform: scale(0.8);
+    visibility: hidden;
+    opacity: 0;
+    z-index: 20;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: none;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.6);
+    width: 32px;
+    height: 32px;
+}
+
+.form__upload-remove:hover {
+    transform: scale(1.1);
+    background-color: var(--color-error);
+}
+
+.form__upload-wrapper.has-file .form__upload-remove {
+    transform: scale(1);
+    visibility: visible;
+    opacity: 1;
+}
+
+/*  ===========================================================================
+    SECTION: TOGGLES & OPTIONS
+    =========================================================================== */
+
+/* Option Box */
+.form__option-box {
+    border: 1px solid var(--color-gray-300);
+    border-radius: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.form__option-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.form__option-header .form__label {
+    margin-left: 0;
+    font-size: var(--text-lg);
+}
+
+.form__helper-text {
+    margin: 0;
+    color: var(--color-gray-500);
+    font-size: 14px;
+}
+
+/* Toggle Switch */
 .form__toggle {
     display: inline-flex;
     position: relative;
     align-items: center;
     cursor: pointer;
+}
+
+.form__option-header .form__toggle-slider {
+    margin-right: 0;
 }
 
 .form__toggle-input {
@@ -307,103 +347,9 @@
     transform: translateX(20px);
 }
 
-.form__toggle-text {
-    color: var(--color-gray-900);
-    font-size: var(--text-lg);
-}
-
-.form__label-wrapper {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-}
-
-.form__hint {
-    display: flex;
-    position: relative;
-    justify-content: center;
-    align-items: center;
-    cursor: help;
-    border-radius: 50%;
-    background-color: var(--color-gray-400);
-    width: 20px;
-    height: 20px;
-    color: var(--color-white);
-    font-weight: var(--weight-bold);
-    font-size: 12px;
-}
-
-.form__hint:hover {
-    background-color: var(--color-primary-base);
-}
-
-.form__hint::after {
-    position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%) translateY(-8px);
-    visibility: hidden;
-    opacity: 0;
-    transition: opacity 0.2s;
-    border-radius: var(--spacing-xs);
-    background-color: var(--color-gray-900);
-    padding: var(--spacing-xs) var(--spacing-sm);
-    pointer-events: none;
-    content: attr(data-tooltip);
-    color: var(--color-white);
-    font-size: 12px;
-    white-space: nowrap;
-}
-
-.form__hint:hover::after {
-    visibility: visible;
-    opacity: 1;
-}
-
-.form__hint::before {
-    position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%) translateY(-4px);
-    visibility: hidden;
-    opacity: 0;
-    transition: opacity 0.2s;
-    border: 4px solid transparent;
-    border-top-color: var(--color-gray-900);
-    content: "";
-}
-
-.form__hint:hover::before {
-    visibility: visible;
-    opacity: 1;
-}
-
-.form__option-box {
-    border: 1px solid var(--color-gray-300);
-    border-radius: var(--spacing-sm);
-    padding: var(--spacing-sm) var(--spacing-md);
-}
-
-.form__option-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.form__option-header .form__label {
-    margin-left: 0;
-    font-size: var(--text-lg);
-}
-
-.form__option-header .form__toggle-slider {
-    margin-right: 0;
-}
-
-.form__helper-text {
-    margin: 0;
-    color: var(--color-gray-500);
-    font-size: 14px;
-}
+/*  ===========================================================================
+    SECTION: ACTIONS & BUTTONS
+    =========================================================================== */
 
 .form__action {
     display: flex;
@@ -453,7 +399,7 @@
 }
 
 /*  ===========================================================================
-    RESPONSIVE
+    SECTION: RESPONSIVE DESIGN
     =========================================================================== */
 
 @media (max-width: 768px) {

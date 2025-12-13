@@ -95,6 +95,8 @@ public class Book
 
     public bool IsArchived { get; set; }
 
+    public DateOnly DateAdded { get; set; }
+
     public List<Genre> Genres { get; set; } = [];
 
     public List<Author> Authors { get; set; } = [];

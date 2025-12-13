@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LibraryManagementSystem.Migrations
 {
     [DbContext(typeof(LMSDB))]
-    [Migration("20251213091044_CreateLMSDB")]
+    [Migration("20251213184213_CreateLMSDB")]
     partial class CreateLMSDB
     {
         /// <inheritdoc />
@@ -76,6 +76,9 @@ namespace LibraryManagementSystem.Migrations
                     b.Property<string>("Id")
                         .HasMaxLength(6)
                         .HasColumnType("nvarchar(6)");
+
+                    b.Property<DateOnly>("DateAdded")
+                        .HasColumnType("date");
 
                     b.Property<string>("Description")
                         .IsRequired()

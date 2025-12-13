@@ -35,7 +35,8 @@ namespace LibraryManagementSystem.Migrations
                     Edition = table.Column<int>(type: "int", nullable: false),
                     ImageURL = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     IsFeatured = table.Column<bool>(type: "bit", nullable: false),
-                    IsArchived = table.Column<bool>(type: "bit", nullable: false)
+                    IsArchived = table.Column<bool>(type: "bit", nullable: false),
+                    DateAdded = table.Column<DateOnly>(type: "date", nullable: false)
                 },
                 constraints: table =>
                 {
