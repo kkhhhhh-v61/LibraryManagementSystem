@@ -1,177 +1,225 @@
-﻿/* =========================================
-   1. Global Variables
-   ========================================= */
+﻿/* --- Global Variables --- */
 :root {
+    /* Brand colors */
     --primary: #4f46e5;
     --primary-hover: #4338ca;
-    --bg-page: #f3f4f6; /* Light gray background */
-    --bg-surface: #ffffff; /* White panels */
-    --border: #e5e7eb;
-    --text-main: #111827;
-    --text-muted: #6b7280;
-    --radius: 12px; /* Rounded corners */
+    --primary-subtle: #eef2ff;
+    /* Status colors */
+    --success: #10b981;
+    --success-bg: #ecfdf5;
+    --warning: #f59e0b;
+    --warning-bg: #fffbeb;
+    --danger: #ef4444;
+    --danger-bg: #fef2f2;
+    /* Backgrounds & Borders */
+    --bg-app: #f8fafc;
+    --bg-card: #ffffff;
+    --border: #e2e8f0;
+    /* Text colors */
+    --text-main: #0f172a;
+    --text-body: #475569;
+    --text-muted: #94a3b8;
+    /* Sizing variables */
+    --header-buffer: 110px; /* Space for the top nav bar */
+    --radius: 10px;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
-/* =========================================
-   2. Full Screen Layout Container
-   ========================================= */
-.dashboard-container {
-    /* CRITICAL: This calculation makes the container fill the screen height,
-       subtracting roughly the height of your top navigation bar (approx 80px).
-       Adjust '80px' if your top nav is taller/shorter.
-    */
-    height: calc(100vh - 100px);
-    width: 100%;
-    padding: 20px;
+* {
     box-sizing: border-box;
-    display: grid;
-    /* Left side fills space, Right side is fixed 420px */
-    grid-template-columns: 1fr 420px;
-    gap: 20px;
 }
 
-/* =========================================
-   3. Panel Styling (Left & Right)
-   ========================================= */
-.panel {
-    background-color: var(--bg-surface);
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
+body {
+    background-color: var(--bg-app);
+    color: var(--text-body);
+    font-family: 'Inter', -apple-system, sans-serif;
+    margin: 0;
+    overflow: hidden; /* Stop the whole page from scrolling */
+}
+
+/* --- Layout Containers --- */
+
+/* For the main Index page (Left table, Right sidebar) */
+.dashboard-container {
+    /* Calculate height to fit screen exactly */
+    height: calc(100vh - var(--header-buffer));
+    width: 100%;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 1rem;
+    display: grid;
+    grid-template-columns: 1fr 360px; /* Sidebar width */
+    gap: 1rem;
+    align-items: start;
+}
+
+/* For the Update page (Top form, Bottom table) */
+.update-page-container, .edit-full-page {
+    height: calc(100vh - var(--header-buffer));
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 1rem;
     display: flex;
     flex-direction: column;
-    /* This ensures both panels stretch to the full height of the container */
-    height: 100%;
-    overflow: hidden; /* Prevents overflow from breaking rounded corners */
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    gap: 1rem;
 }
 
-/* Header inside the panel */
+/* --- Card / Panel Styles --- */
+.panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Helper to fill empty space */
+.panel-fill {
+    height: 100%;
+}
+
+/* Helper to fit content size */
+.panel-auto {
+    flex-shrink: 0;
+}
+
 .panel-header {
-    padding: 1.25rem 1.5rem;
+    padding: 0.75rem 1.25rem;
+    background: #fff;
     border-bottom: 1px solid var(--border);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: #fff;
-    flex-shrink: 0; /* Header stays fixed size */
+    flex-shrink: 0;
+    min-height: 50px;
 }
 
 .panel-title {
     margin: 0;
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     font-weight: 700;
     color: var(--text-main);
-}
-
-/* Body content that can scroll */
-.panel-body {
-    padding: 1.5rem;
-    overflow-y: auto; /* Internal scrollbar if content is too long */
-    flex-grow: 1; /* Fills the remaining height */
-}
-
-/* =========================================
-   4. Left Side: Table Styling
-   ========================================= */
-.modern-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-    .modern-table th {
-        position: sticky; /* Keeps header visible when scrolling */
-        top: 0;
-        background: #fff; /* Covers content when scrolling */
-        z-index: 10;
-        text-align: left;
-        padding: 1rem;
-        color: var(--text-muted);
-        font-size: 0.75rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        border-bottom: 2px solid var(--bg-page);
-    }
-
-    .modern-table td {
-        padding: 1.25rem 1rem;
-        border-bottom: 1px solid var(--border);
-        color: var(--text-main);
-        vertical-align: middle;
-    }
-
-    .modern-table tr:hover {
-        background-color: #f9fafb;
-    }
-
-/* Action Button */
-.btn-action {
-    color: var(--primary);
-    background: #eef2ff;
-    padding: 6px 12px;
-    border-radius: 6px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.2s;
-}
-
-    .btn-action:hover {
-        background: var(--primary);
-        color: white;
-    }
-
-/* =========================================
-   5. Right Side: Form Styling
-   ========================================= */
-.form-section {
-    margin-bottom: 2rem;
-    padding-bottom: 2rem;
-    border-bottom: 1px dashed var(--border);
-}
-
-    .form-section:last-child {
-        border-bottom: none;
-    }
-
-.section-label {
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: var(--primary);
-    margin-bottom: 1rem;
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
-.form-grid {
+.panel-body {
+    padding: 1.25rem;
+    overflow-y: auto; /* Internal scrollbar */
+    flex: 1;
+}
+
+/* --- Table Styles --- */
+.table-wrapper {
+    flex: 1;
+    overflow: auto;
+    background: var(--bg-card);
+    position: relative;
+}
+
+.modern-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.85rem;
+}
+
+    /* Keep header fixed at top */
+    .modern-table th {
+        position: sticky;
+        top: 0;
+        background: #f9fafb;
+        z-index: 10;
+        padding: 0.75rem 1rem;
+        text-align: left;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        border-bottom: 1px solid var(--border);
+    }
+
+    .modern-table td {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--border);
+        vertical-align: middle;
+        color: var(--text-main);
+    }
+
+    .modern-table tbody tr:hover {
+        background-color: #f8fafc;
+    }
+
+/* Status Labels */
+.badge {
+    display: inline-flex;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.badge-success {
+    background: var(--success-bg);
+    color: var(--success);
+}
+
+.badge-warning {
+    background: var(--warning-bg);
+    color: var(--warning);
+}
+
+.badge-neutral {
+    background: #f1f5f9;
+    color: var(--text-body);
+}
+
+/* --- Forms --- */
+.form-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* Grid for the update form */
+.form-horizontal-grid, .form-compact-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* Side-by-side inputs */
-    gap: 15px;
+    grid-template-columns: 1fr 2fr 1fr 1fr;
+    gap: 1rem;
+    align-items: start;
 }
 
 .form-group {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 0.3rem;
 }
 
-.full-width {
-    grid-column: span 2;
+.form-full-row, .form-full-width {
+    grid-column: 1 / -1;
+    margin-top: 0.25rem;
 }
 
 .form-label {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-weight: 600;
     color: var(--text-main);
 }
 
 .form-input {
-    padding: 0.75rem;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    font-size: 0.95rem;
     width: 100%;
-    box-sizing: border-box;
+    padding: 0.55rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    background: #fff;
+    transition: all 0.2s;
+    font-family: inherit;
 }
 
     .form-input:focus {
@@ -180,36 +228,212 @@
         box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
     }
 
+    .form-input[readonly] {
+        background-color: #f8fafc;
+        color: var(--text-muted);
+    }
+
+textarea.form-input {
+    resize: none;
+    min-height: 60px;
+}
+
+/* --- Buttons & Nav --- */
 .btn-save {
     width: 100%;
-    padding: 0.85rem;
+    padding: 0.6rem 1rem;
     background-color: var(--primary);
     color: white;
     border: none;
-    border-radius: 8px;
+    border-radius: 6px;
     font-weight: 600;
+    font-size: 0.85rem;
     cursor: pointer;
-    margin-top: 10px;
+    transition: background 0.2s;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
 }
 
     .btn-save:hover {
         background-color: var(--primary-hover);
     }
 
-/* =========================================
-   6. Responsive
-   ========================================= */
+/* Small icon buttons */
+.btn-icon {
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    background: white;
+    border-radius: 6px;
+    color: var(--text-body);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+    .btn-icon svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    .btn-icon:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+    }
+
+.btn-delete:hover {
+    border-color: var(--danger);
+    color: var(--danger);
+    background: var(--danger-bg);
+}
+
+/* Ghost / Outline button */
+.btn-action {
+    background: white;
+    border: 1px solid var(--border);
+    color: var(--text-body);
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+/* Back link */
+.nav-back-bar, .back-nav {
+    flex-shrink: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+    .back-nav a {
+        text-decoration: none;
+        color: var(--text-muted);
+        font-weight: 600;
+        font-size: 0.85rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+        .back-nav a:hover {
+            color: var(--primary);
+        }
+
+/* --- Popup Modal --- */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    backdrop-filter: blur(2px);
+}
+
+.modal-box {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    width: 90%;
+    max-width: 400px;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+    .modal-header h3 {
+        margin: 0;
+        font-size: 1.1rem;
+    }
+
+.btn-close {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #999;
+}
+
+.modal-actions {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+/* --- Mobile View --- */
 @media (max-width: 1024px) {
+    /* Stack columns on small screens */
     .dashboard-container {
-        display: block; /* Stack on small screens */
+        grid-template-columns: 1fr;
+        height: auto;
+        overflow: auto;
+    }
+
+    .form-horizontal-grid, .form-compact-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .update-page-container, .edit-full-page {
         height: auto;
     }
 
-    .panel {
-        margin-bottom: 20px;
-        height: auto; /* Auto height on mobile */
+    body {
+        overflow: auto;
     }
 }
+
+/* =========================================
+   SCROLLBAR STYLING 
+   ========================================= */
+::-webkit-scrollbar {
+    width: 6px; 
+    height: 6px; 
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1; 
+    border-radius: 3px;
+}
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8; 
+    }
+
+/* =========================================
+   UTILITIES 
+   ========================================= */
+
+.scrollable-panel-body {
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.right-sidebar-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    overflow-y: auto; 
+    height: 100%; 
+    padding-right: 4px; 
+}
+
 /* =========================================
    NEW: Edit Page Layout (Vertical Stack)
    ========================================= */

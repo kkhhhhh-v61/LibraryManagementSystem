@@ -63,10 +63,22 @@ public class RoomCreateVM
     [Range(1, 30, ErrorMessage = "Capacity must be between 1 and 30.")]
     public int Capacity { get; set; }
 
+    [Required(ErrorMessage = "Please select a status.")]
+    public RoomStatus Status { get; set; } = RoomStatus.AVAILABLE;
+
     [DisplayName("Category")]
     [Required(ErrorMessage = "Please select a category.")]
     public string RoomCategoryId { get; set; }
 
     [DisplayName("Room Image")]
     public IFormFile? Image { get; set; }
+}
+
+public class RoomIndexVM
+{
+    public List<RoomCategory> Categories { get; set; } = new();
+
+    public RoomCategoryCreateVM CategoryInput { get; set; } = new();
+
+    public RoomCreateVM RoomInput { get; set; } = new();
 }
