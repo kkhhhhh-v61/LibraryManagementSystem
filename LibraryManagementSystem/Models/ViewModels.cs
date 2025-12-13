@@ -31,6 +31,10 @@ public class BookInsertVM
     [Required(ErrorMessage = "{0} is required.")]
     [Range(1, 100, ErrorMessage = "{0} must be between 1 and 100.")]
     public int Edition { get; set; }
+
+    public bool IsFeatured { get; set; } = false;
+
+    public bool IsArchived { get; set; } = false;
 }
 
 public class RoomCategoryCreateVM

@@ -37,31 +37,53 @@
 
         <div class="form__group form__group--right">
             <div class="form__item">
-                <label asp-for="Title" class="form__label">Title</label>
+                <label asp-for="Title" class="form__label form__label--required">Title</label>
                 <input asp-for="Title" class="form__input" data-trim autofocus />
-                <span asp-validation-for="Title"" class="form__error"></span>
+                <span asp-validation-for="Title" class="form__error"></span>
             </div>
             <div class="form__item">
-                <label asp-for="Description" class="form__label">Description</label>
+                <label asp-for="Description" class="form__label form__label--required">Description</label>
                 <textarea asp-for="Description" class="form__textarea" data-trim></textarea>
                 <span asp-validation-for="Description" class="form__error"></span>
             </div>
             <div class="form__item">
-                <label asp-for="ISBN" class="form__label">ISBN</label>
-                <input asp-for="ISBN"" class="form__input" data-trim />
+                <label asp-for="ISBN" class="form__label form__label--required">ISBN</label>
+                <input asp-for="ISBN" class="form__input" data-trim />
                 <span asp-validation-for="ISBN" class="form__error"></span>
             </div>
             <div class="form__row">
                 <div class="form__row-item">
-                    <label asp-for="PublicationYear" class="form__label">Publication Year</label>
+                    <label asp-for="PublicationYear" class="form__label form__label--required">Publication Year</label>
                     <input asp-for="PublicationYear" class="form__input" type="number" min="1450" max="2100" step="1" value="@DateTime.Now.Year" data-trim />
                     <span asp-validation-for="PublicationYear" class="form__error"></span>
                 </div>
                 <div class="form__row-item">
-                    <label asp-for="Edition" class="form__label">Edition</label>
+                    <label asp-for="Edition" class="form__label form__label--required">Edition</label>
                     <input asp-for="Edition" class="form__input" type="number" min="1" max="100" step="1" value="1" data-trim />
                     <span asp-validation-for="Edition" class="form__error"></span>
 
+                </div>
+            </div>
+            <div class="form__row">
+                <div class="form__row-item form__option-box">
+                    <div class="form__option-header">
+                        <label asp-for="IsFeatured" class="form__label">Featured</label>
+                        <label class="form__toggle">
+                            <input asp-for="IsFeatured" class="form__toggle-input" type="checkbox" />
+                            <span class="form__toggle-slider"></span>
+                        </label>
+                    </div>
+                    <p class="form__helper-text">Displays the book on the Featured section of the Home page.</p>
+                </div>
+                <div class="form__row-item form__option-box">
+                    <div class="form__option-header">
+                        <label asp-for="IsArchived" class="form__label">Archived</label>
+                        <label class="form__toggle">
+                            <input asp-for="IsArchived" class="form__toggle-input" type="checkbox" />
+                            <span class="form__toggle-slider"></span>
+                        </label>
+                    </div>
+                    <p class="form__helper-text">Archive the book from being shown in the Catalogue.</p>
                 </div>
             </div>
             <div class="form__action">
