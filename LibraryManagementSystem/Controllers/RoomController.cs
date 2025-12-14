@@ -26,7 +26,7 @@ namespace LibraryManagementSystem.Controllers
         // 1. CREATE CATEGORY
         // =======================================================================================
         [HttpPost]
-        public IActionResult Create(RoomIndexVM vm)
+        public IActionResult CreateCategoryAjax(RoomIndexVM vm)
         {
             ModelState.Remove("RoomInput.Name");
             ModelState.Remove("RoomInput.Location");
@@ -36,7 +36,6 @@ namespace LibraryManagementSystem.Controllers
             ModelState.Remove("RoomInput");
 
             bool nameExists = db.RoomCategories.Any(c => c.Name == vm.CategoryInput.Name.Trim());
-
             if (nameExists)
             {
                 ModelState.AddModelError("CategoryInput.Name", "Category Name already exists.");
@@ -45,8 +44,8 @@ namespace LibraryManagementSystem.Controllers
             if (ModelState.IsValid)
             {
                 string newId = GenerateNextId("Category");
-
                 string uniqueFileName = "";
+
                 if (vm.CategoryInput.Image != null)
                 {
                     string uploadFolder = Path.Combine(en.WebRootPath, "images", "categories");
@@ -70,22 +69,34 @@ namespace LibraryManagementSystem.Controllers
                 db.RoomCategories.Add(newCategory);
                 db.SaveChanges();
 
-                TempData["Success"] = "Category created successfully!";
-                return RedirectToAction("Index");
+
+                return Json(new
+                {
+                    success = true,
+                    message = "Category created successfully!",
+                    data = new
+                    {
+                        id = newCategory.Id,
+                        name = newCategory.Name,
+                        rate = newCategory.HourlyRate.ToString("F2"),
+                        description = newCategory.Description
+                    }
+                });
             }
-            vm.Categories = db.RoomCategories.Include(c => c.Rooms).OrderByDescending(c => c.Id).ToList();
-            ViewBag.CategoryList = new SelectList(vm.Categories, "Id", "Name");
 
-            TempData["Error"] = "Please fix the errors below.";
+            var errors = ModelState.ToDictionary(
+                kvp => kvp.Key,
+                kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToArray() ?? Array.Empty<string>()
+            );
 
-            return View("Index", vm);
+            return Json(new { success = false, message = "Please fix the errors below.", errors = errors });
         }
 
         // ==========================================================================================
         // 2. CREATE ROOM
         // ==========================================================================================
         [HttpPost]
-        public IActionResult CreateRoom(RoomIndexVM vm)
+        public IActionResult CreateRoomAjax(RoomIndexVM vm)
         {
             ModelState.Remove("CategoryInput.Name");
             ModelState.Remove("CategoryInput.Description");
@@ -94,7 +105,6 @@ namespace LibraryManagementSystem.Controllers
             ModelState.Remove("CategoryInput");
 
             bool nameExists = db.Rooms.Any(r => r.RoomCategoryId == vm.RoomInput.RoomCategoryId && r.Name == vm.RoomInput.Name.Trim());
-
             if (nameExists)
             {
                 ModelState.AddModelError("RoomInput.Name", "Room Name already exists in this category.");
@@ -117,15 +127,15 @@ namespace LibraryManagementSystem.Controllers
                 db.Rooms.Add(newRoom);
                 db.SaveChanges();
 
-                TempData["Success"] = "Room added!";
-                return RedirectToAction("Index");
+                return Json(new { success = true, message = "Room added successfully!" });
             }
 
-            vm.Categories = db.RoomCategories.Include(c => c.Rooms).OrderByDescending(c => c.Id).ToList();
-            ViewBag.CategoryList = new SelectList(vm.Categories, "Id", "Name");
+            var errors = ModelState.ToDictionary(
+                kvp => kvp.Key,
+                kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToArray() ?? Array.Empty<string>()
+            );
 
-            TempData["Error"] = "Failed to add room.";
-            return View("Index", vm);
+            return Json(new { success = false, message = "Failed to add room.", errors = errors });
         }
 
         private string GenerateNextId(string type)

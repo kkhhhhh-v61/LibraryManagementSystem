@@ -73,7 +73,7 @@
         <div class="panel panel-auto">
             <div class="panel-header"><div class="panel-title">Add Category</div></div>
             <div class="panel-body">
-                <form asp-action="Create" method="post" class="form-stack" enctype="multipart/form-data">
+                <form id="formCreateCategory" onsubmit="submitCategory(event)" class="form-stack" enctype="multipart/form-data">
 
                     <div class="form-group">
                         <label class="form-label">Name</label>
@@ -106,7 +106,7 @@
         <div class="panel panel-auto">
             <div class="panel-header"><div class="panel-title">Add Room</div></div>
             <div class="panel-body scrollable-panel-body">
-                <form asp-action="CreateRoom" method="post" class="form-stack" enctype="multipart/form-data">
+                <form id="formCreateRoom" onsubmit="submitRoom(event)" class="form-stack" enctype="multipart/form-data">
 
                     <div class="form-group">
                         <label class="form-label">Room Name</label>
@@ -144,3 +144,11 @@
 
     </div>
 </div>
+
+@section foot {
+    <script src="/js/room.js" asp-append-version="true"></script>
+
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
