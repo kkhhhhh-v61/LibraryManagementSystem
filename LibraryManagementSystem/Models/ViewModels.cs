@@ -1,15 +1,21 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using static LibraryManagementSystem.Models.Room;
 
 namespace LibraryManagementSystem.Models;
 
 #nullable disable warnings
 
+/* ------------------------------ LAI CHEE KIT ------------------------------ */
+
+
+/* ------------------------------ TAN KAI HAO ------------------------------ */
+
 public class BookInsertVM
 {
     public IFormFile? Image { get; set; }
-    
+
     [Required(ErrorMessage = "{0} is required.")]
     [StringLength(255, ErrorMessage = "{0} must be between 1 and 255 characters.")]
     public string Title { get; set; }
@@ -31,7 +37,51 @@ public class BookInsertVM
     [Required(ErrorMessage = "{0} is required.")]
     [Range(1, 100, ErrorMessage = "{0} must be between 1 and 100.")]
     public int Edition { get; set; }
+
+    [DisplayName("Genre(s)")]
+    [Required(ErrorMessage = "At least one Genre is required.")]
+    public List<string> SelectedGenreIds { get; set; } = new();
+
+    public List<SelectListItem> GenreList { get; set; } = new();
+
+    [DisplayName("Author(s)")]
+    [Required(ErrorMessage = "At least one Author is required.")]
+    [MaxLength(10, ErrorMessage = "A Book cannot have more than 10 authors.")]
+    public List<string> SelectedAuthorIds { get; set; } = new();
+
+    public List<SelectListItem> AuthorList { get; set; } = new();
+
+    public bool IsFeatured { get; set; } = false;
+
+    public bool IsArchived { get; set; } = false;
 }
+
+public class GenreVM
+{
+    [DisplayName("Genre Name")]
+    [Required(ErrorMessage = "{0} is required.")]
+    [StringLength(50, MinimumLength = 3, ErrorMessage = "{0} must be between 3 and 50 characters.")]
+    [RegularExpression(@"^[a-zA-Z]+(?:[\s-&][a-zA-Z]+)*$",
+    ErrorMessage = "{0} must start and end with a letter, and symbols (- and &) must be between letters.")]
+    public string Name { get; set; }
+}
+
+
+public class AuthorVM
+{
+    [DisplayName("Author Name")]
+    [Required(ErrorMessage = "{0} is required.")]
+    [StringLength(100, MinimumLength = 1, ErrorMessage = "{0} must be between 1 and 100 characters.")]
+    [RegularExpression(@"^[a-zA-Z]+(?:(?:[\s\-\']|\. ?)[a-zA-Z]+)*\.?$", 
+    ErrorMessage = "{0} must start with a letter, and symbols (', -, .) must be between letters.")]
+    public string Name { get; set; }
+}
+
+
+/* ------------------------------ JASON TYE HONG YI ------------------------------ */
+
+
+/* ------------------------------ BRIAN OOI SHU YI ------------------------------ */
 
 public class RoomCategoryCreateVM
 {

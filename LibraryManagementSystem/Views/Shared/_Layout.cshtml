@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sansation:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap">
     <link rel="stylesheet" href="/css/app.css" asp-append-version="true" />
-    @RenderSection("head", false)
+    @await RenderSectionAsync("head", false)
 </head>
 
 <body>
@@ -41,13 +41,13 @@
                     </a>
 
                     <div class="sidebar-subnav">
-                        <a href="#" class="sidebar-subnav__link">Browse All</a>
-                        <a href="#" class="sidebar-subnav__link">New Arrivals</a>
-                        <a href="#" class="sidebar-subnav__link">Genres</a>
+                        <a asp-controller="Book" asp-action="" class="sidebar-subnav__link @Html.IsActive("Book", "Browse", "sidebar-subnav__link--active")">Browse All</a>
 
                         <div class="sidebar-subnav__separator"></div>
 
-                        <a asp-controller="Book" asp-action="Insert" class="sidebar-subnav__link @Html.IsActive("Book", "Insert", "sidebar-subnav__link--active")">Insert Book</a>
+                        <a asp-controller="Book" asp-action="InsertBook" class="sidebar-subnav__link @Html.IsActive("Book", "InsertBook", "sidebar-subnav__link--active")">Insert Book</a>
+                        <a asp-controller="Book" asp-action="InsertGenre" class="sidebar-subnav__link @Html.IsActive("Book", "InsertGenre", "sidebar-subnav__link--active")">Insert Genre</a>
+                        <a asp-controller="Book" asp-action="InsertAuthor" class="sidebar-subnav__link @Html.IsActive("Book", "InsertAuthor", "sidebar-subnav__link--active")">Insert Author</a>
                     </div>
                 </div>
 
@@ -124,14 +124,43 @@
         </main>
     </div>
 
+    <div id="toast-container"></div>
+
     <script src="/js/jquery.min.js" asp-append-version="true"></script>
     <script src="/js/jquery.unobtrusive-ajax.min.js" asp-append-version="true"></script>
     <script src="/js/jquery.validate.min.js" asp-append-version="true"></script>
     <script src="/js/jquery.validate.unobtrusive.min.js" asp-append-version="true"></script>
     <script src="/js/app.js" asp-append-version="true"></script>
-    @RenderSection("foot", false)
+    @await RenderSectionAsync("foot", false)
 
-    @await RenderSectionAsync("Scripts", required: false)
+    @if (TempData["ToastMessage"] != null)
+    {
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // 1. Check if the user used the Back/Forward button
+                var isBackNavigation = false;
+
+                if (window.performance && window.performance.getEntriesByType) {
+                    var navEntries = window.performance.getEntriesByType('navigation');
+                    if (navEntries.length > 0 && navEntries[0].type === 'back_forward') {
+                        isBackNavigation = true;
+                    }
+                }
+                else if (window.performance && window.performance.navigation) {
+                    if (window.performance.navigation.type === 2) {
+                        isBackNavigation = true;
+                    }
+                }
+
+                // 2. Show toast if only it is a fresh load
+                if (!isBackNavigation) {
+                    var message = @Json.Serialize(TempData["ToastMessage"]);
+                    var type = @Json.Serialize(TempData["ToastType"]);
+                    showToast(message, type);
+                }
+            });
+        </script>
+    }
 </body>
 
 </html>

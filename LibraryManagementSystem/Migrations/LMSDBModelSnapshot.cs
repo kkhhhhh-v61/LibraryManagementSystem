@@ -74,6 +74,9 @@ namespace LibraryManagementSystem.Migrations
                         .HasMaxLength(6)
                         .HasColumnType("nvarchar(6)");
 
+                    b.Property<DateOnly>("DateAdded")
+                        .HasColumnType("date");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(2000)
