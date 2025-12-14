@@ -1,5 +1,6 @@
 ﻿@using LibraryManagementSystem.Models
-@model RoomCategory
+@model RoomUpdatePageVM
+
 
 @{
     ViewBag.Title = "Update Category";
@@ -9,23 +10,41 @@
     <link rel="stylesheet" href="/css/room.css" asp-append-version="true" />
 }
 
+<div class="toast-container">
+    @if (TempData["Success"] != null)
+    {
+        <div class="toast toast-success" id="autoToast">
+            <span>@TempData["Success"]</span>
+            <button onclick="this.parentElement.remove()" style="background:none; border:none; color:white; cursor:pointer; font-size:1.2rem;">&times;</button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="toast toast-error" id="autoToast">
+            <span>@TempData["Error"]</span>
+            <button onclick="this.parentElement.remove()" style="background:none; border:none; color:white; cursor:pointer; font-size:1.2rem;">&times;</button>
+        </div>
+    }
+</div>
+
 <div class="update-page-container">
 
     <div class="nav-back-bar">
         <a href="/Room" style="text-decoration:none; color:#6b7280; display:inline-flex; align-items:center; gap:6px; font-weight:600; font-size:0.95rem; transition:color 0.2s;">
             <div style="background:white; border:1px solid #e5e7eb; border-radius:6px; padding:4px; display:flex;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
+                <img src="~/images/icons/back.svg" />
             </div>
             Back to Dashboard
         </a>
-        <span style="font-size:0.85rem; color:#9ca3af;">Category ID: @Model.Id</span>
+        <span style="font-size:0.85rem; color:#9ca3af;">Category ID: @Model.CategoryDisplay.Id</span>
     </div>
 
     <div class="panel panel-top">
         <div class="panel-header">
             <h2 class="panel-title" style="display:flex; align-items:center; gap:10px;">
-                <span style="background:#eef2ff; padding:6px; border-radius:8px; color:#4f46e5;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                <span>
+                    <img src="~/images/icons/edit_square.svg" />
                 </span>
                 Edit Category
             </h2>
@@ -42,28 +61,28 @@
 
                     <div class="form-group">
                         <label class="form-label">ID</label>
-                        <input asp-for="Id" class="form-input" readonly style="background:#f8fafc; color:#6b7280; font-family:monospace;" />
+                        <input asp-for="CategoryUpdate.Id" class="form-input" readonly style="background:#f8fafc; color:#6b7280; font-family:monospace;" />
                     </div>
 
                     <div class="form-group">
                         <label class="form-label">Category Name</label>
-                        <input asp-for="Name" class="form-input" style="font-weight:600;" />
-                        <span asp-validation-for="Name" class="text-danger" style="font-size:0.8rem; color:var(--danger);"></span>
+                        <input asp-for="CategoryUpdate.Name" class="form-input" style="font-weight:600;" />
+                        <span asp-validation-for="CategoryUpdate.Name" class="text-danger" style="font-size:0.8rem; color:var(--danger);"></span>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label">Hourly Rate</label>
                         <div style="position:relative;">
                             <span style="position:absolute; left:12px; top:10px; color:#9ca3af; font-size:0.9rem;">RM</span>
-                            <input asp-for="HourlyRate" class="form-input" type="number" step="0.01" style="padding-left:40px;" />
+                            <input asp-for="CategoryUpdate.HourlyRate" class="form-input" type="number" step="0.01" style="padding-left:40px;" />
                         </div>
-                        <span asp-validation-for="HourlyRate" class="text-danger" style="font-size:0.8rem; color:var(--danger);"></span>
+                        <span asp-validation-for="CategoryUpdate.HourlyRate" class="text-danger" style="font-size:0.8rem; color:var(--danger);"></span>
                     </div>
 
                     <div class="form-group form-full-width">
                         <label class="form-label">Description & Amenities</label>
-                        <textarea asp-for="Description" class="form-input" rows="2"></textarea>
-                        <span asp-validation-for="Description" class="text-danger" style="font-size:0.8rem; color:var(--danger);"></span>
+                        <textarea asp-for="CategoryUpdate.Description" class="form-input" rows="2"></textarea>
+                        <span asp-validation-for="CategoryUpdate.Description" class="text-danger" style="font-size:0.8rem; color:var(--danger);"></span>
                     </div>
 
                 </div>
@@ -79,10 +98,16 @@
     <div class="panel panel-bottom-fill">
         <div class="panel-header">
             <div class="section-title">
-                🚪 Associated Rooms
-                <span class="badge badge-neutral" style="margin-left:10px;">
-                    @Model.Rooms.Count Total
+                <h2 class="panel-title" style="display:flex; align-items:center; gap:10px;">
+                <span>
+                <img src="~/images/icons/room.svg" />   
                 </span>
+                    Associated Rooms
+                <span class="badge badge-neutral" style="margin-left:10px;">
+                    @Model.CategoryDisplay.Rooms.Count Total
+                </span>
+                </h2>
+                
             </div>
             <button class="btn-save" style="width:auto; padding: 6px 16px; font-size:0.85rem;" onclick="alert('Use the Dashboard to add new rooms!')">+ Add Room</button>
         </div>
@@ -101,7 +126,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var room in Model.Rooms)
+                    @foreach (var room in Model.CategoryDisplay.Rooms)
                     {
                         <tr>
                             <td><strong>@room.Id</strong></td>
@@ -135,9 +160,11 @@
                             <td style="text-align: right;">
                                 <button class="btn-icon"
                                         onclick="openEditModal('@room.Id', '@room.Name', '@room.Location', @room.Capacity, '@room.Status')">
-                                    ✎
+                                    <img src="~/images/icons/edit.svg" />
                                 </button>
-                                <button class="btn-icon btn-delete">🗑️</button>
+                                <button class="btn-icon btn-delete">
+                                    <img src="~/images/icons/delete.svg" />
+                                </button>
                             </td>
                         </tr>
                     }
@@ -155,34 +182,38 @@
         </div>
 
         <form asp-action="UpdateRoomDetails" method="post">
-            <input type="hidden" id="modalRoomIdHidden" name="RoomId" />
+            <input type="hidden" id="modalRoomIdHidden" asp-for="RoomUpdate.RoomId" />
 
             <div class="form-group" style="margin-bottom: 1rem;">
                 <label class="form-label">Room Number</label>
-                <input type="text" id="modalRoomIdDisplay" class="form-input" readonly style="background-color:#f9fafb;">
+                <input type="text" id="modalRoomIdDisplay" class="form-input" readonly style="background-color:#f9fafb;" value="@Model.RoomUpdate.RoomId">
             </div>
 
             <div class="form-group" style="margin-bottom: 1rem;">
                 <label class="form-label">Room Name</label>
-                <input type="text" id="modalRoomName" name="Name" class="form-input" required>
+                <input type="text" id="modalRoomName" asp-for="RoomUpdate.Name" class="form-input" />
+                <span asp-validation-for="RoomUpdate.Name" class="text-danger"></span>
             </div>
 
             <div class="form-group" style="margin-bottom: 1rem;">
                 <label class="form-label">Location</label>
-                <input type="text" id="modalRoomLocation" name="Location" class="form-input" required>
+                <input type="text" id="modalRoomLocation" asp-for="RoomUpdate.Location" class="form-input" />
+                <span asp-validation-for="RoomUpdate.Location" class="text-danger"></span>
             </div>
 
             <div class="form-group" style="margin-bottom: 1rem;">
                 <label class="form-label">Capacity (Pax)</label>
-                <input type="number" id="modalCapacity" name="Capacity" class="form-input" required>
+                <input type="number" id="modalCapacity" asp-for="RoomUpdate.Capacity" class="form-input" />
+                <span asp-validation-for="RoomUpdate.Capacity" class="text-danger"></span>
             </div>
 
             <div class="form-group" style="margin-bottom: 1rem;">
                 <label class="form-label">Status</label>
-                <select id="modalStatus" name="Status" class="form-input">
+                <select id="modalStatus" asp-for="RoomUpdate.Status" class="form-input">
                     <option value="AVAILABLE">Available</option>
                     <option value="MAINTENANCE">Maintenance</option>
                 </select>
+                <span asp-validation-for="RoomUpdate.Status" class="text-danger"></span>
             </div>
 
             <div class="modal-actions">
@@ -195,4 +226,21 @@
 
 @section Scripts {
     <script src="/js/room.js" asp-append-version="true"></script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        @if (!ViewData.ModelState.IsValid && ViewData.ModelState.Keys.Any(k => k.StartsWith("RoomUpdate")))
+        {
+                <text>
+                    document.addEventListener("DOMContentLoaded", function() {
+                        var modal = document.getElementById('roomEditModal');
+                        if(modal) {
+                            modal.style.display = 'block';
+                        }
+                    });
+                </text>
+        }
+    </script>
 }

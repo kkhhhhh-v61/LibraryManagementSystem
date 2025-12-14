@@ -37,15 +37,17 @@ public class RoomCategoryCreateVM
 {
     [Required(ErrorMessage = "{0} is required.")]
     [StringLength(50, ErrorMessage = "{0} must be between 1 and 50 characters.")]
+    [RegularExpression(@"^[a-zA-Z0-9 ]+$", ErrorMessage = "{0} can only contain alphabets and numbers.")]
     public string Name { get; set; }
 
     [Required(ErrorMessage = "{0} is required.")]
     [StringLength(500, ErrorMessage = "{0} cannot exceed 500 characters.")]
+    [RegularExpression(@"^[a-zA-Z0-9,. ]+$", ErrorMessage = "{0} can only contain alphabets, punctuations and numbers.")]
     public string Description { get; set; }
 
     [DisplayName("Hourly Rate")]
     [Required(ErrorMessage = "{0} is required.")]
-    [Range(0, 1000, ErrorMessage = "{0} must be between RM 0 and RM 1000.")]
+    [Range(0, 100, ErrorMessage = "{0} must be between RM 0 and RM 100.")]
     public decimal HourlyRate { get; set; }
 }
 
@@ -53,10 +55,12 @@ public class RoomCreateVM
 {
     [Required(ErrorMessage = "{0} is required.")]
     [StringLength(50, ErrorMessage = "{0} cannot exceed 50 characters.")]
+    [RegularExpression(@"^[a-zA-Z0-9 ]+$", ErrorMessage = "{0} can only contain alphabets and numbers.")]
     public string Name { get; set; }
 
     [Required(ErrorMessage = "{0} is required.")]
     [StringLength(100, ErrorMessage = "{0} cannot exceed 100 characters.")]
+    [RegularExpression(@"^[a-zA-Z0-9,. ]+$", ErrorMessage = "{0} can only contain alphabets, punctuations and numbers.")]
     public string Location { get; set; }
 
     [Required(ErrorMessage = "{0} is required.")]
@@ -74,6 +78,49 @@ public class RoomCreateVM
     public IFormFile? Image { get; set; }
 }
 
+public class RoomCategoryUpdateVM
+{
+    [Required]
+    public string Id { get; set; }
+
+    [Required(ErrorMessage = "{0} is required.")]
+    [StringLength(50, ErrorMessage = "{0} must be between 1 and 50 characters.")]
+    [RegularExpression(@"^[a-zA-Z0-9 ]+$", ErrorMessage = "{0} can only contain alphabets and numbers.")]
+    public string Name { get; set; }
+
+    [DisplayName("Hourly Rate")]
+    [Required(ErrorMessage = "{0} is required.")]
+    [Range(0, 100, ErrorMessage = "{0} must be between RM 0 and RM 100.")]
+    public decimal HourlyRate { get; set; }
+
+    [Required(ErrorMessage = "{0} is required.")]
+    [StringLength(500, ErrorMessage = "{0} cannot exceed 500 characters.")]
+    [RegularExpression(@"^[a-zA-Z0-9-,._' ]+$", ErrorMessage = "{0} can only contain alphabets, punctuations and numbers.")]
+    public string Description { get; set; }
+}
+
+public class RoomUpdateVM
+{
+    [Required]
+    public string RoomId { get; set; }
+
+    [Required(ErrorMessage = "{0} is required.")]
+    [StringLength(50, ErrorMessage = "{0} cannot exceed 50 characters.")]
+    [RegularExpression(@"^[a-zA-Z0-9 ]+$", ErrorMessage = "{0} can only contain alphabets and numbers.")]
+    public string Name { get; set; }
+
+    [Required(ErrorMessage = "{0} is required.")]
+    [StringLength(100, ErrorMessage = "{0} cannot exceed 100 characters.")]
+    public string Location { get; set; }
+
+    [Required(ErrorMessage = "{0} is required.")]
+    [Range(1, 30, ErrorMessage = "Capacity must be between 1 and 30.")]
+    public int Capacity { get; set; }
+
+    [Required(ErrorMessage = "Please select a status.")]
+    public RoomStatus Status { get; set; }
+}
+
 public class RoomIndexVM
 {
     public List<RoomCategory> Categories { get; set; } = new();
@@ -81,4 +128,13 @@ public class RoomIndexVM
     public RoomCategoryCreateVM CategoryInput { get; set; } = new();
 
     public RoomCreateVM RoomInput { get; set; } = new();
+}
+
+public class RoomUpdatePageVM
+{
+    public RoomCategory CategoryDisplay { get; set; } = new();
+
+    public RoomCategoryUpdateVM CategoryUpdate { get; set; } = new();
+
+    public RoomUpdateVM RoomUpdate { get; set; } = new();
 }

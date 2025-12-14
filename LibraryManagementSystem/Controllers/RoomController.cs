@@ -32,6 +32,16 @@ namespace LibraryManagementSystem.Controllers
             ModelState.Remove("RoomInput.Location");
             ModelState.Remove("RoomInput.Capacity");
             ModelState.Remove("RoomInput.RoomCategoryId");
+            ModelState.Remove("RoomInput.Status");
+            ModelState.Remove("RoomInput.Image");
+            ModelState.Remove("RoomInput");
+
+            bool nameExists = db.RoomCategories.Any(c => c.Name == vm.CategoryInput.Name.Trim());
+
+            if (nameExists)
+            {
+                ModelState.AddModelError("CategoryInput.Name", "Category Name already exists.");
+            }
 
             if (ModelState.IsValid)
             {
@@ -40,9 +50,9 @@ namespace LibraryManagementSystem.Controllers
                 var newCategory = new RoomCategory
                 {
                     Id = newId,
-                    Name = vm.CategoryInput.Name,
+                    Name = vm.CategoryInput.Name.Trim(),
                     HourlyRate = vm.CategoryInput.HourlyRate,
-                    Description = vm.CategoryInput.Description
+                    Description = vm.CategoryInput.Description.Trim()
                 };
 
                 db.RoomCategories.Add(newCategory);
@@ -67,6 +77,15 @@ namespace LibraryManagementSystem.Controllers
         {
             ModelState.Remove("CategoryInput.Name");
             ModelState.Remove("CategoryInput.Description");
+            ModelState.Remove("CategoryInput.HourlyRate");
+            ModelState.Remove("CategoryInput");
+
+            bool nameExists = db.Rooms.Any(r => r.RoomCategoryId == vm.RoomInput.RoomCategoryId && r.Name == vm.RoomInput.Name.Trim());
+
+            if (nameExists)
+            {
+                ModelState.AddModelError("RoomInput.Name", "Room Name already exists in this category.");
+            }
 
             if (ModelState.IsValid)
             {
@@ -89,8 +108,8 @@ namespace LibraryManagementSystem.Controllers
                 var newRoom = new Room
                 {
                     Id = newId,
-                    Name = vm.RoomInput.Name,
-                    Location = vm.RoomInput.Location,
+                    Name = vm.RoomInput.Name.Trim(),
+                    Location = vm.RoomInput.Location.Trim(),
                     Capacity = vm.RoomInput.Capacity,
                     RoomCategoryId = vm.RoomInput.RoomCategoryId,
                     Status = vm.RoomInput.Status,
@@ -149,63 +168,143 @@ namespace LibraryManagementSystem.Controllers
                 return RedirectToAction("Index");
             }
 
-            return View(category);
+            var vm = new RoomUpdatePageVM
+            {
+                CategoryDisplay = category,
+
+                CategoryUpdate = new RoomCategoryUpdateVM
+                {
+                    Id = category.Id,
+                    Name = category.Name,
+                    HourlyRate = category.HourlyRate,
+                    Description = category.Description
+                }
+            };
+
+            return View(vm);
         }
 
         // =========================================================
         // 4. UPDATE CATEGORY 
         // =========================================================
         [HttpPost]
-        public IActionResult Edit(RoomCategory category)
+        public IActionResult Edit(RoomUpdatePageVM vm)
         {
+            ModelState.Remove("CategoryDisplay.Name");
+            ModelState.Remove("CategoryDisplay.Description");
+            ModelState.Remove("CategoryDisplay.HourlyRate");
+            ModelState.Remove("CategoryDisplay.Id");
+            ModelState.Remove("CategoryDisplay");
+
+            ModelState.Remove("RoomUpdate.RoomId");
+            ModelState.Remove("RoomUpdate.Name");
+            ModelState.Remove("RoomUpdate.Location");
+            ModelState.Remove("RoomUpdate.Capacity");
+            ModelState.Remove("RoomUpdate.Status");
+            ModelState.Remove("RoomUpdate");
+
+            bool nameExists = db.RoomCategories.Any(c => c.Name == vm.CategoryUpdate.Name.Trim() && c.Id != vm.CategoryUpdate.Id);
+
+            if (nameExists)
+            {
+                ModelState.AddModelError("CategoryUpdate.Name", "Category Name already exists.");
+            }
+
             if (ModelState.IsValid)
             {
-                var existingCategory = db.RoomCategories.FirstOrDefault(c => c.Id == category.Id);
+                var existingCategory = db.RoomCategories.FirstOrDefault(c => c.Id == vm.CategoryUpdate.Id);
 
                 if (existingCategory != null)
                 {
-                    existingCategory.Name = category.Name;
-                    existingCategory.HourlyRate = category.HourlyRate;
-                    existingCategory.Description = category.Description;
+                    existingCategory.Name = vm.CategoryUpdate.Name.Trim();
+                    existingCategory.HourlyRate = vm.CategoryUpdate.HourlyRate;
+                    existingCategory.Description = vm.CategoryUpdate.Description.Trim();
 
                     db.SaveChanges();
 
                     TempData["Success"] = "Category details updated!";
-
-                    return RedirectToAction("Update", new { id = category.Id });
+                    return RedirectToAction("Update", new { id = vm.CategoryUpdate.Id });
                 }
             }
 
-            TempData["Error"] = "Failed to update category.";
+            TempData["Error"] = "Failed to update category. Please check inputs.";
 
-            category.Rooms = db.Rooms.Where(r => r.RoomCategoryId == category.Id).ToList();
-            return View("Update", category);
+            var categoryId = vm.CategoryUpdate.Id;
+            var freshData = db.RoomCategories.Include(c => c.Rooms).FirstOrDefault(c => c.Id == categoryId);
+
+            if (freshData != null)
+            {
+                vm.CategoryDisplay = freshData;
+            }
+
+            return View("Update", vm);
         }
 
         // =========================================================
         // 5. UPDATE ROOM DETAILS 
         // =========================================================
         [HttpPost]
-        public IActionResult UpdateRoomDetails(string roomId, string name, string location, int capacity, Room.RoomStatus status)
+        public IActionResult UpdateRoomDetails(RoomUpdatePageVM vm)
         {
-            var room = db.Rooms.FirstOrDefault(r => r.Id == roomId);
+            ModelState.Remove("CategoryUpdate.Id");
+            ModelState.Remove("CategoryUpdate.Name");
+            ModelState.Remove("CategoryUpdate.HourlyRate");
+            ModelState.Remove("CategoryUpdate.Description");
+            ModelState.Remove("CategoryUpdate");
 
-            if (room != null)
+            ModelState.Remove("CategoryDisplay.Name");
+            ModelState.Remove("CategoryDisplay.Description");
+            ModelState.Remove("CategoryDisplay.HourlyRate");
+            ModelState.Remove("CategoryDisplay.Id");
+            ModelState.Remove("CategoryDisplay");
+
+            var room = db.Rooms.FirstOrDefault(r => r.Id == vm.RoomUpdate.RoomId);
+
+            if (room == null)
             {
-                room.Name = name;
-                room.Location = location;
-                room.Capacity = capacity;
-                room.Status = status;
+                TempData["Error"] = "Room not found.";
+                return RedirectToAction("Index");
+            }
+
+            bool nameExists = db.Rooms.Any(r => r.RoomCategoryId == room.RoomCategoryId && r.Name == vm.RoomUpdate.Name.Trim() && r.Id != vm.RoomUpdate.RoomId);
+
+            if (nameExists)
+            {
+                ModelState.AddModelError("RoomUpdate.Name", "Room Name already exists in this category.");
+            }
+
+            if (ModelState.IsValid)
+            {
+                room.Name = vm.RoomUpdate.Name.Trim();
+                room.Location = vm.RoomUpdate.Location.Trim();
+                room.Capacity = vm.RoomUpdate.Capacity;
+                room.Status = vm.RoomUpdate.Status;
 
                 db.SaveChanges();
 
-                TempData["Success"] = $"Room {roomId} updated successfully!";
-
+                TempData["Success"] = $"Room {vm.RoomUpdate.RoomId} updated successfully!";
                 return RedirectToAction("Update", new { id = room.RoomCategoryId });
             }
 
-            TempData["Error"] = "Room not found or update failed.";
-            return RedirectToAction("Index");
+            TempData["Error"] = "Failed to update room. Please check inputs.";
+            var categoryId = room.RoomCategoryId;
+            var freshData = db.RoomCategories.Include(c => c.Rooms).FirstOrDefault(c => c.Id == categoryId);
+
+            if (freshData != null)
+            {
+                vm.CategoryDisplay = freshData;
+
+                vm.CategoryUpdate = new RoomCategoryUpdateVM
+                {
+                    Id = freshData.Id,
+                    Name = freshData.Name,
+                    HourlyRate = freshData.HourlyRate,
+                    Description = freshData.Description
+                };
+            }
+
+            return View("Update", vm);
         }
+
     }
 }
