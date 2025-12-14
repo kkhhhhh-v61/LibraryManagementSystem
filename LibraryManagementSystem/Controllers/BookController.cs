@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Runtime.Intrinsics.X86;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace LibraryManagementSystem.Controllers;
 
-public class BookController(LMSDB db) : Controller
+public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
 {
     public IActionResult Browse()
     {
@@ -27,6 +29,8 @@ public class BookController(LMSDB db) : Controller
     [HttpPost]
     public IActionResult InsertBook(BookInsertVM vm)
     {
+        string? imageUrl = null;
+
         // 1. Check if ISBN already exists
         if (db.Books.Any(b => b.ISBN == vm.ISBN.Replace("-", "").Trim().Replace(" ", "").ToUpper()))
         {
@@ -37,25 +41,62 @@ public class BookController(LMSDB db) : Controller
         {
             vm.GenreList = db.Genres.Select(g => new SelectListItem(g.Name, g.Id)).ToList();
             vm.AuthorList = db.Authors.Select(a => new SelectListItem(a.Name, a.Id)).ToList();
-            vm.TempImage = vm.TempImage;
             return View(vm);
         }
 
-
         if (ModelState.IsValid)
         {
-            // 2. Add book
+            bool isNewImageUpload = vm.Image != null;
+
+            // If the primary image is null, reconstruct it from Base64 TempImage string.
+            if (vm.Image == null && !string.IsNullOrEmpty(vm.TempImage))
+            {
+                try
+                {
+                    var base64Data = vm.TempImage.Split(',')[1];
+                    byte[] imageBytes = Convert.FromBase64String(base64Data);
+                    var stream = new MemoryStream(imageBytes);
+                    vm.Image = new FormFile(stream, 0, imageBytes.Length, "image", "image.jpg");
+                }
+                catch (Exception)
+                {
+                    // Handle potential Base64 conversion errors if necessary
+                }
+            }
+
+            // 2. Validate Image
+            if (isNewImageUpload)
+            {
+                var result = Helper.ValidateImage(vm.Image!);
+
+                if (result != ValidationResult.Success)
+                {
+                    ModelState.AddModelError("Image", result.ErrorMessage!);
+                    vm.GenreList = db.Genres.Select(g => new SelectListItem(g.Name, g.Id)).ToList();
+                    vm.AuthorList = db.Authors.Select(a => new SelectListItem(a.Name, a.Id)).ToList();
+                    return View(vm);
+                }
+
+            }
+
+            if (vm.Image != null)
+            {
+                imageUrl = Helper.SaveImage(vm.Image!, "books", en.WebRootPath);
+            }
+
+            // 3. Add book
             var lastId = db.Books.OrderByDescending(b => b.Id).Select(b => b.Id).FirstOrDefault();
 
             db.Books.Add(new()
             {
-                // 2.1 Generate new ID
+                // 3.1 Generate new ID
                 Id = GenerateNewId(lastId, 'B'),
                 Title = vm.Title.Trim(),
                 Description = vm.Description.Trim(),
                 ISBN = vm.ISBN.Replace("-", "").Trim().Replace(" ", "").ToUpper(),
                 PublicationYear = vm.PublicationYear,
                 Edition = vm.Edition,
+                ImageURL = imageUrl,
                 IsFeatured = vm.IsFeatured,
                 IsArchived = vm.IsArchived,
                 DateAdded = DateOnly.FromDateTime(DateTime.Now),
@@ -64,7 +105,7 @@ public class BookController(LMSDB db) : Controller
 
             var newBookId = db.Books.OrderByDescending(b => b.Id).Select(b => b.Id).FirstOrDefault();
 
-            // 2.2 Add genres
+            // 3.2 Add genres
             foreach (var genreId in vm.SelectedGenreIds)
             {
                 var genre = db.Genres.Find(genreId);
@@ -74,7 +115,7 @@ public class BookController(LMSDB db) : Controller
                 }
             }
 
-            // 2.3 Add authors
+            // 3.3 Add authors
             foreach (var authorId in vm.SelectedAuthorIds)
             {
                 var author = db.Authors.Find(authorId);
@@ -86,7 +127,7 @@ public class BookController(LMSDB db) : Controller
 
             db.SaveChanges();
 
-            // 3. Display toast messagee (success)
+            // 4. Display toast messagee (success)
             TempData["ToastMessage"] = $"Book '{vm.Title}' added successfully!";
             TempData["ToastType"] = "success";
             TempData["SubmissionSuccess"] = true;
@@ -94,7 +135,7 @@ public class BookController(LMSDB db) : Controller
             return RedirectToAction("Browse");
         }
 
-        // 3.1 Display toast message (error)
+        // 4.1 Display toast message (error)
         TempData["ToastMessage"] = "Failed to add book. Please check errors.";
         TempData["ToastType"] = "error";
 
