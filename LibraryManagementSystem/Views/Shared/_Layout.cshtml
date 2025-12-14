@@ -137,9 +137,27 @@
     {
         <script>
             document.addEventListener('DOMContentLoaded', function () {
-                var message = @Json.Serialize(TempData["ToastMessage"]);
-                var type = @Json.Serialize(TempData["ToastType"]);
-                showToast(message, type);
+                // 1. Check if the user used the Back/Forward button
+                var isBackNavigation = false;
+
+                if (window.performance && window.performance.getEntriesByType) {
+                    var navEntries = window.performance.getEntriesByType('navigation');
+                    if (navEntries.length > 0 && navEntries[0].type === 'back_forward') {
+                        isBackNavigation = true;
+                    }
+                }
+                else if (window.performance && window.performance.navigation) {
+                    if (window.performance.navigation.type === 2) {
+                        isBackNavigation = true;
+                    }
+                }
+
+                // 2. Show toast if only it is a fresh load
+                if (!isBackNavigation) {
+                    var message = @Json.Serialize(TempData["ToastMessage"]);
+                    var type = @Json.Serialize(TempData["ToastType"]);
+                    showToast(message, type);
+                }
             });
         </script>
     }
