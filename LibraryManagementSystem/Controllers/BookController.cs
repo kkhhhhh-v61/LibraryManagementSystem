@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace LibraryManagementSystem.Controllers;
 
@@ -12,12 +12,33 @@ public class BookController(LMSDB db) : Controller
 
     public IActionResult InsertBook()
     {
-        return View();
+        var vm = new BookInsertVM
+        {
+            GenreList = db.Genres.Select(g => new SelectListItem(g.Name, g.Id)).ToList(),
+            SelectedGenreIds = [],
+            AuthorList = db.Authors.Select(a => new SelectListItem(a.Name, a.Id)).ToList(),
+            SelectedAuthorIds = [],
+            PublicationYear = DateTime.Now.Year,
+            Edition = 1,
+            IsFeatured = false,
+            IsArchived = false,
+        };
+        return View(vm);
     }
 
     [HttpPost]
     public IActionResult Insert(BookInsertVM vm)
     {
+        // if (db.Books.Any(b => b.ISBN == vm.ISBN))
+        // {
+        //     ModelState.AddModelError("ISBN", "This ISBN already exists.");
+        // }
+
+        // if (ModelState.IsValid)
+        // {
+            
+        // }
+
         return View(vm);
     }
 

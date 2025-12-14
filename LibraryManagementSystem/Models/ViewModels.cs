@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using static LibraryManagementSystem.Models.Room;
 
 namespace LibraryManagementSystem.Models;
@@ -36,6 +37,19 @@ public class BookInsertVM
     [Required(ErrorMessage = "{0} is required.")]
     [Range(1, 100, ErrorMessage = "{0} must be between 1 and 100.")]
     public int Edition { get; set; }
+
+    [DisplayName("Genre(s)")]
+    [Required(ErrorMessage = "At least one Genre is required.")]
+    public List<string> SelectedGenreIds { get; set; } = new();
+
+    public List<SelectListItem> GenreList { get; set; } = new();
+
+    [DisplayName("Author(s)")]
+    [Required(ErrorMessage = "At least one Author is required.")]
+    [MaxLength(10, ErrorMessage = "A Book cannot have more than 10 authors.")]
+    public List<string> SelectedAuthorIds { get; set; } = new();
+
+    public List<SelectListItem> AuthorList { get; set; } = new();
 
     public bool IsFeatured { get; set; } = false;
 

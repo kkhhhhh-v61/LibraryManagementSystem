@@ -38,7 +38,7 @@
         <div class="form__group form__group--right">
             <div class="form__item">
                 <label asp-for="Title" class="form__label form__label--required">Title</label>
-                <input asp-for="Title" class="form__input" data-trim autofocus />
+                <input asp-for="Title" class="form__input" type="text" data-trim autofocus />
                 <span asp-validation-for="Title" class="form__error"></span>
             </div>
             <div class="form__item">
@@ -48,20 +48,64 @@
             </div>
             <div class="form__item">
                 <label asp-for="ISBN" class="form__label form__label--required">ISBN</label>
-                <input asp-for="ISBN" class="form__input" data-trim />
+                <input asp-for="ISBN" class="form__input" type="text" data-trim />
                 <span asp-validation-for="ISBN" class="form__error"></span>
             </div>
             <div class="form__row">
                 <div class="form__row-item">
                     <label asp-for="PublicationYear" class="form__label form__label--required">Publication Year</label>
-                    <input asp-for="PublicationYear" class="form__input" type="number" min="1450" max="2100" step="1" value="@DateTime.Now.Year" data-trim />
+                    <input asp-for="PublicationYear" class="form__input" type="number" min="1450" max="2100" step="1" data-trim />
                     <span asp-validation-for="PublicationYear" class="form__error"></span>
                 </div>
                 <div class="form__row-item">
                     <label asp-for="Edition" class="form__label form__label--required">Edition</label>
-                    <input asp-for="Edition" class="form__input" type="number" min="1" max="100" step="1" value="1" data-trim />
+                    <input asp-for="Edition" class="form__input" type="number" min="1" max="100" step="1" data-trim />
                     <span asp-validation-for="Edition" class="form__error"></span>
 
+                </div>
+            </div>
+            <div class="form__row">
+                <div class="form__row-item">
+                    <label asp-for="SelectedGenreIds" class="form__label form__label--required">Genres</label>
+                    <div class="form__multi-select" id="genre-multi-select">
+                        <div class="multi-select__container">
+                            <input class="multi-select__search" type="text" placeholder="Search for genres..." />
+                        </div>
+                        <div class="multi-select__dropdown">
+                            @foreach (var item in Model.GenreList)
+                            {
+                                <div class="multi-select__option" data-value="@item.Value">@item.Text</div>
+                            }
+                        </div>
+                        <select asp-for="SelectedGenreIds" class="multi-select__hidden-input" multiple>
+                            @foreach (var item in Model.GenreList)
+                            {
+                                <option value="@item.Value">@item.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <span asp-validation-for="SelectedGenreIds" class="form__error"></span>
+                </div>
+                <div class="form__row-item">
+                    <label asp-for="SelectedAuthorIds" class="form__label form__label--required">Authors</label>
+                    <div class="form__multi-select" id="author-multi-select">
+                        <div class="multi-select__container">
+                            <input class="multi-select__search" type="text" placeholder="Search for authors..." />
+                        </div>
+                        <div class="multi-select__dropdown">
+                            @foreach (var item in Model.AuthorList)
+                            {
+                                <div class="multi-select__option" data-value="@item.Value">@item.Text</div>
+                            }
+                        </div>
+                        <select asp-for="SelectedAuthorIds" class="multi-select__hidden-input" multiple>
+                            @foreach (var item in Model.AuthorList)
+                            {
+                                <option value="@item.Value">@item.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <span asp-validation-for="SelectedAuthorIds" class="form__error"></span>
                 </div>
             </div>
             <div class="form__row">
