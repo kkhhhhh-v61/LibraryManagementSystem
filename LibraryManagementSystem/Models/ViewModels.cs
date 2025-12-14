@@ -99,6 +99,9 @@ public class RoomCategoryCreateVM
     [Required(ErrorMessage = "{0} is required.")]
     [Range(0, 100, ErrorMessage = "{0} must be between RM 0 and RM 100.")]
     public decimal HourlyRate { get; set; }
+
+    [DisplayName("Room Image")]
+    public IFormFile? Image { get; set; }
 }
 
 public class RoomCreateVM
@@ -123,9 +126,6 @@ public class RoomCreateVM
     [DisplayName("Category")]
     [Required(ErrorMessage = "Please select a category.")]
     public string RoomCategoryId { get; set; }
-
-    [DisplayName("Room Image")]
-    public IFormFile? Image { get; set; }
 }
 
 public class RoomCategoryUpdateVM
@@ -147,6 +147,11 @@ public class RoomCategoryUpdateVM
     [StringLength(500, ErrorMessage = "{0} cannot exceed 500 characters.")]
     [RegularExpression(@"^[a-zA-Z0-9-,._' ]+$", ErrorMessage = "{0} can only contain alphabets, punctuations and numbers.")]
     public string Description { get; set; }
+
+    [DisplayName("Category Image")]
+    public IFormFile? Image { get; set; }
+
+    public string? ExistingImageURL { get; set; }
 }
 
 public class RoomUpdateVM
@@ -161,6 +166,7 @@ public class RoomUpdateVM
 
     [Required(ErrorMessage = "{0} is required.")]
     [StringLength(100, ErrorMessage = "{0} cannot exceed 100 characters.")]
+    [RegularExpression(@"^[a-zA-Z0-9,. ]+$", ErrorMessage = "{0} can only contain alphabets, punctuations and numbers.")]
     public string Location { get; set; }
 
     [Required(ErrorMessage = "{0} is required.")]

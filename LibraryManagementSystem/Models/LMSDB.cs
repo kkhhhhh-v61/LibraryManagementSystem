@@ -346,8 +346,11 @@ public class RoomCategory
     [MaxLength(500)]
     public string Description { get; set; }
 
-    [Precision(8, 2)]
+    [Precision(5, 2)]
     public decimal HourlyRate { get; set; }
+
+    [MaxLength(100)]
+    public string? ImageURL { get; set; }
 
     public List<Room> Rooms { get; set; } = [];
 }
@@ -374,9 +377,6 @@ public class Room
     public int Capacity { get; set; }
 
     public RoomStatus Status { get; set; }
-
-    [MaxLength(100)]
-    public string? ImageURL { get; set; }
 
     [MaxLength(3)]
     public string RoomCategoryId { get; set; }

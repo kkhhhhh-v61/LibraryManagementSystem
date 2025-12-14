@@ -14,7 +14,7 @@ namespace LibraryManagementSystem.Controllers
         {
             var vm = new RoomIndexVM
             {
-                Categories = db.RoomCategories.Include(c => c.Rooms).ToList()
+                Categories = db.RoomCategories.Include(c => c.Rooms).OrderByDescending(c => c.Id).ToList()
             };
 
             ViewBag.CategoryList = new SelectList(vm.Categories, "Id", "Name");
@@ -33,7 +33,6 @@ namespace LibraryManagementSystem.Controllers
             ModelState.Remove("RoomInput.Capacity");
             ModelState.Remove("RoomInput.RoomCategoryId");
             ModelState.Remove("RoomInput.Status");
-            ModelState.Remove("RoomInput.Image");
             ModelState.Remove("RoomInput");
 
             bool nameExists = db.RoomCategories.Any(c => c.Name == vm.CategoryInput.Name.Trim());
@@ -47,12 +46,25 @@ namespace LibraryManagementSystem.Controllers
             {
                 string newId = GenerateNextId("Category");
 
+                string uniqueFileName = "";
+                if (vm.CategoryInput.Image != null)
+                {
+                    string uploadFolder = Path.Combine(en.WebRootPath, "images", "categories");
+                    Directory.CreateDirectory(uploadFolder);
+                    uniqueFileName = Guid.NewGuid().ToString() + "_" + vm.CategoryInput.Image.FileName;
+                    using (var stream = new FileStream(Path.Combine(uploadFolder, uniqueFileName), FileMode.Create))
+                    {
+                        vm.CategoryInput.Image.CopyTo(stream);
+                    }
+                }
+
                 var newCategory = new RoomCategory
                 {
                     Id = newId,
                     Name = vm.CategoryInput.Name.Trim(),
                     HourlyRate = vm.CategoryInput.HourlyRate,
-                    Description = vm.CategoryInput.Description.Trim()
+                    Description = vm.CategoryInput.Description.Trim(),
+                    ImageURL = uniqueFileName
                 };
 
                 db.RoomCategories.Add(newCategory);
@@ -61,7 +73,7 @@ namespace LibraryManagementSystem.Controllers
                 TempData["Success"] = "Category created successfully!";
                 return RedirectToAction("Index");
             }
-            vm.Categories = db.RoomCategories.Include(c => c.Rooms).ToList();
+            vm.Categories = db.RoomCategories.Include(c => c.Rooms).OrderByDescending(c => c.Id).ToList();
             ViewBag.CategoryList = new SelectList(vm.Categories, "Id", "Name");
 
             TempData["Error"] = "Please fix the errors below.";
@@ -78,6 +90,7 @@ namespace LibraryManagementSystem.Controllers
             ModelState.Remove("CategoryInput.Name");
             ModelState.Remove("CategoryInput.Description");
             ModelState.Remove("CategoryInput.HourlyRate");
+            ModelState.Remove("CategoryInput.Image");
             ModelState.Remove("CategoryInput");
 
             bool nameExists = db.Rooms.Any(r => r.RoomCategoryId == vm.RoomInput.RoomCategoryId && r.Name == vm.RoomInput.Name.Trim());
@@ -90,20 +103,6 @@ namespace LibraryManagementSystem.Controllers
             if (ModelState.IsValid)
             {
                 string newId = GenerateNextId("Room");
-                string uniqueFileName = "";
-
-                // Handle image upload if user selected one
-                if (vm.RoomInput.Image != null)
-                {
-                    string uploadFolder = Path.Combine(en.WebRootPath, "images", "rooms");
-                    Directory.CreateDirectory(uploadFolder);
-                    uniqueFileName = Guid.NewGuid().ToString() + "_" + vm.RoomInput.Image.FileName;
-
-                    using (var stream = new FileStream(Path.Combine(uploadFolder, uniqueFileName), FileMode.Create))
-                    {
-                        vm.RoomInput.Image.CopyTo(stream);
-                    }
-                }
 
                 var newRoom = new Room
                 {
@@ -112,8 +111,7 @@ namespace LibraryManagementSystem.Controllers
                     Location = vm.RoomInput.Location.Trim(),
                     Capacity = vm.RoomInput.Capacity,
                     RoomCategoryId = vm.RoomInput.RoomCategoryId,
-                    Status = vm.RoomInput.Status,
-                    ImageURL = uniqueFileName
+                    Status = vm.RoomInput.Status
                 };
 
                 db.Rooms.Add(newRoom);
@@ -123,7 +121,7 @@ namespace LibraryManagementSystem.Controllers
                 return RedirectToAction("Index");
             }
 
-            vm.Categories = db.RoomCategories.Include(c => c.Rooms).ToList();
+            vm.Categories = db.RoomCategories.Include(c => c.Rooms).OrderByDescending(c => c.Id).ToList();
             ViewBag.CategoryList = new SelectList(vm.Categories, "Id", "Name");
 
             TempData["Error"] = "Failed to add room.";
@@ -156,7 +154,7 @@ namespace LibraryManagementSystem.Controllers
         }
 
         // =========================================================
-        // 3. UPDATE PAGE 
+        // 3. Edit PAGE 
         // =========================================================
         public IActionResult Edit(string id)
         {
@@ -168,6 +166,8 @@ namespace LibraryManagementSystem.Controllers
                 return RedirectToAction("Index");
             }
 
+            category.Rooms = category.Rooms.OrderByDescending(r => r.Id).ToList();
+
             var vm = new RoomUpdatePageVM
             {
                 CategoryDisplay = category,
@@ -177,7 +177,8 @@ namespace LibraryManagementSystem.Controllers
                     Id = category.Id,
                     Name = category.Name,
                     HourlyRate = category.HourlyRate,
-                    Description = category.Description
+                    Description = category.Description,
+                    ExistingImageURL = category.ImageURL
                 }
             };
 
@@ -195,6 +196,8 @@ namespace LibraryManagementSystem.Controllers
             ModelState.Remove("CategoryDisplay.HourlyRate");
             ModelState.Remove("CategoryDisplay.Id");
             ModelState.Remove("CategoryDisplay");
+
+            ModelState.Remove("CategoryUpdate.Image");
 
             ModelState.Remove("RoomUpdate.RoomId");
             ModelState.Remove("RoomUpdate.Name");
@@ -219,6 +222,20 @@ namespace LibraryManagementSystem.Controllers
                     existingCategory.Name = vm.CategoryUpdate.Name.Trim();
                     existingCategory.HourlyRate = vm.CategoryUpdate.HourlyRate;
                     existingCategory.Description = vm.CategoryUpdate.Description.Trim();
+
+                    if (vm.CategoryUpdate.Image != null)
+                    {
+                        string uploadFolder = Path.Combine(en.WebRootPath, "images", "categories");
+                        Directory.CreateDirectory(uploadFolder);
+                        string uniqueFileName = Guid.NewGuid().ToString() + "_" + vm.CategoryUpdate.Image.FileName;
+
+                        using (var stream = new FileStream(Path.Combine(uploadFolder, uniqueFileName), FileMode.Create))
+                        {
+                            vm.CategoryUpdate.Image.CopyTo(stream);
+                        }
+
+                        existingCategory.ImageURL = uniqueFileName;
+                    }
 
                     db.SaveChanges();
 
@@ -257,6 +274,8 @@ namespace LibraryManagementSystem.Controllers
             ModelState.Remove("CategoryDisplay.HourlyRate");
             ModelState.Remove("CategoryDisplay.Id");
             ModelState.Remove("CategoryDisplay");
+
+            ModelState.Remove("CategoryUpdate.Image");
 
             var room = db.Rooms.FirstOrDefault(r => r.Id == vm.RoomUpdate.RoomId);
 
@@ -302,6 +321,8 @@ namespace LibraryManagementSystem.Controllers
                     Description = freshData.Description
                 };
             }
+
+            ViewData["ActiveModal"] = "roomEditModal";
 
             return View("Edit", vm);
         }
@@ -354,6 +375,75 @@ namespace LibraryManagementSystem.Controllers
 
             TempData["Success"] = "Room deleted successfully!";
             return RedirectToAction("Edit", new { id = returnId });
+        }
+
+        // =========================================================
+        // 8. CREATE ROOM (FROM EDIT PAGE)
+        // =========================================================
+        [HttpPost]
+        public IActionResult CreateRoomFromEdit(RoomUpdatePageVM vm)
+        {
+            ModelState.Remove("CategoryDisplay.Name");
+            ModelState.Remove("CategoryDisplay.Description");
+            ModelState.Remove("CategoryDisplay.HourlyRate");
+            ModelState.Remove("CategoryDisplay.Id");
+            ModelState.Remove("CategoryDisplay");
+
+            ModelState.Remove("CategoryUpdate.Name");
+            ModelState.Remove("CategoryUpdate.HourlyRate");
+            ModelState.Remove("CategoryUpdate.Description");
+            ModelState.Remove("CategoryUpdate.Image");
+            ModelState.Remove("CategoryUpdate.ExistingImageURL");
+
+            ModelState.Remove("RoomUpdate.RoomId");
+
+            string categoryId = vm.CategoryUpdate.Id;
+
+            bool nameExists = db.Rooms.Any(r => r.RoomCategoryId == categoryId && r.Name == vm.RoomUpdate.Name.Trim());
+
+            if (nameExists)
+            {
+                ModelState.AddModelError("RoomUpdate.Name", "Room Name already exists in this category.");
+            }
+
+            if (ModelState.IsValid)
+            {
+                string newId = GenerateNextId("Room");
+
+                var newRoom = new Room
+                {
+                    Id = newId,
+                    Name = vm.RoomUpdate.Name.Trim(),
+                    Location = vm.RoomUpdate.Location.Trim(),
+                    Capacity = vm.RoomUpdate.Capacity,
+                    RoomCategoryId = categoryId,
+                    Status = vm.RoomUpdate.Status
+                };
+
+                db.Rooms.Add(newRoom);
+                db.SaveChanges();
+
+                TempData["Success"] = "Room added successfully!";
+                return RedirectToAction("Edit", new { id = categoryId });
+            }
+
+            TempData["Error"] = "Failed to add room. Please check inputs.";
+
+            var categoryData = db.RoomCategories.Include(c => c.Rooms).FirstOrDefault(c => c.Id == categoryId);
+
+            if (categoryData != null)
+            {
+                vm.CategoryDisplay = categoryData;
+                vm.CategoryDisplay.Rooms = vm.CategoryDisplay.Rooms.OrderByDescending(r => r.Id).ToList();
+                vm.CategoryUpdate.Id = categoryData.Id;
+                vm.CategoryUpdate.Name = categoryData.Name;
+                vm.CategoryUpdate.Description = categoryData.Description;
+                vm.CategoryUpdate.ExistingImageURL = categoryData.ImageURL;
+            }
+
+            ViewData["ActiveModal"] = "addRoomModal";
+
+            return View("Edit", vm);
         }
 
     }

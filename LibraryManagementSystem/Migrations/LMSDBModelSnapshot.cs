@@ -391,10 +391,6 @@ namespace LibraryManagementSystem.Migrations
                     b.Property<int>("Capacity")
                         .HasColumnType("int");
 
-                    b.Property<string>("ImageURL")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
                     b.Property<string>("Location")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -432,8 +428,12 @@ namespace LibraryManagementSystem.Migrations
                         .HasColumnType("nvarchar(500)");
 
                     b.Property<decimal>("HourlyRate")
-                        .HasPrecision(8, 2)
-                        .HasColumnType("decimal(8,2)");
+                        .HasPrecision(5, 2)
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<string>("ImageURL")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Name")
                         .IsRequired()

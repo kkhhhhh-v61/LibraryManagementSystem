@@ -1,4 +1,6 @@
-﻿/* --- Global Variables & Colors --- */
+﻿/* =========================================
+   1. GLOBAL VARIABLES & RESET
+   ========================================= */
 :root {
     /* Brand colors */
     --primary: #4f46e5;
@@ -12,16 +14,16 @@
     --danger: #ef4444;
     --danger-bg: #fef2f2;
     /* Backgrounds */
-    --bg-app: #f1f5f9; /* Slightly darker gray to make white cards pop */
+    --bg-app: #f1f5f9;
     --bg-card: #ffffff;
     --border: #e2e8f0;
     /* Text */
     --text-main: #0f172a;
-    --text-body: #334155; /* Darker body text for better contrast */
+    --text-body: #334155;
     --text-muted: #64748b;
     /* Sizing */
-    --header-buffer: 100px; /* Adjusted for tighter fit */
-    --radius: 8px; /* Sharp, professional corners */
+    --header-buffer: 100px;
+    --radius: 8px;
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
@@ -38,38 +40,32 @@ body {
     overflow: hidden; /* Stop main scrollbar */
 }
 
-/* --- Layout Containers (Full Width Edition) --- */
-
-/* Main Dashboard (Index Page) */
-.dashboard-container {
-    /* Full height minus header */
-    height: calc(100vh - var(--header-buffer));
-    width: 100%;
-    /* REMOVED MAX-WIDTH: Now fills the whole screen */
-    max-width: 100%;
-    margin: 0;
-    padding: 1rem; /* Consistent padding around edges */
-    display: grid;
-    /* Left takes all space, Right fixed at 380px */
-    grid-template-columns: 1fr 400px;
-    gap: 1rem;
-    align-items: start;
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
 }
 
-/* Update Page (Update Page) */
-.update-page-container {
-    height: calc(100vh - var(--header-buffer));
-    width: 100%;
-    /* REMOVED MAX-WIDTH */
-    max-width: 100%;
-    margin: 0;
-    padding: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
+::-webkit-scrollbar-track {
+    background: transparent;
 }
 
-/* --- Cards / Panels --- */
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+    border: 2px solid #fff;
+}
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
+
+
+/* =========================================
+   2. SHARED COMPONENTS (Panels, Forms, Tables)
+   ========================================= */
+
+/* --- Panels --- */
 .panel {
     background: var(--bg-card);
     border-radius: var(--radius);
@@ -85,7 +81,34 @@ body {
         box-shadow: var(--shadow-md);
     }
 
-/* Helper classes for sizing */
+.panel-header {
+    padding: 1rem 1.5rem;
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+    min-height: 60px;
+}
+
+.panel-title {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.panel-body {
+    padding: 1.5rem;
+    overflow-y: auto;
+    flex: 1;
+}
+
+/* Helper sizes */
 .panel-fill {
     height: 100%;
 }
@@ -102,127 +125,11 @@ body {
     flex: 1;
 }
 
-.panel-header {
-    padding: 1rem 1.5rem; /* Larger padding for fuller look */
-    background: #fff;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-shrink: 0;
-    min-height: 60px; /* Taller header */
-}
-
-.panel-title {
-    margin: 0;
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: var(--text-main);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.panel-body {
-    padding: 1.5rem; /* Increased padding */
-    overflow-y: auto;
-    flex: 1;
-}
-
-/* --- Table Styles --- */
-.table-wrapper {
-    flex: 1;
-    overflow: auto;
-    background: var(--bg-card);
-    position: relative;
-}
-
-.modern-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    font-size: 0.9rem; /* Slightly larger text */
-}
-
-    /* Sticky Header */
-    .modern-table th {
-        position: sticky;
-        top: 0;
-        background: #f8fafc;
-        z-index: 10;
-        padding: 1rem 1.5rem; /* More breathing room */
-        text-align: left;
-        font-size: 0.75rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        color: var(--text-muted);
-        letter-spacing: 0.05em;
-        border-bottom: 1px solid var(--border);
-    }
-
-    .modern-table td {
-        padding: 1rem 1.5rem; /* More breathing room */
-        border-bottom: 1px solid var(--border);
-        vertical-align: middle;
-        color: var(--text-main);
-        transition: background 0.1s;
-    }
-
-    .modern-table tbody tr:hover td {
-        background-color: #f8fafc;
-    }
-
-/* Status Badges */
-.badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.25rem 0.75rem; /* Wider badge */
-    border-radius: 99px; /* Pill shape */
-    font-size: 0.75rem;
-    font-weight: 600;
-    line-height: 1;
-}
-
-.badge-success {
-    background: var(--success-bg);
-    color: var(--success);
-}
-
-.badge-warning {
-    background: var(--warning-bg);
-    color: var(--warning);
-}
-
-.badge-neutral {
-    background: #f1f5f9;
-    color: var(--text-body);
-}
-
-/* --- Forms --- */
-.form-stack {
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-}
-
-/* Horizontal grid for Update page - Smart Resizing */
-.form-horizontal-grid {
-    display: grid;
-    /* Use minmax to prevent ID from getting too huge, allow Name/Desc to stretch */
-    grid-template-columns: minmax(100px, 150px) 2fr minmax(150px, 200px) minmax(150px, 200px);
-    gap: 1.5rem;
-    align-items: start;
-}
-
+/* --- Forms (Shared) --- */
 .form-group {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-}
-
-.form-full-width {
-    grid-column: 1 / -1;
-    margin-top: 0.5rem;
 }
 
 .form-label {
@@ -231,9 +138,18 @@ body {
     color: var(--text-main);
 }
 
+.lbl-sm {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    display: block;
+}
+
 .form-input {
     width: 100%;
-    padding: 0.75rem 1rem; /* Taller inputs */
+    padding: 0.75rem 1rem;
     border: 1px solid var(--border);
     border-radius: 8px;
     font-size: 0.95rem;
@@ -261,10 +177,24 @@ textarea.form-input {
     min-height: 100px;
 }
 
-/* --- Buttons & Nav --- */
+/* Validation Styles */
+.text-danger, .field-validation-error {
+    color: var(--danger);
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin-top: 4px;
+    display: block;
+}
+
+.input-validation-error {
+    border-color: var(--danger) !important;
+    background-color: var(--danger-bg);
+}
+
+/* --- Buttons (Shared) --- */
 .btn-save {
     width: 100%;
-    padding: 0.75rem 1.5rem; /* Larger button */
+    padding: 0.75rem 1.5rem;
     background-color: var(--primary);
     color: white;
     border: none;
@@ -276,7 +206,6 @@ textarea.form-input {
     display: inline-flex;
     justify-content: center;
     align-items: center;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 
     .btn-save:hover {
@@ -284,10 +213,30 @@ textarea.form-input {
         transform: translateY(-1px);
     }
 
-/* Icon buttons */
+.btn-action {
+    background: white;
+    border: 1px solid var(--border);
+    color: var(--text-body);
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    transition: all 0.2s;
+}
+
+    .btn-action:hover {
+        background: #f8fafc;
+        color: var(--text-main);
+        border-color: #cbd5e1;
+    }
+
 .btn-icon {
     width: 36px;
-    height: 36px; /* Larger targets */
+    height: 36px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -311,60 +260,249 @@ textarea.form-input {
     background: var(--danger-bg);
 }
 
-/* Ghost button */
-.btn-action {
-    background: white;
-    border: 1px solid var(--border);
-    color: var(--text-body);
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    font-weight: 600;
-    cursor: pointer;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    transition: all 0.2s;
+/* --- Tables & Badges (Shared) --- */
+.table-wrapper {
+    flex: 1;
+    overflow: auto;
+    background: var(--bg-card);
+    position: relative;
 }
 
-    .btn-action:hover {
+.modern-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.9rem;
+}
+
+    .modern-table th {
+        position: sticky;
+        top: 0;
+        z-index: 10;
         background: #f8fafc;
-        color: var(--text-main);
-        border-color: #cbd5e1;
+        padding: 1rem 1.5rem;
+        text-align: left;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        letter-spacing: 0.05em;
+        border-bottom: 1px solid var(--border);
     }
 
-/* Back button area */
+    .modern-table td {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--border);
+        vertical-align: middle;
+        color: var(--text-main);
+    }
+
+    .modern-table tbody tr:hover td {
+        background-color: #f8fafc;
+    }
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 99px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.badge-success {
+    background: var(--success-bg);
+    color: var(--success);
+}
+
+.badge-warning {
+    background: var(--warning-bg);
+    color: var(--warning);
+}
+
+.badge-neutral {
+    background: #f1f5f9;
+    color: var(--text-body);
+}
+
+
+/* =========================================
+   3. PAGE: DASHBOARD (INDEX)
+   ========================================= */
+.dashboard-container {
+    height: calc(100vh - var(--header-buffer));
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 1rem;
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 1rem;
+    align-items: start;
+}
+
+.right-sidebar-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    overflow-y: auto;
+    height: 100%;
+    padding-right: 4px;
+}
+
+.form-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.scrollable-panel-body {
+    max-height: 65vh;
+    overflow-y: auto;
+}
+
+@media (max-width: 1024px) {
+    .dashboard-container {
+        grid-template-columns: 1fr;
+        height: auto;
+        overflow: auto;
+    }
+}
+
+
+/* =========================================
+   4. PAGE: EDIT / UPDATE CATEGORY
+   ========================================= */
+
+/* Main Container */
+.update-page-container {
+    height: calc(100vh - var(--header-buffer));
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* Navigation Bar */
 .nav-back-bar {
     flex-shrink: 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 0.5rem;
-    padding: 0 0.5rem; /* Align with panels */
+    padding: 0 0.5rem;
 }
 
-.back-nav a {
-    text-decoration: none;
-    color: var(--text-muted);
-    font-weight: 600;
-    font-size: 0.9rem;
-    display: inline-flex;
+/* --- Edit Form Layout (Horizontal Split) --- */
+.layout-horizontal-card {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+}
+
+/* Left Side: Image Uploader */
+.layout-left-img {
+    width: 220px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.img-preview-box {
+    width: 100%;
+    aspect-ratio: 1 / 1; /* Makes it a square */
+    background: #f8fafc;
+    border: 2px dashed #cbd5e1;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 0;
-    transition: color 0.2s;
+    justify-content: center;
+    position: relative;
 }
 
-    .back-nav a:hover {
-        color: var(--primary);
+    .img-preview-box img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
     }
 
-/* --- Popup Modal --- */
+    .img-preview-box .no-img {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: var(--text-muted);
+        gap: 8px;
+        font-size: 0.85rem;
+    }
+
+.btn-upload-overlay {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 8px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-body);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+    .btn-upload-overlay:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+        background: var(--primary-subtle);
+    }
+
+/* Right Side: Inputs */
+.layout-right-form {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* The compact 3-column row (ID, Rate, Name) */
+.form-row-compact {
+    display: grid;
+    /* ID: fixed small, Rate: fixed medium, Name: rest */
+    grid-template-columns: 80px 140px 1fr;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+/* Description Row */
+.form-row-desc {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.desc-textarea {
+    min-height: 120px;
+    line-height: 1.5;
+}
+
+
+/* =========================================
+   5. MODALS & TOASTS
+   ========================================= */
+
+/* --- Modal Overlay --- */
 .modal-overlay {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(15, 23, 42, 0.6); /* Darker overlay */
+    background: rgba(15, 23, 42, 0.6);
     z-index: 1000;
     backdrop-filter: blur(4px);
 }
@@ -402,7 +540,6 @@ textarea.form-input {
     font-size: 1.5rem;
     cursor: pointer;
     color: var(--text-muted);
-    transition: color 0.2s;
 }
 
     .btn-close:hover {
@@ -416,83 +553,7 @@ textarea.form-input {
     gap: 12px;
 }
 
-/* --- Mobile View & Utilities --- */
-@media (max-width: 1024px) {
-    .dashboard-container {
-        grid-template-columns: 1fr;
-        height: auto;
-        overflow: auto;
-    }
-
-    .form-horizontal-grid {
-        grid-template-columns: 1fr 1fr;
-    }
-
-    .update-page-container {
-        height: auto;
-    }
-
-    body {
-        overflow: auto;
-    }
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 4px;
-    border: 2px solid #fff;
-}
-    /* Added border for padding effect */
-    ::-webkit-scrollbar-thumb:hover {
-        background: #94a3b8;
-    }
-
-.right-sidebar-container {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    overflow-y: auto;
-    height: 100%;
-    padding-right: 4px;
-}
-
-.scrollable-panel-body {
-    max-height: 65vh;
-    overflow-y: auto;
-}
-
-.text-danger,
-.field-validation-error {
-    color: var(--danger);
-    font-size: 0.8rem;
-    font-weight: 500;
-    margin-top: 4px;
-    display: block; 
-}
-
-.input-validation-error {
-    border-color: var(--danger) !important;
-    background-color: var(--danger-bg);
-    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1); 
-}
-
-.input-validation-valid {
-    border-color: var(--border);
-}
-
-/* =========================================
-   TOAST NOTIFICATION 
-   ========================================= */
+/* --- Toast Notifications --- */
 .toast-container {
     position: fixed;
     top: 20px;
@@ -535,16 +596,5 @@ textarea.form-input {
     to {
         transform: translateX(0);
         opacity: 1;
-    }
-}
-
-.toast-hide {
-    animation: fadeOut 0.3s ease-in forwards;
-}
-
-@keyframes fadeOut {
-    to {
-        transform: translateX(100%);
-        opacity: 0;
     }
 }

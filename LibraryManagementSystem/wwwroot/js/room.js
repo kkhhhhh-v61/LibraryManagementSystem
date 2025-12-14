@@ -1,5 +1,23 @@
 ﻿const modalId = 'roomEditModal';
+const addRoomModalId = 'addRoomModal';
 const deleteModalId = 'deleteConfirmationModal';
+
+function openAddRoomModal() {
+    const modal = document.getElementById(addRoomModalId);
+    if (modal) {
+        modal.style.display = 'block';
+
+        const form = modal.querySelector('form');
+        if (form) form.reset();
+    }
+}
+
+function closeAddRoomModal() {
+    const modal = document.getElementById(addRoomModalId);
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
 
 function openEditModal(roomId, name, location, capacity, status) {
     const modal = document.getElementById(modalId);
@@ -30,9 +48,15 @@ function closeEditModal() {
 
 // Close on click outside
 window.addEventListener('click', (e) => {
-    const modal = document.getElementById(modalId);
-    if (e.target === modal) {
+    const editModal = document.getElementById('roomEditModal');
+    const addModal = document.getElementById('addRoomModal');
+
+    if (editModal && e.target === editModal) {
         closeEditModal();
+    }
+
+    if (addModal && e.target === addModal) {
+        closeAddRoomModal();
     }
 });
 
@@ -40,6 +64,7 @@ window.addEventListener('click', (e) => {
 window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
         closeEditModal();
+        closeAddRoomModal();
     }
 });
 
