@@ -24,6 +24,7 @@
                         </div>
                         <img src="#" alt="Cover Preview" class="form__upload-preview" id="book-cover-preview" />
                         <input asp-for="Image" class="form__file-input" id="book-cover-input" type="file" accept="image/jpeg, image/png" />
+                        <input asp-for="TempImage" id="book-cover-temp" type="hidden" />
                     </label>
                     <button class="form__upload-remove" id="book-cover-remove" type="button">
                         <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#ffffff">
@@ -38,28 +39,28 @@
         <div class="form__group form__group--right">
             <div class="form__item">
                 <label asp-for="Title" class="form__label form__label--required">Title</label>
-                <input asp-for="Title" class="form__input" type="text" data-trim autofocus />
+                <input asp-for="Title" class="form__input" type="text" placeholder="e.g. The Lord of the Rings" data-trim autofocus />
                 <span asp-validation-for="Title" class="form__error"></span>
             </div>
             <div class="form__item">
                 <label asp-for="Description" class="form__label form__label--required">Description</label>
-                <textarea asp-for="Description" class="form__textarea" data-trim></textarea>
+                <textarea asp-for="Description" class="form__textarea" placeholder="e.g. A brief summary of the book..." data-trim></textarea>
                 <span asp-validation-for="Description" class="form__error"></span>
             </div>
             <div class="form__item">
                 <label asp-for="ISBN" class="form__label form__label--required">ISBN</label>
-                <input asp-for="ISBN" class="form__input" type="text" data-trim />
+                <input asp-for="ISBN" class="form__input" type="text" placeholder="e.g. 978-0-395-19395-8" data-trim />
                 <span asp-validation-for="ISBN" class="form__error"></span>
             </div>
             <div class="form__row">
                 <div class="form__row-item">
                     <label asp-for="PublicationYear" class="form__label form__label--required">Publication Year</label>
-                    <input asp-for="PublicationYear" class="form__input" type="number" min="1450" max="2100" step="1" data-trim />
+                    <input asp-for="PublicationYear" class="form__input" type="number" min="1450" max="2100" step="1" placeholder="e.g. 1954" data-trim />
                     <span asp-validation-for="PublicationYear" class="form__error"></span>
                 </div>
                 <div class="form__row-item">
                     <label asp-for="Edition" class="form__label form__label--required">Edition</label>
-                    <input asp-for="Edition" class="form__input" type="number" min="1" max="100" step="1" data-trim />
+                    <input asp-for="Edition" class="form__input" type="number" min="1" max="100" step="1" placeholder="e.g. 1" data-trim />
                     <span asp-validation-for="Edition" class="form__error"></span>
 
                 </div>

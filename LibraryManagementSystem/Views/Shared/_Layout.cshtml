@@ -161,6 +161,15 @@
             });
         </script>
     }
+
+    @if (TempData["SubmissionSuccess"] as bool? == true)
+    {
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                sessionStorage.setItem('submissionSuccess', 'true');
+            });
+        </script>
+    }
 </body>
 
 </html>

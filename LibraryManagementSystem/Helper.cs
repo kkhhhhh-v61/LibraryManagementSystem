@@ -1,6 +1,71 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using SixLabors.ImageSharp;
 
 namespace LibraryManagementSystem;
+
+public class Helper
+{
+    public static ValidationResult ValidateImage(IFormFile image)
+    {
+        // 1. Check the file extension
+        string extension = Path.GetExtension(image.FileName).ToUpper();
+        if (extension != ".JPEG" && extension != ".JPG" && extension != ".PNG")
+        {
+            return new ValidationResult("Only JPEG, JPG, and PNG files are allowed.");
+        }
+
+        // 2. Check the file content type
+        if (image.ContentType == null || !image.ContentType.StartsWith("image/"))
+        {
+            return new ValidationResult("The file must be an image.");
+        }
+
+        // 3. Check the file size
+        if (image.Length > 1 * 1024 * 1024)
+        {
+            return new ValidationResult("The file size cannot be more than 1MB.");
+        }
+
+        // 4. Check the file type using magic bytes
+        byte[] magicBytes = [0xFF, 0xD8, 0xFF];
+        byte[] imageBytes = new byte[magicBytes.Length];
+        using (var stream = image.OpenReadStream())
+        {
+            stream.ReadExactly(imageBytes, 0, magicBytes.Length);
+        }
+        if (!magicBytes.SequenceEqual(imageBytes))
+        {
+            return new ValidationResult("The file must be a valid image.");
+        }
+
+        return ValidationResult.Success!;
+    }
+
+    public static string SaveImage(IFormFile image, string folder, string webRootPath)
+    {
+        // 1. Generate a GUID file name and force the extension to .jpg
+        string filename = Guid.NewGuid().ToString("N") + ".jpg";
+
+        // 2. Create the full file path
+        string folderPath = Path.Combine(webRootPath, "images", folder);
+        string fullPath = Path.Combine(folderPath, filename);
+
+        // 3. Ensure directory exists
+        if (!Directory.Exists(folderPath))
+        {
+            Directory.CreateDirectory(folderPath);
+        }
+
+        // 4. Save the Image
+        using (var stream = image.OpenReadStream())
+        using (var img = Image.Load(stream))
+        {
+            img.Save(fullPath);
+        }
+
+        return filename;
+    }
+}
 
 public class ISBNValidationAttribute : ValidationAttribute
 {
