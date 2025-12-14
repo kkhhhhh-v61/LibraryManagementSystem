@@ -15,9 +15,7 @@ public class BookController(LMSDB db) : Controller
         var vm = new BookInsertVM
         {
             GenreList = db.Genres.Select(g => new SelectListItem(g.Name, g.Id)).ToList(),
-            SelectedGenreIds = [],
             AuthorList = db.Authors.Select(a => new SelectListItem(a.Name, a.Id)).ToList(),
-            SelectedAuthorIds = [],
             PublicationYear = DateTime.Now.Year,
             Edition = 1,
             IsFeatured = false,
@@ -27,17 +25,78 @@ public class BookController(LMSDB db) : Controller
     }
 
     [HttpPost]
-    public IActionResult Insert(BookInsertVM vm)
+    public IActionResult InsertBook(BookInsertVM vm)
     {
-        // if (db.Books.Any(b => b.ISBN == vm.ISBN))
-        // {
-        //     ModelState.AddModelError("ISBN", "This ISBN already exists.");
-        // }
+        // 1. Check if ISBN already exists
+        if (db.Books.Any(b => b.ISBN == vm.ISBN.Replace("-", "").Trim().Replace(" ", "").ToUpper()))
+        {
+            ModelState.AddModelError("ISBN", "This ISBN already exists.");
+        }
+        
+        if (!ModelState.IsValid)
+        {
+            vm.GenreList = db.Genres.Select(g => new SelectListItem(g.Name, g.Id)).ToList();
+            vm.AuthorList = db.Authors.Select(a => new SelectListItem(a.Name, a.Id)).ToList();
+            vm.TempImage = vm.TempImage;
+            return View(vm);
+        }
 
-        // if (ModelState.IsValid)
-        // {
-            
-        // }
+
+        if (ModelState.IsValid)
+        {
+            // 2. Add book
+            var lastId = db.Books.OrderByDescending(b => b.Id).Select(b => b.Id).FirstOrDefault();
+
+            db.Books.Add(new()
+            {
+                // 2.1 Generate new ID
+                Id = GenerateNewId(lastId, 'B'),
+                Title = vm.Title.Trim(),
+                Description = vm.Description.Trim(),
+                ISBN = vm.ISBN.Replace("-", "").Trim().Replace(" ", "").ToUpper(),
+                PublicationYear = vm.PublicationYear,
+                Edition = vm.Edition,
+                IsFeatured = vm.IsFeatured,
+                IsArchived = vm.IsArchived,
+                DateAdded = DateOnly.FromDateTime(DateTime.Now),
+            });
+            db.SaveChanges();
+
+            var newBookId = db.Books.OrderByDescending(b => b.Id).Select(b => b.Id).FirstOrDefault();
+
+            // 2.2 Add genres
+            foreach (var genreId in vm.SelectedGenreIds)
+            {
+                var genre = db.Genres.Find(genreId);
+                if (genre != null)
+                {
+                    db.Books.Find(newBookId)?.Genres.Add(genre);
+                }
+            }
+
+            // 2.3 Add authors
+            foreach (var authorId in vm.SelectedAuthorIds)
+            {
+                var author = db.Authors.Find(authorId);
+                if (author != null)
+                {
+                    db.Books.Find(newBookId)?.Authors.Add(author);
+                }
+            }
+
+            db.SaveChanges();
+
+            // 3. Display toast messagee (success)
+            TempData["ToastMessage"] = $"Book '{vm.Title}' added successfully!";
+            TempData["ToastType"] = "success";
+            TempData["SubmissionSuccess"] = true;
+
+            return RedirectToAction("Browse");
+        }
+
+        // 3.1 Display toast message (error)
+        TempData["ToastMessage"] = "Failed to add book. Please check errors.";
+        TempData["ToastType"] = "error";
 
         return View(vm);
     }

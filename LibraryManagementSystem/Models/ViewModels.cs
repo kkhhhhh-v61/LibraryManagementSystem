@@ -16,6 +16,8 @@ public class BookInsertVM
 {
     public IFormFile? Image { get; set; }
 
+    public string? TempImage { get; set; }
+
     [Required(ErrorMessage = "{0} is required.")]
     [StringLength(255, ErrorMessage = "{0} must be between 1 and 255 characters.")]
     public string Title { get; set; }
@@ -39,14 +41,14 @@ public class BookInsertVM
     public int Edition { get; set; }
 
     [DisplayName("Genre(s)")]
-    [Required(ErrorMessage = "At least one Genre is required.")]
+    [MinLength(1, ErrorMessage = "At least one Genre is required.")]
     public List<string> SelectedGenreIds { get; set; } = new();
 
     public List<SelectListItem> GenreList { get; set; } = new();
 
     [DisplayName("Author(s)")]
-    [Required(ErrorMessage = "At least one Author is required.")]
-    [MaxLength(10, ErrorMessage = "A Book cannot have more than 10 authors.")]
+    [MinLength(1, ErrorMessage = "At least one Author is required.")]
+    [MaxLength(10, ErrorMessage = "A book cannot have more than 10 authors.")]
     public List<string> SelectedAuthorIds { get; set; } = new();
 
     public List<SelectListItem> AuthorList { get; set; } = new();
