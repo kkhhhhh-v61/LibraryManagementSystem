@@ -19,7 +19,20 @@
     SECTION: LAYOUT & CONTAINER
     =========================================================================== */
 
-.book-insert__title {
+/* Form Layout */
+.book-insert__form {
+    height: 100%;
+}
+
+.genre-insert__form,
+.author-insert__form {
+    height: 100%;
+    width: 500px;
+    margin: 0 auto;
+}
+
+/* Form Title */
+.form__title {
     margin-bottom: var(--spacing-md);
     height: 3%;
     font-size: var(--text-xl);
@@ -39,16 +52,23 @@
     height: auto;
 }
 
+.form--column {
+    flex-direction: column;
+}
+
+.form__group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
 /* Layout Columns */
 .form__group--left {
     flex: 1;
 }
 
 .form__group--right {
-    display: flex;
     flex: 2.5;
-    flex-direction: column;
-    gap: var(--spacing-md);
 }
 
 /* Layout Rows */

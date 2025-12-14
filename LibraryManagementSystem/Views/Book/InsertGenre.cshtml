@@ -1,3 +1,30 @@
-﻿@{
+﻿@model GenreVM;
+
+@{
     ViewBag.Title = "Insert Genre";
+}
+
+@section head {
+    <link rel="stylesheet" href="/css/book.css" asp-append-version="true" />
+}
+
+<form class="genre-insert__form" method="POST">
+    <h1 class="form__title">Insert Genre</h1>
+    <div class="form form--column">
+        <div class="form__group">
+            <div class="form__item">
+                <label asp-for="Name" class="form__label form__label--required">Genre Name</label>
+                <input asp-for="Name" class="form__input" data-trim autofocus />
+                <span asp-validation-for="Name" class="form__error"></span>
+            </div>
+        </div>
+        <div class="form__action">
+            <button class="form__button button--reset" type="reset">Reset</button>
+            <button class="form__button button--submit" type="submit">Submit</button>
+        </div>
+    </div>
+</form>
+
+@section foot {
+    <script src="/js/book.js" asp-append-version="true"></script>
 }

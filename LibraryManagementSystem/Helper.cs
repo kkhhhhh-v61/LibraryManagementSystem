@@ -11,7 +11,7 @@ public class ISBNValidationAttribute : ValidationAttribute
         string isbn = value.ToString()!;
 
         // 1. Remove hyphens and spaces to get raw numbers
-        string cleanIsbn = isbn.Replace("-", "").Replace(" ", "").ToUpper();
+        string cleanIsbn = isbn.Replace("-", "").Trim().Replace(" ", "").ToUpper();
 
         // 2. Check Length
         if (cleanIsbn.Length != 10 && cleanIsbn.Length != 13)

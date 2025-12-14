@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace LibraryManagementSystem.Extensions;
 
@@ -25,5 +26,12 @@ public static class Extensions
         }
 
         return cssClass;
+    }
+
+    public static bool IsValid(this ModelStateDictionary ms, string key)
+    {
+        if (ms == null) return false;
+        if (string.IsNullOrEmpty(key)) return false;
+        return ms.GetFieldValidationState(key) == ModelValidationState.Valid;
     }
 }

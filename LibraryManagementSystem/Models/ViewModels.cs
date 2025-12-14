@@ -6,10 +6,15 @@ namespace LibraryManagementSystem.Models;
 
 #nullable disable warnings
 
+/* ------------------------------ LAI CHEE KIT ------------------------------ */
+
+
+/* ------------------------------ TAN KAI HAO ------------------------------ */
+
 public class BookInsertVM
 {
     public IFormFile? Image { get; set; }
-    
+
     [Required(ErrorMessage = "{0} is required.")]
     [StringLength(255, ErrorMessage = "{0} must be between 1 and 255 characters.")]
     public string Title { get; set; }
@@ -36,6 +41,31 @@ public class BookInsertVM
 
     public bool IsArchived { get; set; } = false;
 }
+
+public class GenreVM
+{
+    [DisplayName("Genre Name")]
+    [Required(ErrorMessage = "{0} is required.")]
+    [StringLength(50, MinimumLength = 3, ErrorMessage = "{0} must be between 3 and 50 characters.")]
+    [RegularExpression(@"^[a-zA-Z\s-&]+$", ErrorMessage = "{0} can only contain letters, numbers, spaces, hyphens, and ampersands.")]
+    public string Name { get; set; }
+}
+
+
+public class AuthorVM
+{
+    [DisplayName("Author Name")]
+    [Required(ErrorMessage = "{0} is required.")]
+    [StringLength(100, MinimumLength = 1, ErrorMessage = "{0} must be between 1 and 100 characters.")]
+    [RegularExpression(@"^[a-zA-Z\s\-\.\']+$", ErrorMessage = "{0} can only contain letters, spaces, hyphens, periods, and apostrophes.")]
+    public string Name { get; set; }
+}
+
+
+/* ------------------------------ JASON TYE HONG YI ------------------------------ */
+
+
+/* ------------------------------ BRIAN OOI SHU YI ------------------------------ */
 
 public class RoomCategoryCreateVM
 {

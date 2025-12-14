@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sansation:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap">
     <link rel="stylesheet" href="/css/app.css" asp-append-version="true" />
-    @RenderSection("head", false)
+    @await RenderSectionAsync("head", false)
 </head>
 
 <body>
@@ -46,8 +46,8 @@
                         <div class="sidebar-subnav__separator"></div>
 
                         <a asp-controller="Book" asp-action="InsertBook" class="sidebar-subnav__link @Html.IsActive("Book", "InsertBook", "sidebar-subnav__link--active")">Insert Book</a>
-                        <a asp-controller="Book" asp-action="InsertAuthor" class="sidebar-subnav__link @Html.IsActive("Book", "InsertAuthor", "sidebar-subnav__link--active")">Insert Author</a>
                         <a asp-controller="Book" asp-action="InsertGenre" class="sidebar-subnav__link @Html.IsActive("Book", "InsertGenre", "sidebar-subnav__link--active")">Insert Genre</a>
+                        <a asp-controller="Book" asp-action="InsertAuthor" class="sidebar-subnav__link @Html.IsActive("Book", "InsertAuthor", "sidebar-subnav__link--active")">Insert Author</a>
                     </div>
                 </div>
 
@@ -131,9 +131,18 @@
     <script src="/js/jquery.validate.min.js" asp-append-version="true"></script>
     <script src="/js/jquery.validate.unobtrusive.min.js" asp-append-version="true"></script>
     <script src="/js/app.js" asp-append-version="true"></script>
-    @RenderSection("foot", false)
+    @await RenderSectionAsync("foot", false)
 
-    @await RenderSectionAsync("Scripts", required: false)
+    @if (TempData["ToastMessage"] != null)
+    {
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                var message = @Json.Serialize(TempData["ToastMessage"]);
+                var type = @Json.Serialize(TempData["ToastType"]);
+                showToast(message, type);
+            });
+        </script>
+    }
 </body>
 
 </html>
