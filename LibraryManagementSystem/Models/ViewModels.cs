@@ -47,7 +47,8 @@ public class GenreVM
     [DisplayName("Genre Name")]
     [Required(ErrorMessage = "{0} is required.")]
     [StringLength(50, MinimumLength = 3, ErrorMessage = "{0} must be between 3 and 50 characters.")]
-    [RegularExpression(@"^[a-zA-Z\s-&]+$", ErrorMessage = "{0} can only contain letters, numbers, spaces, hyphens, and ampersands.")]
+    [RegularExpression(@"^[a-zA-Z]+(?:[\s-&][a-zA-Z]+)*$",
+    ErrorMessage = "{0} must start and end with a letter, and symbols (- and &) must be between letters.")]
     public string Name { get; set; }
 }
 
@@ -57,7 +58,8 @@ public class AuthorVM
     [DisplayName("Author Name")]
     [Required(ErrorMessage = "{0} is required.")]
     [StringLength(100, MinimumLength = 1, ErrorMessage = "{0} must be between 1 and 100 characters.")]
-    [RegularExpression(@"^[a-zA-Z\s\-\.\']+$", ErrorMessage = "{0} can only contain letters, spaces, hyphens, periods, and apostrophes.")]
+    [RegularExpression(@"^[a-zA-Z]+(?:(?:[\s\-\']|\. ?)[a-zA-Z]+)*\.?$", 
+    ErrorMessage = "{0} must start with a letter, and symbols (', -, .) must be between letters.")]
     public string Name { get; set; }
 }
 
