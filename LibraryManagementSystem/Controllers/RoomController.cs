@@ -158,7 +158,7 @@ namespace LibraryManagementSystem.Controllers
         // =========================================================
         // 3. UPDATE PAGE 
         // =========================================================
-        public IActionResult Update(string id)
+        public IActionResult Edit(string id)
         {
             var category = db.RoomCategories.Include(c => c.Rooms).FirstOrDefault(c => c.Id == id);
 
@@ -223,7 +223,7 @@ namespace LibraryManagementSystem.Controllers
                     db.SaveChanges();
 
                     TempData["Success"] = "Category details updated!";
-                    return RedirectToAction("Update", new { id = vm.CategoryUpdate.Id });
+                    return RedirectToAction("Edit", new { id = vm.CategoryUpdate.Id });
                 }
             }
 
@@ -237,7 +237,7 @@ namespace LibraryManagementSystem.Controllers
                 vm.CategoryDisplay = freshData;
             }
 
-            return View("Update", vm);
+            return View("Edit", vm);
         }
 
         // =========================================================
@@ -283,7 +283,7 @@ namespace LibraryManagementSystem.Controllers
                 db.SaveChanges();
 
                 TempData["Success"] = $"Room {vm.RoomUpdate.RoomId} updated successfully!";
-                return RedirectToAction("Update", new { id = room.RoomCategoryId });
+                return RedirectToAction("Edit", new { id = room.RoomCategoryId });
             }
 
             TempData["Error"] = "Failed to update room. Please check inputs.";
@@ -303,7 +303,57 @@ namespace LibraryManagementSystem.Controllers
                 };
             }
 
-            return View("Update", vm);
+            return View("Edit", vm);
+        }
+
+        // =========================================================
+        // 6. DELETE CATEGORY
+        // =========================================================
+        [HttpPost]
+        public IActionResult DeleteCategory(string id)
+        {
+            var category = db.RoomCategories.Include(c => c.Rooms).FirstOrDefault(c => c.Id == id);
+
+            if (category == null)
+            {
+                TempData["Error"] = "Category not found.";
+                return RedirectToAction("Index");
+            }
+
+            if (category.Rooms.Any())
+            {
+                TempData["Error"] = $"Cannot delete '{category.Name}' because it still contains rooms. Please delete the rooms first.";
+                return RedirectToAction("Index");
+            }
+
+            db.RoomCategories.Remove(category);
+            db.SaveChanges();
+
+            TempData["Success"] = "Category deleted successfully!";
+            return RedirectToAction("Index");
+        }
+
+        // =========================================================
+        // 7. DELETE ROOM 
+        // =========================================================
+        [HttpPost]
+        public IActionResult DeleteRoom(string id)
+        {
+            var room = db.Rooms.FirstOrDefault(r => r.Id == id);
+
+            if (room == null)
+            {
+                TempData["Error"] = "Room not found.";
+                return RedirectToAction("Index");
+            }
+
+            string returnId = room.RoomCategoryId;
+
+            db.Rooms.Remove(room);
+            db.SaveChanges();
+
+            TempData["Success"] = "Room deleted successfully!";
+            return RedirectToAction("Edit", new { id = returnId });
         }
 
     }

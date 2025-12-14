@@ -3,7 +3,7 @@
 
 
 @{
-    ViewBag.Title = "Update Category";
+    ViewBag.Title = "Edit Category";
 }
 
 @section head {
@@ -88,7 +88,7 @@
                 </div>
 
                 <div style="margin-top: 1.5rem; display:flex; justify-content:flex-end; gap:10px; border-top:1px solid #f3f4f6; padding-top:1rem;">
-                    <a href="/Room" class="btn-action">Discard</a>
+                    <button type="button" class="btn-action" onclick="openDeleteModal('/Room/DeleteCategory/@Model.CategoryUpdate.Id', '@Model.CategoryUpdate.Name')">Delete</button>
                     <button type="submit" class="btn-save" style="width: auto; padding: 0.6rem 2rem; margin:0;">Save Changes</button>
                 </div>
             </form>
@@ -162,7 +162,8 @@
                                         onclick="openEditModal('@room.Id', '@room.Name', '@room.Location', @room.Capacity, '@room.Status')">
                                     <img src="~/images/icons/edit.svg" />
                                 </button>
-                                <button class="btn-icon btn-delete">
+                                <button class="btn-icon btn-delete"
+                                        onclick="openDeleteModal('/Room/DeleteRoom/@room.Id', '@room.Name')">
                                     <img src="~/images/icons/delete.svg" />
                                 </button>
                             </td>
@@ -224,6 +225,28 @@
     </div>
 </div>
 
+<div id="deleteConfirmationModal" class="modal-overlay">
+    <div class="modal-box" style="max-width:380px; text-align:center;">
+
+        <div style="color:var(--danger); margin-bottom:1rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+        </div>
+
+        <h3 style="margin-bottom:0.5rem; color:var(--text-main);">Confirm Deletion</h3>
+        <p style="color:var(--text-body); margin-bottom:1.5rem;">
+            Are you sure you want to delete <strong id="deleteItemName">Item</strong>?<br>
+            <span style="font-size:0.85rem; color:var(--text-muted);">This action cannot be undone.</span>
+        </p>
+
+        <form id="deleteForm" method="post">
+            <div style="display:flex; justify-content:center; gap:10px;">
+                <button type="button" class="btn-action" onclick="closeDeleteModal()">Cancel</button>
+                <button type="submit" class="btn-save" style="background-color:var(--danger); width:auto; padding:0.6rem 2rem;">Delete</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 @section foot {
     <script src="/js/room.js" asp-append-version="true"></script>
     @{
@@ -231,16 +254,15 @@
     }
 
     <script>
-        @if (!ViewData.ModelState.IsValid && ViewData.ModelState.Keys.Any(k => k.StartsWith("RoomUpdate")))
-        {
-                <text>
-                    document.addEventListener("DOMContentLoaded", function() {
-                        var modal = document.getElementById('roomEditModal');
-                        if(modal) {
-                            modal.style.display = 'block';
-                        }
-                    });
-                </text>
+        var shouldOpenModal = @((!ViewData.ModelState.IsValid && ViewData.ModelState.Keys.Any(k => k.StartsWith("RoomUpdate"))).ToString().ToLower());
+
+        if (shouldOpenModal) {
+            document.addEventListener("DOMContentLoaded", function() {
+                var modal = document.getElementById('roomEditModal');
+                if (modal) {
+                    modal.style.display = 'block';
+                }
+            });
         }
     </script>
 }

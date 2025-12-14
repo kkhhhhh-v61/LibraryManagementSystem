@@ -1,4 +1,5 @@
 ﻿const modalId = 'roomEditModal';
+const deleteModalId = 'deleteConfirmationModal';
 
 function openEditModal(roomId, name, location, capacity, status) {
     const modal = document.getElementById(modalId);
@@ -40,4 +41,26 @@ window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
         closeEditModal();
     }
+});
+
+function openDeleteModal(actionUrl, itemName) {
+    const modal = document.getElementById(deleteModalId);
+    if (!modal) return;
+
+    const deleteForm = document.getElementById('deleteForm');
+    deleteForm.action = actionUrl;
+
+    document.getElementById('deleteItemName').textContent = itemName;
+
+    modal.style.display = 'block';
+}
+
+function closeDeleteModal() {
+    const modal = document.getElementById(deleteModalId);
+    if (modal) modal.style.display = 'none';
+}
+
+window.addEventListener('click', (e) => {
+    const dModal = document.getElementById(deleteModalId);
+    if (e.target === dModal) closeDeleteModal();
 });
