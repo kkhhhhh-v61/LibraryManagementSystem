@@ -60,7 +60,11 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
                 }
                 catch (Exception)
                 {
-                    // Handle potential Base64 conversion errors if necessary
+                    isNewImageUpload = false;
+                    ModelState.AddModelError("Image", "Invalid image data.");
+                    vm.GenreList = db.Genres.Select(g => new SelectListItem(g.Name, g.Id)).ToList();
+                    vm.AuthorList = db.Authors.Select(a => new SelectListItem(a.Name, a.Id)).ToList();
+                    return View(vm);
                 }
             }
 

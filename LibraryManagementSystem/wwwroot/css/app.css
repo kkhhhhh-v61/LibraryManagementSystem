@@ -499,6 +499,97 @@ body {
 }
 
 /*  ===========================================================================
+    COMPONENT: TOAST NOTIFICATIONS
+    =========================================================================== */
+
+#toast-container {
+    display: flex;
+    position: fixed;
+    top: var(--spacing-xl);
+    left: 50%;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    transform: translateX(-50%);
+    z-index: 9999;
+    padding: 0 var(--spacing-md);
+    width: 100%;
+    max-width: 400px;
+    pointer-events: none;
+}
+
+.toast {
+    display: flex;
+    position: relative;
+    justify-content: center;
+    align-items: center;
+    transform: translateY(-1rem);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+        0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border-radius: var(--spacing-sm);
+    background-color: var(--color-gray-900);
+    padding: var(--spacing-md) calc(var(--spacing-lg) + 24px) var(--spacing-md)
+        var(--spacing-lg);
+    pointer-events: auto;
+    color: var(--color-white);
+    font-weight: var(--weight-medium);
+    font-size: var(--text-lg);
+    text-align: center;
+}
+
+.toast--visible {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.toast--success {
+    background-color: var(--color-success);
+    color: var(--color-white);
+}
+
+.toast--error {
+    background-color: var(--color-error);
+    color: var(--color-white);
+}
+
+.toast--warning {
+    background-color: var(--color-warning);
+    color: var(--color-black);
+}
+
+.toast--info {
+    background-color: var(--color-primary-base);
+    color: var(--color-white);
+}
+
+.toast__close {
+    display: flex;
+    position: absolute;
+    top: 50%;
+    right: var(--spacing-sm);
+    justify-content: center;
+    align-items: center;
+    transform: translateY(-50%);
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+    border-radius: 50%;
+    padding: 4px;
+    background-color: transparent;
+}
+
+.toast__close:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.toast__close-icon {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+    opacity: 0.7;
+}
+
+/*  ===========================================================================
     SECTION: RESPONSIVE DESIGN
     =========================================================================== */
 
@@ -525,7 +616,8 @@ body {
 
     .sidebar-nav__link {
         gap: 0;
-        padding: var(--spacing-md) 29px;
+        margin: 0 1.25rem;
+        padding: var(--spacing-md) 9px;
     }
 
     .sidebar-nav__text {
@@ -557,67 +649,4 @@ body {
     .layout__details {
         display: none;
     }
-}
-
-/*  ===========================================================================
-    COMPONENT: TOAST NOTIFICATIONS
-    =========================================================================== */
-
-#toast-container {
-    display: flex;
-    position: fixed;
-    top: var(--spacing-xl);
-    left: 50%;
-    flex-direction: column;
-    gap: var(--spacing-sm);
-    transform: translateX(-50%);
-    z-index: 9999;
-    padding: 0 var(--spacing-md);
-    width: 100%;
-    max-width: 400px;
-    pointer-events: none;
-}
-
-.toast {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transform: translateY(-1rem);
-    opacity: 0;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-        0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    border-radius: var(--spacing-sm);
-    background-color: var(--color-gray-900);
-    padding: var(--spacing-md) var(--spacing-lg);
-    pointer-events: auto;
-    color: var(--color-white);
-    font-weight: var(--weight-medium);
-    font-size: var(--text-lg);
-    text-align: center;
-}
-
-.toast--visible {
-    transform: translateY(0);
-    opacity: 1;
-}
-
-.toast--success {
-    background-color: var(--color-success);
-    color: var(--color-white);
-}
-
-.toast--error {
-    background-color: var(--color-error);
-    color: var(--color-white);
-}
-
-.toast--warning {
-    background-color: var(--color-warning);
-    color: var(--color-black);
-}
-
-.toast--info {
-    background-color: var(--color-primary-base);
-    color: var(--color-white);
 }
