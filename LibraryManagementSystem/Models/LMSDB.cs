@@ -35,6 +35,11 @@ public class User
         MEMBER
     }
 
+    public enum UserStatus
+    {
+        ACTIVE,
+        INACTIVE
+    }
 
     [Key]
     [MaxLength(6)]
@@ -62,6 +67,8 @@ public class User
 
     [MaxLength(255)]
     public string ImageURL { get; set; }
+
+    public UserStatus Status { get; set; }
 }
 
 
