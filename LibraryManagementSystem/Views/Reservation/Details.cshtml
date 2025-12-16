@@ -1,0 +1,32 @@
+﻿@model ReservationVM
+
+@{
+    ViewBag.Title = "Reservation Details";
+}
+
+<h1>Reservation Details</h1>
+
+<div class="card">
+    <div class="card-body">
+        <p><b>ID:</b> @Model.Id</p>
+        <p><b>User:</b> @Model.UserId</p>
+        <p><b>Book:</b> @Model.BookId</p>
+        <p><b>Copy:</b> @(Model.CopyId ?? "Not assigned")</p>
+        <p><b>Status:</b> @Model.Status</p>
+        <p><b>Reservation Date:</b> @Model.ReservationDate</p>
+        <p><b>Due:</b> @(Model.ReservationDue?.ToString() ?? "N/A")</p>
+
+        <a asp-action="Index" class="btn btn-secondary">Back</a>
+
+        @if (Model.Status == Reservation.ReservationStatus.PENDING ||
+                Model.Status == Reservation.ReservationStatus.READY)
+        {
+            <a asp-action="Cancel"
+               asp-route-id="@Model.Id"
+               class="btn btn-danger"
+               onclick="return confirm('Cancel reservation?');">
+                Cancel
+            </a>
+        }
+    </div>
+</div>
