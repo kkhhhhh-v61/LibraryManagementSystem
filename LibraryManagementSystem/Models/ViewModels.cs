@@ -81,7 +81,41 @@ public class AuthorVM
 
 
 /* ------------------------------ JASON TYE HONG YI ------------------------------ */
+public class ReservationVM
+{
+    [Display(Name = "Reservation ID")]
+    public string? Id { get; set; }
 
+    [DisplayName("User")]
+    [Required(ErrorMessage = "{0} is required.")]
+    [StringLength(6, ErrorMessage = "{0} must be 6 characters.")]
+    public string UserId { get; set; }
+
+    [DisplayName("Book")]
+    [Required(ErrorMessage = "{0} is required.")]
+    [StringLength(6, ErrorMessage = "{0} must be 6 characters.")]
+    public string BookId { get; set; }
+
+    [DisplayName("Copy")]
+    [StringLength(6, ErrorMessage = "{0} must be 6 characters.")]
+    public string? CopyId { get; set; }
+
+    [DisplayName("Reservation Date")]
+    public DateTime ReservationDate { get; set; } = DateTime.Now;
+
+    [DisplayName("Reservation Due")]
+    public DateTime? ReservationDue { get; set; }
+
+    [DisplayName("Reservation Status")]
+    [Required(ErrorMessage = "{0} is required.")]
+    public Reservation.ReservationStatus Status { get; set; } = Reservation.ReservationStatus.PENDING;
+
+    [DisplayName("User")]
+    public List<SelectListItem> UserList { get; set; } = new();
+
+    [DisplayName("Book")]
+    public List<SelectListItem> BookList { get; set; } = new();
+}
 
 /* ------------------------------ BRIAN OOI SHU YI ------------------------------ */
 
