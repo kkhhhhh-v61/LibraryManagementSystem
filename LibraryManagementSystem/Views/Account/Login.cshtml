@@ -10,19 +10,20 @@
             <h1 class="auth-title">Welcome Back</h1>
             <p class="auth-subtitle">Please enter your details to sign in.</p>
         </div>
-
         <form asp-controller="Account" asp-action="Login" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
             <div class="auth-group">
-                <label asp-for="Username" class="auth-label"></label>
-                <input asp-for="Username" class="auth-input" placeholder="Enter your username" />
+                <label asp-for="Username" class="auth-label">Username</label>
+                <input asp-for="Username" class="auth-input" placeholder="Enter your username" autocomplete="username" />
                 <span asp-validation-for="Username" class="text-danger"></span>
             </div>
 
             <div class="auth-group">
-                <label asp-for="Password" class="auth-label"></label>
-                <input asp-for="Password" type="password" class="auth-input" placeholder="Password" />
+                <label asp-for="Password" class="auth-label">Password</label>
+                <div class="password-wrapper">
+                    <input asp-for="Password" type="password" class="auth-input" id="loginPasswordInput" placeholder="Enter your password" style="padding-right: 40px;" autocomplete="current-password" />
+                    <i class="fa-solid fa-eye password-toggle" onclick="togglePassword('loginPasswordInput', this)"></i>
+                </div>
                 <span asp-validation-for="Password" class="text-danger"></span>
             </div>
 
