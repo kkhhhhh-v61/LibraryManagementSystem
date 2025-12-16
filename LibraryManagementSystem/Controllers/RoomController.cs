@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.Authorization;
 using System;
 
 namespace LibraryManagementSystem.Controllers
@@ -10,6 +11,7 @@ namespace LibraryManagementSystem.Controllers
     public class RoomController(LMSDB db, IWebHostEnvironment en) : Controller
     {
         // GET: Room/Index
+        [Authorize(Roles = "MEMBER")]
         public IActionResult Index()
         {
             var vm = new RoomIndexVM
@@ -26,6 +28,7 @@ namespace LibraryManagementSystem.Controllers
         // 1. CREATE CATEGORY
         // =======================================================================================
         [HttpPost]
+        //[Authorize(Roles = "MEMBER")]
         public IActionResult CreateCategoryAjax(RoomIndexVM vm)
         {
             ModelState.Remove("RoomInput.Name");
@@ -96,6 +99,7 @@ namespace LibraryManagementSystem.Controllers
         // 2. CREATE ROOM
         // ==========================================================================================
         [HttpPost]
+        //[Authorize(Roles = "STAFF")]
         public IActionResult CreateRoomAjax(RoomIndexVM vm)
         {
             ModelState.Remove("CategoryInput.Name");
