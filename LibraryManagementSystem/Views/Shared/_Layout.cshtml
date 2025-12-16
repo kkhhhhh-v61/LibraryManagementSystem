@@ -45,8 +45,8 @@
                         <a asp-controller="Book" asp-action="" class="sidebar-subnav__link @Html.IsActive("Book", "Browse", "sidebar-subnav__link--active")">Browse All</a>
                         <div class="sidebar-subnav__separator"></div>
                         <a asp-controller="Book" asp-action="InsertBook" class="sidebar-subnav__link @Html.IsActive("Book", "InsertBook", "sidebar-subnav__link--active")">Insert Book</a>
-                        <a asp-controller="Book" asp-action="InsertGenre" class="sidebar-subnav__link @Html.IsActive("Book", "InsertGenre", "sidebar-subnav__link--active")">Insert Genre</a>
-                        <a asp-controller="Book" asp-action="InsertAuthor" class="sidebar-subnav__link @Html.IsActive("Book", "InsertAuthor", "sidebar-subnav__link--active")">Insert Author</a>
+                        <a asp-controller="Book" asp-action="ManageGenre" class="sidebar-subnav__link @Html.IsActive("Book", "ManageGenre", "sidebar-subnav__link--active")">Manage Genre</a>
+                        <a asp-controller="Book" asp-action="ManageAuthor" class="sidebar-subnav__link @Html.IsActive("Book", "ManageAuthor", "sidebar-subnav__link--active")">Manage Author</a>
                     </div>
                 </div>
 
@@ -91,12 +91,28 @@
             <div class="sidebar-nav__group">
                 @if (User.Identity.IsAuthenticated)
                 {
-                    <form id="logoutForm" asp-controller="Account" asp-action="Logout" method="post" style="display:none;"></form>
-                    <a href="#" onclick="document.getElementById('logoutForm').submit(); return false;" class="sidebar-nav__link sidebar-nav__link--logout">
+                    <form asp-controller="Account" asp-action="Logout" method="post">
+                        <button type="submit" class="sidebar-nav__link sidebar-nav__link--logout">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000" class="sidebar-nav__icon">
+                                <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h280v80H200Zm440-160-55-58 102-102H360v-80h327L585-622l55-58 200 200-200 200Z" />
+                            </svg>
+                            <span class="sidebar-nav__text">Logout</span>
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login" class="sidebar-nav__link @Html.IsActive("Account", "Login", "sidebar-nav__link--active")">
                         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000" class="sidebar-nav__icon">
-                            <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h280v80H200Zm440-160-55-58 102-102H360v-80h327L585-622l55-58 200 200-200 200Z" />
+                            <path d="M480-400q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47Zm0 320q-121 0-221-58.5T80-200q44-93 144-151.5T480-410q100 0 200 58.5T880-200q-44 93-144 151.5T480-80Z" />
                         </svg>
-                        <span class="sidebar-nav__text">Logout</span>
+                        <span class="sidebar-nav__text">Login</span>
+                    </a>
+                    <a asp-controller="Account" asp-action="Register" class="sidebar-nav__link @Html.IsActive("Account", "Register", "sidebar-nav__link--active")">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000" class="sidebar-nav__icon">
+                            <path d="M440-280q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM480-80q-121 0-221-58.5T80-320q44-93 144-151.5T480-530q100 0 200 58.5T880-320q-44 93-144 151.5T480-80Zm0-180q33 0 56.5-23.5T560-320q0-33-23.5-56.5T480-400q-33 0-56.5 23.5T400-320q0 33 23.5 56.5T480-240Zm0-440q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM480-800q-121 0-221-58.5T80-1040q44-93 144-151.5T480-1250q100 0 200 58.5T880-1040q-44 93-144 151.5T480-800Zm0-180q33 0 56.5-23.5T560-980q0-33-23.5-56.5T480-1060q-33 0-56.5 23.5T400-980q0 33 23.5 56.5T480-900Z" />
+                        </svg>
+                        <span class="sidebar-nav__text">Register</span>
                     </a>
                 }
                 </div>
@@ -168,15 +184,6 @@
                     var type = @Json.Serialize(TempData["ToastType"]);
                     showToast(message, type);
                 }
-            });
-        </script>
-    }
-
-    @if (TempData["SubmissionSuccess"] as bool? == true)
-    {
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                sessionStorage.setItem("submissionSuccess", "true");
             });
         </script>
     }

@@ -1,4 +1,4 @@
-﻿@model BookInsertVM;
+﻿@model BookInsertVM
 
 @{
     ViewBag.Title = "Insert Book";
@@ -8,127 +8,128 @@
     <link rel="stylesheet" href="/css/book.css" asp-append-version="true" />
 }
 
-<form class="book-insert__form" method="POST">
+<form class="form" asp-action="InsertBook" method="post" enctype="multipart/form-data">
     <h1 class="form__title">Insert Book</h1>
-    <div class="form">
+    <div class="form__content">
         <div class="form__group form__group--left">
-            <div class="form__item">
-                <label asp-for="Image" class="form__label">Image</label>
-                <div class="form__upload-wrapper">
-                    <label for="book-cover-input" class="form__upload-zone" id="book-cover-zone">
-                        <div class="form__upload-placeholder">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="form__upload-icon">
+            <div class="form__field">
+                <label class="field__label" asp-for="Image"></label>
+                <div class="upload__wrapper">
+                    <label class="upload__zone">
+                        <div class="upload__placeholder">
+                            <svg class="upload__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
                                 <path d="M440-320v-326L336-542l-56-58 200-200 200 200-56 58-104-104v326h-80ZM240-160q-33 0-56.5-23.5T160-240v-120h80v120h480v-120h80v120q0 33-23.5 56.5T720-160H240Z"/>
                             </svg>
-                            <span class="form__upload-text">Choose File</span>
+                            <span class="upload__text">Upload Image File</span>
                         </div>
-                        <img src="#" alt="Cover Preview" class="form__upload-preview" id="book-cover-preview" />
-                        <input asp-for="Image" class="form__file-input" id="book-cover-input" type="file" accept="image/jpeg, image/png" />
-                        <input asp-for="TempImage" id="book-cover-temp" type="hidden" />
+                        <img class="upload__preview" />
+                        <input class="upload__input" asp-for="Image" type="file" accept="image/jpeg, image/jpg, image/png" />
                     </label>
-                    <button class="form__upload-remove" id="book-cover-remove" type="button">
-                        <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#ffffff">
+                    <button class="upload__remove" type="button">
+                        <svg class="upload__remove-icon" xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#ffffff">
                             <path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/>
                         </svg>
                     </button>
                 </div>
-                <span asp-validation-for="Image" class="form__error"></span>
+                <span class="field__error" asp-validation-for="Image"></span>
             </div>
         </div>
-
         <div class="form__group form__group--right">
-            <div class="form__item">
-                <label asp-for="Title" class="form__label form__label--required">Title</label>
-                <input asp-for="Title" class="form__input" type="text" placeholder="e.g. The Lord of the Rings" data-trim autofocus />
-                <span asp-validation-for="Title" class="form__error"></span>
+            <div class="form__field">
+                <label class="field__label field__label--required" asp-for="Title"></label>
+                <input class="field__input input--text" asp-for="Title" type="text" required data-trim autofocus />
+                <span class="field__error" asp-validation-for="Title"></span>
             </div>
-            <div class="form__item">
-                <label asp-for="Description" class="form__label form__label--required">Description</label>
-                <textarea asp-for="Description" class="form__textarea" placeholder="e.g. A brief summary of the book..." data-trim></textarea>
-                <span asp-validation-for="Description" class="form__error"></span>
+            <div class="form__field">
+                <label class="field__label field__label--required" asp-for="Description"></label>
+                <textarea class="field__input input--textarea" asp-for="Description" required data-trim></textarea>
+                <span class="field__error" asp-validation-for="Description"></span>
             </div>
-            <div class="form__item">
-                <label asp-for="ISBN" class="form__label form__label--required">ISBN</label>
-                <input asp-for="ISBN" class="form__input" type="text" placeholder="e.g. 978-0-395-19395-8" data-trim />
-                <span asp-validation-for="ISBN" class="form__error"></span>
+            <div class="form__field">
+                <label class="field__label field__label--required" asp-for="ISBN"></label>
+                <input class="field__input input--text" asp-for="ISBN" type="text" required data-trim />
+                <span class="field__error" asp-validation-for="ISBN"></span>
             </div>
-            <div class="form__row">
-                <div class="form__row-item">
-                    <label asp-for="PublicationYear" class="form__label form__label--required">Publication Year</label>
-                    <input asp-for="PublicationYear" class="form__input" type="number" min="1450" max="2100" step="1" placeholder="e.g. 1954" data-trim />
-                    <span asp-validation-for="PublicationYear" class="form__error"></span>
+            <div class="form__section">
+                <div class="form__field">
+                    <label class="field__label field__label--required" asp-for="PublicationYear"></label>
+                    <input class="field__input input--number" asp-for="PublicationYear" type="number" min="1450" max="2100" step="1" required data-trim />
+                    <span class="field__error" asp-validation-for="PublicationYear"></span>
                 </div>
-                <div class="form__row-item">
-                    <label asp-for="Edition" class="form__label form__label--required">Edition</label>
-                    <input asp-for="Edition" class="form__input" type="number" min="1" max="100" step="1" placeholder="e.g. 1" data-trim />
-                    <span asp-validation-for="Edition" class="form__error"></span>
-
+                <div class="form__field">
+                    <label class="field__label field__label--required" asp-for="Edition"></label>
+                    <input class="field__input input--number" asp-for="Edition" type="number" min="1" max="10" step="1" required data-trim />
+                    <span class="field__error" asp-validation-for="Edition"></span>
                 </div>
             </div>
-            <div class="form__row">
-                <div class="form__row-item">
-                    <label asp-for="SelectedGenreIds" class="form__label form__label--required">Genres</label>
-                    <div class="form__multi-select" id="genre-multi-select">
-                        <div class="multi-select__container">
-                            <input class="multi-select__search" type="text" placeholder="Search for genres..." />
+            <div class="form__section">
+                <div class="form__field">
+                    <label class="field__label field__label--required" asp-for="SelectedGenreIds"></label>
+                    <div class="field__multi-select">
+                        <div class="multi-select__search">
+                            <input class="search__input" type="text" placeholder="Search for genres..." />
                         </div>
                         <div class="multi-select__dropdown">
                             @foreach (var item in Model.GenreList)
                             {
-                                <div class="multi-select__option" data-value="@item.Value">@item.Text</div>
+                                <div class="dropdown__option" data-value="@item.Value">@item.Text</div>
                             }
                         </div>
-                        <select asp-for="SelectedGenreIds" class="multi-select__hidden-input" multiple>
+                        <select class="multi-select__select" asp-for="SelectedGenreIds" multiple>
                             @foreach (var item in Model.GenreList)
                             {
-                                <option value="@item.Value">@item.Text</option>
+                                <option class="select__option" value="@item.Value">@item.Text</option>
                             }
                         </select>
                     </div>
-                    <span asp-validation-for="SelectedGenreIds" class="form__error"></span>
+                    <span class="field__error" asp-validation-for="SelectedGenreIds"></span>
                 </div>
-                <div class="form__row-item">
-                    <label asp-for="SelectedAuthorIds" class="form__label form__label--required">Authors</label>
-                    <div class="form__multi-select" id="author-multi-select">
-                        <div class="multi-select__container">
-                            <input class="multi-select__search" type="text" placeholder="Search for authors..." />
+                <div class="form__field">
+                    <label class="field__label field__label--required" asp-for="SelectedAuthorIds"></label>
+                    <div class="field__multi-select">
+                        <div class="multi-select__search">
+                            <input class="search__input" type="text" placeholder="Search for authors..." />
                         </div>
                         <div class="multi-select__dropdown">
                             @foreach (var item in Model.AuthorList)
                             {
-                                <div class="multi-select__option" data-value="@item.Value">@item.Text</div>
+                                <div class="dropdown__option" data-value="@item.Value">@item.Text</div>
                             }
                         </div>
-                        <select asp-for="SelectedAuthorIds" class="multi-select__hidden-input" multiple>
+                        <select class="multi-select__select" asp-for="SelectedAuthorIds" multiple>
                             @foreach (var item in Model.AuthorList)
                             {
-                                <option value="@item.Value">@item.Text</option>
+                                <option class="select__option" value="@item.Value">@item.Text</option>
                             }
                         </select>
                     </div>
-                    <span asp-validation-for="SelectedAuthorIds" class="form__error"></span>
+                    <span class="field__error" asp-validation-for="SelectedAuthorIds"></span>
                 </div>
             </div>
-            <div class="form__row">
-                <div class="form__row-item form__option-box">
-                    <div class="form__option-header">
-                        <label asp-for="IsFeatured" class="form__label">Featured</label>
-                        <label class="form__toggle">
-                            <input asp-for="IsFeatured" class="form__toggle-input" type="checkbox" />
-                            <span class="form__toggle-slider"></span>
+            <div class="form__section">
+                <div class="form__field">
+                    <div class="field__switch-box">
+                        <label class="switch-box__header">
+                            <label class="switch-box__label" asp-for="IsFeatured"></label>
+                            <div class="switch-box__toggle">
+                                <input class="toggle__input" asp-for="IsFeatured" type="checkbox" />
+                                <span class="toggle__slider"></span>
+                            </div>
                         </label>
+                        <p class="switch-box__text">Display this Book in the <b>Featured</b> section of the <b>Home</b> page.</p>
                     </div>
-                    <p class="form__helper-text">Displays the book on the Featured section of the Home page.</p>
                 </div>
-                <div class="form__row-item form__option-box">
-                    <div class="form__option-header">
-                        <label asp-for="IsArchived" class="form__label">Archived</label>
-                        <label class="form__toggle">
-                            <input asp-for="IsArchived" class="form__toggle-input" type="checkbox" />
-                            <span class="form__toggle-slider"></span>
+                <div class="form__field">
+                    <div class="field__switch-box">
+                        <label class="switch-box__header">
+                            <label class="switch-box__label" asp-for="IsArchived"></label>
+                            <div class="switch-box__toggle">
+                                <input class="toggle__input" asp-for="IsArchived" type="checkbox" />
+                                <span class="toggle__slider"></span>
+                            </div>
                         </label>
+                        <p class="switch-box__text">Archive this Book from being displayed in the <b>Catalogue</b>.</p>
                     </div>
-                    <p class="form__helper-text">Archive the book from being shown in the Catalogue.</p>
                 </div>
             </div>
             <div class="form__action">
@@ -141,4 +142,12 @@
 
 @section foot {
     <script src="/js/book.js" asp-append-version="true"></script>
+
+    @if (TempData["BookInsertSuccess"] != null)
+    {
+        <script>
+            // Directly clear the specific key
+            sessionStorage.removeItem("temp_image_data");
+        </script>
+    }
 }
