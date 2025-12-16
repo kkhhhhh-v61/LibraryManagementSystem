@@ -87,12 +87,32 @@
             <div class="sidebar-nav__separator"></div>
 
             <div class="sidebar-nav__group">
-                <a href="#" class="sidebar-nav__link sidebar-nav__link--logout">
-                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000" class="sidebar-nav__icon">
-                        <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h280v80H200Zm440-160-55-58 102-102H360v-80h327L585-622l55-58 200 200-200 200Z"/>
-                    </svg>
-                    <span class="sidebar-nav__text">Logout</span>
-                </a>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <form asp-controller="Account" asp-action="Logout" method="post">
+                        <button type="submit" class="sidebar-nav__link sidebar-nav__link--logout">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000" class="sidebar-nav__icon">
+                                <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h280v80H200Zm440-160-55-58 102-102H360v-80h327L585-622l55-58 200 200-200 200Z"/>
+                            </svg>
+                            <span class="sidebar-nav__text">Logout</span>
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login" class="sidebar-nav__link @Html.IsActive("Account", "Login", "sidebar-nav__link--active")">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000" class="sidebar-nav__icon">
+                            <path d="M480-400q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47Zm0 320q-121 0-221-58.5T80-200q44-93 144-151.5T480-410q100 0 200 58.5T880-200q-44 93-144 151.5T480-80Z"/>
+                        </svg>
+                        <span class="sidebar-nav__text">Login</span>
+                    </a>
+                    <a asp-controller="Account" asp-action="Register" class="sidebar-nav__link @Html.IsActive("Account", "Register", "sidebar-nav__link--active")">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000" class="sidebar-nav__icon">
+                            <path d="M440-280q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM480-80q-121 0-221-58.5T80-320q44-93 144-151.5T480-530q100 0 200 58.5T880-320q-44 93-144 151.5T480-80Zm0-180q33 0 56.5-23.5T560-320q0-33-23.5-56.5T480-400q-33 0-56.5 23.5T400-320q0 33 23.5 56.5T480-240Zm0-440q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM480-800q-121 0-221-58.5T80-1040q44-93 144-151.5T480-1250q100 0 200 58.5T880-1040q-44 93-144 151.5T480-800Zm0-180q33 0 56.5-23.5T560-980q0-33-23.5-56.5T480-1060q-33 0-56.5 23.5T400-980q0 33 23.5 56.5T480-900Z"/>
+                        </svg>
+                        <span class="sidebar-nav__text">Register</span>
+                    </a>
+                }
             </div>
         </div>
     </nav>
@@ -109,13 +129,21 @@
             </div>
 
             <div class="header-main__actions">
-                <div class="header-main__user-profile">
-                    <div class="header-main__user-info">
-                        <span class="header-main__user-name">User Name</span>
-                        <small class="header-main__user-role">Role</small>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <div class="header-main__user-profile">
+                        <div class="header-main__user-info">
+                            <span class="header-main__user-name">@User.Identity.Name</span>
+                            <small class="header-main__user-role">@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value</small>
+                        </div>
+                        <img src="/images/assets/default-profile.png" alt="User" class="header-main__user-avatar" />
                     </div>
-                    <img src="/images/assets/default-profile.png" alt="User" class="header-main__user-avatar" />
-                </div>
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-primary me-2">Login</a>
+                    <a asp-controller="Account" asp-action="Register" class="btn btn-secondary">Register</a>
+                }
             </div>
         </header>
 
@@ -132,17 +160,18 @@
     <script src="/js/jquery.validate.unobtrusive.min.js" asp-append-version="true"></script>
     <script src="/js/app.js" asp-append-version="true"></script>
     @await RenderSectionAsync("foot", false)
+    @await RenderSectionAsync("Scripts", required: false)
 
     @if (TempData["ToastMessage"] != null)
     {
         <script>
-            document.addEventListener('DOMContentLoaded', function () {
+            document.addEventListener("DOMContentLoaded", function () {
                 // 1. Check if the user used the Back/Forward button
                 var isBackNavigation = false;
 
                 if (window.performance && window.performance.getEntriesByType) {
-                    var navEntries = window.performance.getEntriesByType('navigation');
-                    if (navEntries.length > 0 && navEntries[0].type === 'back_forward') {
+                    var navEntries = window.performance.getEntriesByType("navigation");
+                    if (navEntries.length > 0 && navEntries[0].type === "back_forward") {
                         isBackNavigation = true;
                     }
                 }
@@ -165,8 +194,8 @@
     @if (TempData["SubmissionSuccess"] as bool? == true)
     {
         <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                sessionStorage.setItem('submissionSuccess', 'true');
+            document.addEventListener("DOMContentLoaded", function () {
+                sessionStorage.setItem("submissionSuccess", "true");
             });
         </script>
     }

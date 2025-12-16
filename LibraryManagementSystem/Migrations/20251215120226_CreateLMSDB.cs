@@ -99,7 +99,8 @@ namespace LibraryManagementSystem.Migrations
                     Email = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     ContactNo = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: false),
                     Role = table.Column<int>(type: "int", nullable: false),
-                    ImageURL = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false)
+                    ImageURL = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {

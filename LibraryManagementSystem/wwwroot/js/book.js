@@ -82,6 +82,18 @@ function setupMultiSelect(wrapper) {
         }
     }
 
+    // Check for pre-selected options
+    Array.from(hiddenSelect.options).forEach((option) => {
+        if (option.selected) {
+            const value = option.value;
+            const text = option.text;
+            addChip(value, text);
+            dropdown
+                .querySelector(`.multi-select__option[data-value="${value}"]`)
+                .classList.add("selected");
+        }
+    });
+
     // Toggle Dropdown on Focus
     searchInput.addEventListener("focus", () => {
         dropdown.classList.add("active");

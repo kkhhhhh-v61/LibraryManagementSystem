@@ -1,0 +1,160 @@
+﻿@model IEnumerable<LibraryManagementSystem.Models.Reservation>
+
+@{
+    ViewBag.Title = "Reservations";
+}
+
+@section head {
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f6fa;
+            color: #333;
+        }
+
+        h1 {
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .btn-primary {
+            background-color: #3498db;
+            border: none;
+            padding: 8px 16px;
+            font-weight: 500;
+            border-radius: 6px;
+            color: #fff !important;
+            text-decoration: none !important;
+        }
+
+            .btn-primary:hover,
+            .btn-primary:focus {
+                background-color: #2980b9;
+                color: #fff !important;
+                text-decoration: none !important;
+            }
+
+        .table-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: none;
+            margin: 0;
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        table.table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 12px;
+        }
+
+        table th {
+            background: none;
+            font-weight: 600;
+            text-align: left;
+            padding: 12px;
+            color: #555;
+        }
+
+        table td {
+            padding: 12px;
+            vertical-align: middle;
+        }
+
+        table tbody tr {
+            background-color: #fdfdfd;
+            border-radius: 10px;
+            transition: transform 0.2s;
+        }
+
+        table tbody tr:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #fff;
+            display: inline-block;
+        }
+
+        .bg-warning { background-color: #f1c40f; }
+        .bg-success { background-color: #2ecc71; }
+        .bg-danger { background-color: #e74c3c; }
+        .bg-secondary { background-color: #95a5a6; }
+
+        .btn-outline-info {
+            border: 1px solid #3498db;
+            color: #3498db;
+            border-radius: 6px;
+            padding: 5px 12px;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .btn-outline-info:hover {
+            background-color: #3498db;
+            color: #fff;
+        }
+    </style>
+}
+
+
+
+
+<div class="table-container">
+    <div class="header-container">
+        <h1>Reservation List</h1>
+        <a asp-action="Create" class="btn btn-primary">Create Reservation</a>
+    </div>
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>User</th>
+                <th>Book</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var r in Model)
+            {
+                <tr>
+                    <td>@r.Id</td>
+                    <td>@r.UserId</td>
+                    <td>@r.BookId</td>
+                    <td>
+                        <span class="status-badge
+                            @(r.Status == Reservation.ReservationStatus.PENDING ? "bg-warning" :
+                              r.Status == Reservation.ReservationStatus.READY ? "bg-success" :
+                              r.Status == Reservation.ReservationStatus.CANCELLED ? "bg-danger" :
+                              "bg-secondary")">
+                            @r.Status
+                        </span>
+                    </td>
+                    <td>@r.ReservationDate.ToString("dd/MM/yyyy")</td>
+                    <td>
+                        <a asp-action="Details" asp-route-id="@r.Id" class="btn btn-sm btn-outline-info">View</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    
+</div>
+

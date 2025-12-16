@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LibraryManagementSystem.Migrations
 {
     [DbContext(typeof(LMSDB))]
-    [Migration("20251214102504_CreateLMSDB")]
+    [Migration("20251215120226_CreateLMSDB")]
     partial class CreateLMSDB
     {
         /// <inheritdoc />
@@ -485,6 +485,9 @@ namespace LibraryManagementSystem.Migrations
                         .HasColumnType("nvarchar(255)");
 
                     b.Property<int>("Role")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
                         .HasColumnType("int");
 
                     b.Property<string>("Username")

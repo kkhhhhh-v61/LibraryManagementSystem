@@ -1,14 +1,51 @@
 global using LibraryManagementSystem.Models;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddSqlServer<LMSDB>($@"
     Data Source=(LocalDB)\MSSQLLocalDB;
     AttachDbFilename={builder.Environment.ContentRootPath}\LMSDB.mdf;
 ");
 
+// Configure cookie authentication
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Account/Login";
+        options.AccessDeniedPath = "/Account/AccessDenied"; // Optional
+    });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("MemberOnly", policy => policy.RequireRole(User.UserRole.MEMBER.ToString()));
+    options.AddPolicy("StaffOnly", policy => policy.RequireRole(User.UserRole.STAFF.ToString()));
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole(User.UserRole.ADMIN.ToString()));
+});
+
 var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Home/Error");
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
+}
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-app.MapDefaultControllerRoute();
+
+app.UseRouting();
+
+// Add authentication and authorization middleware
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+
 app.Run();
