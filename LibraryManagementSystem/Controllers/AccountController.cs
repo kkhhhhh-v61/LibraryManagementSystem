@@ -29,7 +29,7 @@ namespace LibraryManagementSystem.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = await _db.Users.SingleOrDefaultAsync(u => u.Username == model.Username);
+                var user = await _db.Users.FirstOrDefaultAsync(u => u.Username == model.Username);
 
                 if (user != null && BCrypt.Net.BCrypt.Verify(model.Password, user.PasswordHash))
                 {
