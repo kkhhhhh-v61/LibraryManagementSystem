@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using static LibraryManagementSystem.Models.Room;
+using Microsoft.AspNetCore.Http;
 
 namespace LibraryManagementSystem.Models;
 
@@ -59,7 +60,12 @@ public class RegisterVM
     [Required(ErrorMessage = "{0} is required.")]
     [RegularExpression(@"^\d{10,15}$", ErrorMessage = "{0} must be a valid phone number (10-15 digits).")]
     public string ContactNo { get; set; }
-}
+
+    // --- NEW ADDITION ---
+    // This is required to receive the file from the View
+    [DisplayName("Profile Photo")]
+    public IFormFile? ProfilePhoto { get; set; }
+}   
 
 /* ------------------------------ TAN KAI HAO ------------------------------ */
 
