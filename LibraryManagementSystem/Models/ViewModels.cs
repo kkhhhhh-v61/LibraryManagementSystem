@@ -9,6 +9,57 @@ namespace LibraryManagementSystem.Models;
 
 /* ------------------------------ LAI CHEE KIT ------------------------------ */
 
+public class LoginVM
+{
+    [DisplayName("Username")]
+    [Required(ErrorMessage = "{0} is required.")]
+    public string Username { get; set; }
+
+    [DisplayName("Password")]
+    [Required(ErrorMessage = "{0} is required.")]
+    [DataType(DataType.Password)]
+    public string Password { get; set; }
+}
+
+public class RegisterVM
+{
+    [DisplayName("Username")]
+    [Required(ErrorMessage = "{0} is required.")]
+    [StringLength(50, MinimumLength = 3, ErrorMessage = "{0} must be between 3 and 50 characters.")]
+    public string Username { get; set; }
+
+    [DisplayName("Password")]
+    [Required(ErrorMessage = "{0} is required.")]
+    [StringLength(100, MinimumLength = 6, ErrorMessage = "{0} must be at least 6 characters long.")]
+    [DataType(DataType.Password)]
+    public string Password { get; set; }
+
+    [DisplayName("Confirm Password")]
+    [Required(ErrorMessage = "{0} is required.")]
+    [DataType(DataType.Password)]
+    [Compare("Password", ErrorMessage = "Password and confirmation password do not match.")]
+    public string ConfirmPassword { get; set; }
+
+    [DisplayName("First Name")]
+    [Required(ErrorMessage = "{0} is required.")]
+    [StringLength(50, MinimumLength = 1, ErrorMessage = "{0} must be between 1 and 50 characters.")]
+    public string FirstName { get; set; }
+
+    [DisplayName("Last Name")]
+    [Required(ErrorMessage = "{0} is required.")]
+    [StringLength(50, MinimumLength = 1, ErrorMessage = "{0} must be between 1 and 50 characters.")]
+    public string LastName { get; set; }
+
+    [DisplayName("Email")]
+    [Required(ErrorMessage = "{0} is required.")]
+    [EmailAddress(ErrorMessage = "Invalid Email Address.")]
+    public string Email { get; set; }
+
+    [DisplayName("Contact No.")]
+    [Required(ErrorMessage = "{0} is required.")]
+    [RegularExpression(@"^\d{10,15}$", ErrorMessage = "{0} must be a valid phone number (10-15 digits).")]
+    public string ContactNo { get; set; }
+}
 
 /* ------------------------------ TAN KAI HAO ------------------------------ */
 
