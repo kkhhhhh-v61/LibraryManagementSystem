@@ -99,8 +99,12 @@ namespace LibraryManagementSystem.Migrations
                     Email = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     ContactNo = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: false),
                     Role = table.Column<int>(type: "int", nullable: false),
-                    ImageURL = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false)
+                    ImageURL = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    CredibilityScore = table.Column<int>(type: "int", nullable: false),
+                    FailedLoginAttempts = table.Column<int>(type: "int", nullable: false),
+                    LockoutEnd = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsProfilePublic = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -193,6 +197,28 @@ namespace LibraryManagementSystem.Migrations
                         name: "FK_Rooms_RoomCategories_RoomCategoryId",
                         column: x => x.RoomCategoryId,
                         principalTable: "RoomCategories",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PasswordResetToken",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<string>(type: "nvarchar(6)", maxLength: 6, nullable: false),
+                    Token = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    ExpiryDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsUsed = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PasswordResetToken", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PasswordResetToken_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -296,7 +322,8 @@ namespace LibraryManagementSystem.Migrations
                     DueDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     OverdueRate = table.Column<decimal>(type: "decimal(8,2)", precision: 8, scale: 2, nullable: false),
                     IsPaid = table.Column<bool>(type: "bit", nullable: false),
-                    LoanId = table.Column<string>(type: "nvarchar(6)", maxLength: 6, nullable: false)
+                    LoanId = table.Column<string>(type: "nvarchar(6)", maxLength: 6, nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(6)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -307,6 +334,11 @@ namespace LibraryManagementSystem.Migrations
                         principalTable: "Loans",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Fines_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -388,6 +420,11 @@ namespace LibraryManagementSystem.Migrations
                 column: "LoanId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Fines_UserId",
+                table: "Fines",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Loans_CopyId",
                 table: "Loans",
                 column: "CopyId");
@@ -395,6 +432,11 @@ namespace LibraryManagementSystem.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Loans_UserId",
                 table: "Loans",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PasswordResetToken_UserId",
+                table: "PasswordResetToken",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
@@ -432,6 +474,9 @@ namespace LibraryManagementSystem.Migrations
 
             migrationBuilder.DropTable(
                 name: "BookGenre");
+
+            migrationBuilder.DropTable(
+                name: "PasswordResetToken");
 
             migrationBuilder.DropTable(
                 name: "Payments");

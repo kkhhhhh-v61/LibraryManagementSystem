@@ -37,13 +37,14 @@ public class User
 
     public enum UserStatus
     {
-        ACTIVE,
-        INACTIVE
+        ACTIVE,     // Normal user
+        INACTIVE,   // Deleted/Banned by Admin
+        LOCKED      // Temporary lock due to too many failed login attempts
     }
 
     [Key]
     [MaxLength(6)]
-    public string Id { get; set; }
+    public string Id { get; set; } // PK: e.g., "U00001"
 
     [MaxLength(50)]
     public string Username { get; set; }
@@ -66,9 +67,47 @@ public class User
     public UserRole Role { get; set; }
 
     [MaxLength(255)]
-    public string ImageURL { get; set; }
+    public string? ImageURL { get; set; } 
 
     public UserStatus Status { get; set; }
+
+    // Feature: Credibility System
+    // Logic: Starts at 100. -1 for late return, -10 for booking no-show.
+    public int CredibilityScore { get; set; } = 100;
+
+    // Feature: Security (Login Blocking)
+    // Logic: Increment this on wrong password. If > 3, set Status to LOCKED or use LockoutEnd.
+    public int FailedLoginAttempts { get; set; } = 0;
+    public DateTime? LockoutEnd { get; set; } // The time when they can try logging in again.
+
+    // Feature: User Profile Sharing
+    // Logic: If false, other members cannot view their profile details.
+    public bool IsProfilePublic { get; set; } = true;
+
+    public List<Loan> Loans { get; set; } = [];          
+    public List<Booking> Bookings { get; set; } = [];    
+    public List<Wishlist> Wishlists { get; set; } = [];  
+    public List<Fine> Fines { get; set; } = [];         
+    public List<PasswordResetToken> PasswordResetTokens { get; set; } = []; 
+}
+
+// Feature: Password Recovery (Email with token link).
+public class PasswordResetToken
+{
+    [Key]
+    public int Id { get; set; }
+
+    [MaxLength(6)]
+    public string UserId { get; set; }
+
+    [MaxLength(255)]
+    public string Token { get; set; } // The random secure string sent to email
+
+    public DateTime ExpiryDate { get; set; } // Token usually expires in 15-60 mins
+
+    public bool IsUsed { get; set; } = false; // Prevents re-using the same link
+
+    public User User { get; set; }
 }
 
 

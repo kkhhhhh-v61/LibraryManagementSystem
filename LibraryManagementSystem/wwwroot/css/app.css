@@ -650,3 +650,45 @@ body {
         display: none;
     }
 }
+/* Header Button Styles */
+.header-main__actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+}
+
+/* Register Button (Blue) */
+.btn-primary {
+    background-color: var(--color-primary-base);
+    color: white;
+}
+
+    .btn-primary:hover {
+        background-color: var(--color-primary-dark);
+    }
+
+/* Login Button (White/Gray) */
+.btn-secondary {
+    background-color: transparent;
+    color: var(--color-gray-700);
+    border: 1px solid var(--color-gray-300);
+}
+
+    .btn-secondary:hover {
+        background-color: var(--color-gray-100);
+        border-color: var(--color-gray-400);
+    }
