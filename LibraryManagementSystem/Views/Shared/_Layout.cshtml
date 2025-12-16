@@ -81,6 +81,24 @@
                     </div>
                 </div>
 
+                <div class="sidebar-nav__item">
+                    <a asp-controller="Reservation"
+                       asp-action="Index"
+                       class="sidebar-nav__link @Html.IsActive("Reservation", null, "sidebar-nav__link--active")">
+                
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             height="24px"
+                             viewBox="0 -960 960 960"
+                             width="24px"
+                             fill="#000000"
+                             class="sidebar-nav__icon">
+                            <path d="M160-120v-80h640v80H160Zm80-160q-33 0-56.5-23.5T160-360v-360q0-33 23.5-56.5T240-800h480q33 0 56.5 23.5T800-720v360q0 33-23.5 56.5T720-280H240Zm0-80h480v-360H240v360Zm80-80h320v-80H320v80Zm0-120h320v-80H320v80Zm0-120h320v-80H320v80Z" />
+                        </svg>
+                
+                        <span class="sidebar-nav__text">Reservation</span>
+                    </a>
+                </div>
+
                 
             </div>
 

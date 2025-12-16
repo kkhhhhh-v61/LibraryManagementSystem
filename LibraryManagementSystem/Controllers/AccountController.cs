@@ -107,7 +107,7 @@ namespace LibraryManagementSystem.Controllers
                 };
 
                 var claimsIdentity = new ClaimsIdentity(
-                    claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                        claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
                 await HttpContext.SignInAsync(
                     CookieAuthenticationDefaults.AuthenticationScheme,
@@ -119,6 +119,9 @@ namespace LibraryManagementSystem.Controllers
         }
 
         // GET: /Account/Logout
+
+
+        [HttpGet]
         [HttpPost]
         public async Task<IActionResult> Logout()
         {
