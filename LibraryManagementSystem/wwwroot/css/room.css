@@ -416,27 +416,6 @@ textarea.form-input {
     gap: 12px;
 }
 
-/* --- Mobile View & Utilities --- */
-@media (max-width: 1024px) {
-    .dashboard-container {
-        grid-template-columns: 1fr;
-        height: auto;
-        overflow: auto;
-    }
-
-    .form-horizontal-grid {
-        grid-template-columns: 1fr 1fr;
-    }
-
-    .update-page-container {
-        height: auto;
-    }
-
-    body {
-        overflow: auto;
-    }
-}
-
 /* Custom scrollbar */
 ::-webkit-scrollbar {
     width: 8px;
@@ -488,6 +467,110 @@ textarea.form-input {
 
 .input-validation-valid {
     border-color: var(--border);
+}
+
+.layout-horizontal-card {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+}
+
+.layout-left-img {
+    width: 220px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.img-preview-box {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background: #f8fafc;
+    border: 2px dashed #cbd5e1;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.img-preview-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.img-preview-box .no-img {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: var(--text-muted);
+    gap: 8px;
+    font-size: 0.85rem;
+}
+
+.btn-upload-overlay {
+    display: block;
+    padding: 8px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-body);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+}
+.btn-upload-overlay:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: var(--primary-subtle);
+}
+
+.layout-right-form {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-row-compact {
+    display: grid;
+    grid-template-columns: 80px 140px 1fr; 
+    gap: 1rem;
+    align-items: start;
+}
+
+.lbl-sm {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    display: block;
+}
+
+.form-row-desc {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+@media (max-width: 768px) {
+    .layout-horizontal-card {
+        flex-direction: column;
+    }
+    .layout-left-img {
+        width: 100%;
+        max-width: 300px;
+        margin: 0 auto;
+    }
+    .form-row-compact {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* =========================================

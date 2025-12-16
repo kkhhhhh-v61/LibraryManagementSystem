@@ -1,1 +1,200 @@
-﻿
+﻿@model BookingIndexVM
+@{
+    ViewBag.Title = "Room Schedule";
+
+    int startHour = 9;
+    int endHour = 21;
+    int totalHours = endHour - startHour;
+
+    int slotWidth = 140;
+    int roomColWidth = 240;
+
+    var dateString = Model.BookingDate.ToString("yyyy-MM-dd");
+    var prevDate = Model.BookingDate.AddDays(-1).ToString("yyyy-MM-dd");
+    var nextDate = Model.BookingDate.AddDays(1).ToString("yyyy-MM-dd");
+    var dateDisplay = Model.BookingDate.ToString("dd MMM yyyy (dddd)");
+
+    var activeCategory = Model.Categories.FirstOrDefault(c => c.Id == Model.CurrentCategoryId);
+}
+
+@section head {
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="~/css/booking.css" rel="stylesheet" />
+}
+
+<div class="dashboard-layout">
+
+    <div class="header-section">
+        <div class="header-left">
+            <h2 style="margin:0; font-size:1.2rem; font-weight:800; color:var(--text-main);">Schedule</h2>
+
+            <select class="select-input" onchange="window.location.href='?date=@dateString&categoryId=' + this.value">
+                @foreach (var cat in Model.Categories)
+                {
+                    <!option value="@cat.Id" @(cat.Id == Model.CurrentCategoryId ? "selected" : "")>
+                    @cat.Name (RM @cat.HourlyRate.ToString("F2")/hr)
+                    </!option>
+                }
+            </select>
+        </div>
+
+        <div class="header-right">
+            <div style="display:flex; gap:15px; font-size:0.8rem; color:var(--text-sub); margin-right:10px;">
+                <div style="display:flex; align-items:center; gap:6px;"><div style="width:8px;height:8px;border-radius:50%;background:#4f46e5"></div> Booked</div>
+                <div style="display:flex; align-items:center; gap:6px;"><div style="width:8px;height:8px;border-radius:50%;background:#cbd5e1"></div> Maint</div>
+            </div>
+
+            <div class="date-control">
+                <a href="?categoryId=@Model.CurrentCategoryId&date=@prevDate" class="btn-arrow">◀</a>
+                <div class="date-text">
+                    @dateDisplay
+                    <form method="get" action="/Booking/Index">
+                        <input type="hidden" name="categoryId" value="@Model.CurrentCategoryId" />
+                        <input type="date" name="date" value="@dateString" class="date-trigger" onchange="this.form.submit()" />
+                    </form>
+                </div>
+                <a href="?categoryId=@Model.CurrentCategoryId&date=@nextDate" class="btn-arrow">▶</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid-wrapper">
+        @if (!Model.CurrentCategoryRooms.Any())
+        {
+            <div class="empty-msg">No rooms found in this category.</div>
+        }
+        else
+        {
+            <table class="grid-table">
+                <thead>
+                    <tr>
+                        <th class="th-corner">Room</th>
+                        @for (int h = startHour; h < endHour; h++)
+                        {
+                            <th class="th-time">@h:00</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var room in Model.CurrentCategoryRooms)
+                    {
+                        bool isMaint = (room.Status.ToString() == "MAINTENANCE");
+
+                        <tr>
+                            <td class="td-room">
+                                <span class="room-name">@room.Name</span>
+                                <span class="room-sub">Max @room.Capacity</span>
+                            </td>
+
+                            @if (isMaint)
+                            {
+                                <td colspan="@totalHours" class="td-maint">
+                                    ⚠️ UNDER MAINTENANCE (FULL DAY)
+                                </td>
+                            }
+                            else
+                            {
+                                @for (int h = startHour; h < endHour; h++)
+                                {
+                                    <td class="td-slot" style="position:relative;" onclick="fillTime('@h', '@(h + 1)')">
+
+                                        @if (h == startHour && Model.DailyBookings.ContainsKey(room.Id))
+                                        {
+                                            @foreach (var booking in Model.DailyBookings[room.Id])
+                                            {
+                                                double startOffset = (booking.StartTime.Hour - startHour) + (booking.StartTime.Minute / 60.0);
+                                                double duration = (booking.EndTime - booking.StartTime).TotalHours;
+
+                                                if (startOffset < 0) { duration += startOffset; startOffset = 0; }
+                                                if (startOffset + duration > totalHours) { duration = totalHours - startOffset; }
+
+                                                if (duration > 0)
+                                                {
+                                                    string leftPx = (startOffset * slotWidth).ToString("F0") + "px";
+                                                    string widthPx = (duration * slotWidth).ToString("F0") + "px";
+
+                                                    <div class="booking-chip st-booked" style="left:@leftPx; width:@widthPx;">
+                                                        <span style="font-weight:700;">@booking.User?.Username</span>
+                                                    </div>
+                                                }
+                                            }
+                                        }
+                                    </td>
+                                }
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+
+    <form asp-action="Create" method="post" class="dock-section">
+        <input type="hidden" asp-for="RoomCategoryId" value="@Model.CurrentCategoryId" />
+        <input type="hidden" asp-for="BookingDate" value="@dateString" />
+        <input type="hidden" id="hourlyRate" value="@(activeCategory?.HourlyRate ?? 0)" />
+
+        <div class="dock-group">
+            <div>
+                <div style="font-size:0.7rem; font-weight:700; color:var(--text-sub); margin-bottom:4px;">START</div>
+                <input asp-for="StartTime" type="time" id="inputStart" class="dock-input" onchange="calculateTotal()" />
+            </div>
+            <div style="color:#cbd5e1">➜</div>
+            <div>
+                <div style="font-size:0.7rem; font-weight:700; color:var(--text-sub); margin-bottom:4px;">END</div>
+                <input asp-for="EndTime" type="time" id="inputEnd" class="dock-input" onchange="calculateTotal()" />
+            </div>
+        </div>
+
+        <div class="dock-group">
+            <div style="text-align:right;">
+                <div style="font-size:0.7rem; font-weight:700; color:var(--text-sub);">ESTIMATE</div>
+                <div style="font-size:1.4rem; font-weight:800; color:var(--primary);">RM <span id="displayPrice">0.00</span></div>
+            </div>
+            <button type="submit" class="dock-btn">Confirm Booking</button>
+        </div>
+    </form>
+
+    <div style="text-align:right; margin-top:-10px;">
+        <span asp-validation-for="StartTime" class="text-danger" style="font-size:0.8rem;"></span>
+    </div>
+
+</div>
+
+@section foot {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        function fillTime(startH, endH) {
+            const s = startH.toString().padStart(2, '0') + ":00";
+            const e = endH.toString().padStart(2, '0') + ":00";
+            document.getElementById('inputStart').value = s;
+            document.getElementById('inputEnd').value = e;
+
+            const dock = document.querySelector('.dock-section');
+            dock.style.borderColor = "#4f46e5";
+            dock.style.transform = "scale(1.005)";
+            setTimeout(() => { dock.style.borderColor = "#4f46e5"; dock.style.transform = "scale(1)"; }, 150);
+
+            calculateTotal();
+        }
+
+        function calculateTotal() {
+            const startVal = document.getElementById('inputStart').value;
+            const endVal = document.getElementById('inputEnd').value;
+            const rate = parseFloat(document.getElementById('hourlyRate').value) || 0;
+
+            if (startVal && endVal) {
+                const today = new Date().toISOString().split('T')[0];
+                const s = new Date(today + "T" + startVal);
+                const e = new Date(today + "T" + endVal);
+                let hours = (e - s) / 1000 / 60 / 60;
+                if (hours < 0) hours = 0;
+                const total = hours * rate;
+                document.getElementById('displayPrice').innerText = total.toFixed(2);
+            }
+        }
+        calculateTotal();
+    </script>
+}
