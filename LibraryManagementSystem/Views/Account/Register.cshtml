@@ -11,7 +11,7 @@
             <p class="auth-subtitle">Start your journey with BookBase.</p>
         </div>
 
-        <form asp-controller="Account" asp-action="Register" method="post" enctype="multipart/form-data">
+        <form asp-controller="Account" asp-action="Register" method="post" enctype="multipart/form-data" autocomplete="off">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
             <div style="display: flex; gap: 15px;">
@@ -52,13 +52,19 @@
             </div>
             <div class="auth-group">
                 <label asp-for="Password" class="auth-label">Password</label>
-                <input asp-for="Password" type="password" class="auth-input" placeholder="Password" />
+                <div class="password-wrapper">
+                    <input asp-for="Password" type="password" class="auth-input" id="passwordInput" placeholder="Password" style="padding-right: 40px;" autocomplete="new-password" />
+                    <i class="fa-solid fa-eye password-toggle" onclick="togglePassword('passwordInput', this)"></i>
+                </div>
                 <span asp-validation-for="Password" class="text-danger"></span>
             </div>
 
             <div class="auth-group">
                 <label asp-for="ConfirmPassword" class="auth-label">Confirm Password</label>
-                <input asp-for="ConfirmPassword" type="password" class="auth-input" placeholder="Confirm Password" />
+                <div class="password-wrapper">
+                    <input asp-for="ConfirmPassword" type="password" class="auth-input" id="confirmPasswordInput" placeholder="Confirm Password" style="padding-right: 40px;" autocomplete="new-password" />
+                    <i class="fa-solid fa-eye password-toggle" onclick="togglePassword('confirmPasswordInput', this)"></i>
+                </div>
                 <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
             </div>
 
