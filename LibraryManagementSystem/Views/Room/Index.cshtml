@@ -77,19 +77,19 @@
 
                     <div class="form-group">
                         <label class="form-label">Name</label>
-                        <input asp-for="CategoryInput.Name" class="form-input" placeholder="e.g. Gaming Room" />
+                        <input asp-for="CategoryInput.Name" class="form-input" placeholder="e.g. Gaming Room" data-trim autofocus />
                         <span asp-validation-for="CategoryInput.Name" class="text-danger" style="font-size:0.8rem; color:var(--danger);"></span>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label">Rate (RM/Hr)</label>
-                        <input asp-for="CategoryInput.HourlyRate" class="form-input" placeholder="0.00" type="number" step="0.01" />
+                        <input asp-for="CategoryInput.HourlyRate" class="form-input" placeholder="0.00" type="number" step="0.01" data-trim />
                         <span asp-validation-for="CategoryInput.HourlyRate" class="text-danger" style="font-size:0.8rem; color:var(--danger);"></span>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label">Description</label>
-                        <textarea asp-for="CategoryInput.Description" class="form-input" rows="2"></textarea>
+                        <textarea asp-for="CategoryInput.Description" class="form-input" rows="2" data-trim></textarea>
                         <span asp-validation-for="CategoryInput.Description" class="text-danger" style="font-size:0.8rem; color:var(--danger);"></span>
                     </div>
 
@@ -110,13 +110,13 @@
 
                     <div class="form-group">
                         <label class="form-label">Room Name</label>
-                        <input asp-for="RoomInput.Name" class="form-input" placeholder="e.g. Room A" />
+                        <input asp-for="RoomInput.Name" class="form-input" placeholder="e.g. Room A" data-trim />
                         <span asp-validation-for="RoomInput.Name" class="text-danger" style="font-size:0.8rem; color:var(--danger);"></span>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label">Location</label>
-                        <input asp-for="RoomInput.Location" class="form-input" placeholder="Level 1" />
+                        <input asp-for="RoomInput.Location" class="form-input" placeholder="Level 1" data-trim />
                         <span asp-validation-for="RoomInput.Location" class="text-danger" style="font-size:0.8rem; color:var(--danger);"></span>
                     </div>
 

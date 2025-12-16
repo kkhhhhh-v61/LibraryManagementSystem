@@ -281,3 +281,50 @@ public class RoomUpdatePageVM
 
     public RoomUpdateVM RoomUpdate { get; set; } = new();
 }
+
+
+/* -------------------- Booking ------------------ */
+public class BookingIndexVM : IValidatableObject
+{
+    // --- 1. 用户输入数据 ---
+    public string RoomCategoryId { get; set; } // 当前 Tab 的 Category
+
+    [DisplayName("Date")]
+    [Required]
+    [DataType(DataType.Date)]
+    public DateTime BookingDate { get; set; } = DateTime.Today;
+
+    [DisplayName("Start Time")]
+    [Required]
+    public DateTime StartTime { get; set; } // 用户选的开始时间
+
+    [DisplayName("End Time")]
+    [Required]
+    public DateTime EndTime { get; set; }   // 用户选的结束时间
+
+    // --- 2. 页面显示数据 ---
+    public string CurrentCategoryId { get; set; } // 当前高亮的 Tab
+    public List<RoomCategory> Categories { get; set; } = new(); // Tab 列表
+    public List<Room> CurrentCategoryRooms { get; set; } = new(); // 房间行 (Y轴)
+
+    // 预订数据: [RoomId] -> [该房间当天的预订列表]
+    public Dictionary<string, List<Booking>> DailyBookings { get; set; } = new();
+
+    // 营业时间设置 (9:00 - 21:00)
+    public int OpenHour { get; set; } = 9;
+    public int CloseHour { get; set; } = 21;
+
+    // --- 3. 验证逻辑 ---
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (BookingDate.Date < DateTime.Today)
+            yield return new ValidationResult("Cannot book past dates.", new[] { nameof(BookingDate) });
+
+        if (StartTime.TimeOfDay >= EndTime.TimeOfDay)
+            yield return new ValidationResult("End Time must be later than Start Time.", new[] { nameof(EndTime) });
+
+        // 检查是否在营业时间内
+        if (StartTime.Hour < OpenHour || EndTime.Hour > CloseHour)
+            yield return new ValidationResult($"Library hours are {OpenHour}:00 to {CloseHour}:00.", new[] { nameof(StartTime) });
+    }
+}
