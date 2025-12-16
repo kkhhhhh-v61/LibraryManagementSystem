@@ -286,8 +286,7 @@ public class RoomUpdatePageVM
 /* -------------------- Booking ------------------ */
 public class BookingIndexVM : IValidatableObject
 {
-    // --- 1. 用户输入数据 ---
-    public string RoomCategoryId { get; set; } // 当前 Tab 的 Category
+    public string RoomCategoryId { get; set; } 
 
     [DisplayName("Date")]
     [Required]
@@ -296,25 +295,21 @@ public class BookingIndexVM : IValidatableObject
 
     [DisplayName("Start Time")]
     [Required]
-    public DateTime StartTime { get; set; } // 用户选的开始时间
+    public DateTime StartTime { get; set; } 
 
     [DisplayName("End Time")]
     [Required]
-    public DateTime EndTime { get; set; }   // 用户选的结束时间
+    public DateTime EndTime { get; set; }   
 
-    // --- 2. 页面显示数据 ---
-    public string CurrentCategoryId { get; set; } // 当前高亮的 Tab
-    public List<RoomCategory> Categories { get; set; } = new(); // Tab 列表
-    public List<Room> CurrentCategoryRooms { get; set; } = new(); // 房间行 (Y轴)
+    public string CurrentCategoryId { get; set; } 
+    public List<RoomCategory> Categories { get; set; } = new(); 
+    public List<Room> CurrentCategoryRooms { get; set; } = new();
 
-    // 预订数据: [RoomId] -> [该房间当天的预订列表]
     public Dictionary<string, List<Booking>> DailyBookings { get; set; } = new();
 
-    // 营业时间设置 (9:00 - 21:00)
     public int OpenHour { get; set; } = 9;
     public int CloseHour { get; set; } = 21;
 
-    // --- 3. 验证逻辑 ---
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
         if (BookingDate.Date < DateTime.Today)
@@ -323,8 +318,8 @@ public class BookingIndexVM : IValidatableObject
         if (StartTime.TimeOfDay >= EndTime.TimeOfDay)
             yield return new ValidationResult("End Time must be later than Start Time.", new[] { nameof(EndTime) });
 
-        // 检查是否在营业时间内
         if (StartTime.Hour < OpenHour || EndTime.Hour > CloseHour)
             yield return new ValidationResult($"Library hours are {OpenHour}:00 to {CloseHour}:00.", new[] { nameof(StartTime) });
     }
+
 }
