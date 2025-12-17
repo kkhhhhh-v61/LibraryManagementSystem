@@ -241,21 +241,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // 1. Select All Header Click
         selectAll.addEventListener("click", function () {
+            const visibleRows = Array.from(rowCheckboxes).filter(
+                (cb) => cb.closest(".table__row").style.display !== "none"
+            );
+
             const isChecked = this.checked;
-            rowCheckboxes.forEach((cb) => (cb.checked = isChecked));
+            visibleRows.forEach((cb) => (cb.checked = isChecked));
+
             updateBatchButton();
         });
 
         // 2. Individual Row Click
         rowCheckboxes.forEach((cb) => {
             cb.addEventListener("change", function () {
-                // If one is unchecked, uncheck the header checkbox
                 if (!this.checked) selectAll.checked = false;
 
-                // If all is checked, check the header
-                const allChecked =
-                    document.querySelectorAll(".row-checkbox:checked")
-                        .length === rowCheckboxes.length;
+                const visibleCheckboxes = Array.from(rowCheckboxes).filter(
+                    (cb) => cb.closest(".table__row").style.display !== "none"
+                );
+                const allChecked = visibleCheckboxes.every((cb) => cb.checked);
+
                 if (allChecked) selectAll.checked = true;
 
                 updateBatchButton();
@@ -369,4 +374,55 @@ document.addEventListener("DOMContentLoaded", () => {
     deleteModal.addEventListener("click", (e) => {
         if (e.target === deleteModal) closeDeleteModal();
     });
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+    /* ===========================================================================
+        REAL-TIME SEARCH
+        =========================================================================== */
+    const searchInput = document.getElementById("nameSearchInput");
+    const tableBody = document.querySelector(".table tbody");
+
+    if (searchInput && tableBody) {
+        searchInput.addEventListener("input", function (e) {
+            const term = e.target.value.toLowerCase();
+            const rows = tableBody.querySelectorAll(".table__row");
+            let hasResults = false;
+
+            rows.forEach((row) => {
+                const nameCell = row.querySelectorAll(".table__cell")[2];
+
+                if (nameCell) {
+                    const text = nameCell.textContent.toLowerCase();
+                    if (text.includes(term)) {
+                        row.style.display = "";
+                        hasResults = true;
+                    } else {
+                        row.style.display = "none";
+                    }
+                }
+            });
+
+            let noResultRow = document.getElementById("search-no-results");
+
+            if (!hasResults && term !== "") {
+                if (!noResultRow) {
+                    noResultRow = document.createElement("tr");
+                    noResultRow.id = "search-no-results";
+                    noResultRow.innerHTML = `
+                        <td colspan="5" style="text-align:center; padding: 2rem; color: var(--color-gray-500);">
+                            No results found for "${e.target.value}"
+                        </td>`;
+                    tableBody.appendChild(noResultRow);
+                } else {
+                    noResultRow.querySelector(
+                        "td"
+                    ).textContent = `No results found for "${e.target.value}"`;
+                    noResultRow.style.display = "";
+                }
+            } else {
+                if (noResultRow) noResultRow.remove();
+            }
+        });
+    }
 });
