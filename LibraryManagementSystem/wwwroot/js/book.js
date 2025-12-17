@@ -210,6 +210,76 @@ function setupImageUpload(wrapper) {
 
 document.addEventListener("DOMContentLoaded", () => {
     /*  ===========================================================================
+        BATCH DELETE
+        =========================================================================== */
+
+    const selectAll = document.getElementById("selectAll");
+    const rowCheckboxes = document.querySelectorAll(".row-checkbox");
+    const batchButton = document.getElementById("batchDeleteButton");
+    const batchForm = document.getElementById("batchForm");
+    const selectionCountSpan = document.getElementById("selectionCount");
+
+    if (selectAll && batchForm && batchButton) {
+        const updateBatchButton = () => {
+            const count = document.querySelectorAll(
+                ".row-checkbox:checked"
+            ).length;
+
+            if (count > 0) {
+                if (selectionCountSpan) {
+                    selectionCountSpan.textContent = `${count} Selected`;
+                    selectionCountSpan.classList.add("active");
+                }
+
+                batchButton.classList.add("active");
+            } else {
+                if (selectionCountSpan)
+                    selectionCountSpan.classList.remove("active");
+                batchButton.classList.remove("active");
+            }
+        };
+
+        // 1. Select All Header Click
+        selectAll.addEventListener("click", function () {
+            const isChecked = this.checked;
+            rowCheckboxes.forEach((cb) => (cb.checked = isChecked));
+            updateBatchButton();
+        });
+
+        // 2. Individual Row Click
+        rowCheckboxes.forEach((cb) => {
+            cb.addEventListener("change", function () {
+                // If one is unchecked, uncheck the header checkbox
+                if (!this.checked) selectAll.checked = false;
+
+                // If all is checked, check the header
+                const allChecked =
+                    document.querySelectorAll(".row-checkbox:checked")
+                        .length === rowCheckboxes.length;
+                if (allChecked) selectAll.checked = true;
+
+                updateBatchButton();
+            });
+        });
+
+        // 3. Batch Button Confirmation
+        batchButton.addEventListener("click", function () {
+            const count = document.querySelectorAll(
+                ".row-checkbox:checked"
+            ).length;
+            if (count == 0) return;
+
+            const confirmed = confirm(
+                `Are you sure you want to delete these ${count} items?\n\nNote: Items currently assigned to books will be skipped safely.`
+            );
+
+            if (confirmed) {
+                batchForm.submit();
+            }
+        });
+    }
+
+    /*  ===========================================================================
         EDIT MODAL
         =========================================================================== */
 

@@ -8,20 +8,29 @@
     <link rel="stylesheet" href="/css/book.css" asp-append-version="true" />
 }
 
-<div class="manage__content">
+<form class="manage__content" asp-action="BatchDeleteGenre" method="post" id="batchForm">
     <header class="manage__header">
         <h1 class="header__title">Genres</h1>
-        <button class="form__button form__button--submit js-open-modal" data-type="Genre" type="button">
-            + Add Genre
-        </button>
+        <div class="header__actions">
+            <span class="selection-count" id="selectionCount"></span>
+            <button class="form__button form__button--danger button--batch-delete" id="batchDeleteButton" type="button">
+                Delete Selected
+            </button>
+            <button class="form__button form__button--submit js-open-modal" data-type="Genre" type="button">
+                + Add Genre
+            </button>
+        </div>
     </header>
-
     <div class="manage__table--wrapper">
         <table class="table">
             <thead>
                 <tr class="table__header">
+                    <th class="table__cell table__cell--checkbox">
+                        <input class="checkbox-styled" id="selectAll" type="checkbox" />
+                    </th>
                     <th class="table__cell">ID</th>
                     <th class="table__cell" style="width: 100%;">Name</th>
+                    <th class="table__cell">Books</th>
                     <th class="table__cell">Actions</th>
                 </tr>
             </thead>
@@ -39,24 +48,43 @@
                     @foreach (var genre in Model.ExistingGenres)
                     {
                         <tr class="table__row">
+                            <td class="table__cell table__cell--checkbox">
+                                <input class="row-checkbox checkbox-styled" type="checkbox" name="ids" value="@genre.Id" />
+                            </td>
                             <td class="table__cell">@genre.Id</td>
                             <td class="table__cell">@genre.Name</td>
+                            <td class="table__cell">
+                                @if (genre.Books.Count > 0)
+                                {
+                                    var bookList = string.Join(", ", genre.Books.Take(5).Select(b => b.Title));
+                                    if (genre.Books.Count > 5) bookList += $", {(genre.Books.Count - 5)} more...";
+
+                                    <span title="@bookList" style="cursor: help; border-bottom: 1px dotted var(--color-gray-500);">
+                                        @genre.Books.Count
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span style="color: var(--color-gray-400);">0</span>
+                                }
+                            </td>
                             <td class="table__cell">
                                 <div class="table__actions">
                                     <button class="action__button js-open-modal"
                                             data-id="@genre.Id"
                                             data-name="@genre.Name"
                                             data-type="Genre"
-                                            title="Edit">
+                                            title="Edit"
+                                            type="button">
                                         <svg class="button__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000">
                                             <path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/>
                                         </svg>
                                     </button>
-
                                     <button class="action__button action__button--delete js-delete-trigger" 
                                             data-id="@genre.Id" 
                                             data-name="@genre.Name" 
-                                            title="Delete">
+                                            title="Delete"
+                                            type="button">
                                         <svg class="button__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000">
                                             <path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/>
                                         </svg>
@@ -69,7 +97,7 @@
             </tbody>
         </table>
     </div>
-</div>
+</form>
 
 <div class="modal" id="modal-edit">
     <div class="modal__container">
