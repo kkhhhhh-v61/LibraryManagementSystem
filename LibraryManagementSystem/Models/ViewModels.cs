@@ -65,7 +65,9 @@ public class RegisterVM
     // This is required to receive the file from the View
     [DisplayName("Profile Photo")]
     public IFormFile? ProfilePhoto { get; set; }
-}   
+}
+
+
 
 /* ------------------------------ TAN KAI HAO ------------------------------ */
 
@@ -156,7 +158,9 @@ public class AuthorManagementVM
 }
 
 
+
 /* ------------------------------ JASON TYE HONG YI ------------------------------ */
+
 public class ReservationVM
 {
     [Display(Name = "Reservation ID")]
@@ -192,6 +196,8 @@ public class ReservationVM
     [DisplayName("Book")]
     public List<SelectListItem> BookList { get; set; } = new();
 }
+
+
 
 /* ------------------------------ BRIAN OOI SHU YI ------------------------------ */
 
@@ -307,8 +313,6 @@ public class RoomUpdatePageVM
     public RoomUpdateVM RoomUpdate { get; set; } = new();
 }
 
-
-/* -------------------- Booking ------------------ */
 public class BookingIndexVM : IValidatableObject
 {
     public string RoomCategoryId { get; set; } 

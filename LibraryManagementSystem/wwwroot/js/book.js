@@ -207,3 +207,96 @@ function setupImageUpload(wrapper) {
         input.files = dataTransfer.files;
     }
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+    /*  ===========================================================================
+        EDIT MODAL
+        =========================================================================== */
+
+    const editModal = document.getElementById("modal-edit");
+
+    if (!editModal) return;
+
+    const modalTitle = editModal.querySelector(".modal__title");
+    const formIdInput = editModal.querySelector("input[name='Form.Id']");
+    const formNameInput = editModal.querySelector("input[name='Form.Name']");
+    const openButtons = document.querySelectorAll(".js-open-modal");
+    const closeButton = editModal.querySelector(".js-close-modal");
+    const cancelButton = editModal.querySelector(".js-cancel-modal");
+
+    openButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+            const id = button.dataset.id;
+            const name = button.dataset.name;
+            const type = button.dataset.type;
+
+            if (id) {
+                modalTitle.textContent = `Edit ${type}`;
+                formIdInput.value = id;
+                formNameInput.value = name;
+            } else {
+                modalTitle.textContent = `Add ${type}`;
+                formIdInput.value = "";
+                formNameInput.value = "";
+
+                editModal
+                    .querySelectorAll(".field-validation-error")
+                    .forEach((el) => (el.innerHTML = ""));
+                editModal
+                    .querySelectorAll(".input-validation-error")
+                    .forEach((el) =>
+                        el.classList.remove("input-validation-error")
+                    );
+            }
+            editModal.classList.add("active");
+        });
+    });
+
+    const closeEditModal = () => editModal.classList.remove("active");
+    if (closeButton) closeButton.addEventListener("click", closeEditModal);
+    if (cancelButton) cancelButton.addEventListener("click", closeEditModal);
+
+    editModal.addEventListener("click", (e) => {
+        if (e.target === editModal) closeEditModal();
+    });
+
+    const shouldOpen = document.getElementById("server-modal-trigger");
+    if (shouldOpen) editModal.classList.add("active");
+
+    /*  ===========================================================================
+        DELETE MODAL
+        =========================================================================== */
+
+    const deleteModal = document.getElementById("modal-delete");
+
+    if (!deleteModal) return;
+
+    const deleteIdInput = deleteModal.querySelector("input[name='id']");
+    const deleteNameDisplay = deleteModal.querySelector(".js-delete-name");
+    const deleteButtons = document.querySelectorAll(".js-delete-trigger");
+    const closeDeleteButton = deleteModal.querySelector(".js-close-modal");
+    const cancelDeleteButton = deleteModal.querySelector(".js-cancel-delete");
+
+    deleteButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+            const id = button.dataset.id;
+            const name = button.dataset.name;
+
+            deleteIdInput.value = id;
+            if (deleteNameDisplay) deleteNameDisplay.textContent = name;
+
+            deleteModal.classList.add("active");
+        });
+    });
+
+    const closeDeleteModal = () => deleteModal.classList.remove("active");
+
+    if (closeDeleteButton)
+        closeDeleteButton.addEventListener("click", closeDeleteModal);
+    if (cancelDeleteButton)
+        cancelDeleteButton.addEventListener("click", closeDeleteModal);
+
+    deleteModal.addEventListener("click", (e) => {
+        if (e.target === deleteModal) closeDeleteModal();
+    });
+});

@@ -136,7 +136,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         {
             vm.ExistingGenres = db.Genres.OrderBy(g => g.Name).ToList();
             TempData["ShowModal"] = true;
-            return View("Manage", vm);
+            return View("ManageGenre", vm);
         }
 
         // 4. Generate ID
@@ -215,7 +215,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         {
             vm.ExistingAuthors = db.Authors.OrderBy(a => a.Name).ToList();
             TempData["ShowModal"] = true;
-            return View("Manage", vm);
+            return View("ManageAuthor", vm);
         }
 
         // 4. Generate ID

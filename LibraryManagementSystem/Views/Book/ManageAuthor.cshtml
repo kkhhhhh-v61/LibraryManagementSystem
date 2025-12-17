@@ -8,6 +8,126 @@
     <link rel="stylesheet" href="/css/book.css" asp-append-version="true" />
 }
 
+<div class="manage__content">
+    <header class="manage__header">
+        <h1 class="header__title">Authors</h1>
+        <button class="form__button form__button--submit js-open-modal" data-type="Author" type="button">
+            + Add Author
+        </button>
+    </header>
+
+    <div class="manage__table--wrapper">
+        <table class="table">
+            <thead>
+                <tr class="table__header">
+                    <th class="table__cell">ID</th>
+                    <th class="table__cell" style="width: 100%;">Name</th>
+                    <th class="table__cell">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.ExistingAuthors.Any())
+                {
+                    <tr class="table__row">
+                        <td class="table__cell" colspan="3" style="text-align:center; color: var(--color-gray-500);">
+                            No authors found.
+                        </td>
+                    </tr>
+                }
+                else 
+                {
+                    @foreach (var author in Model.ExistingAuthors)
+                    {
+                        <tr class="table__row">
+                            <td class="table__cell">@author.Id</td>
+                            <td class="table__cell">@author.Name</td>
+                            <td class="table__cell">
+                                <div class="table__actions">
+                                    <button class="action__button js-open-modal"
+                                            data-id="@author.Id"
+                                            data-name="@author.Name"
+                                            data-type="Author"
+                                            title="Edit">
+                                        <svg class="button__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000">
+                                            <path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/>
+                                        </svg>
+                                    </button>
+
+                                    <button class="action__button action__button--delete js-delete-trigger" 
+                                            data-id="@author.Id" 
+                                            data-name="@author.Name" 
+                                            title="Delete">
+                                        <svg class="button__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000">
+                                            <path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal" id="modal-edit">
+    <div class="modal__container">
+        <div class="modal__header">
+            <h2 class="modal__title">Add/Edit Author</h2>
+            <button class="modal__close js-close-modal">
+                <svg class="close__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000">
+                    <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/>
+                </svg>
+            </button>
+        </div>
+
+        <form class="form__group" asp-action="SaveAuthor" method="post">
+            <input asp-for="Form.Id" type="hidden" />
+
+            <div class="form__field">
+                <label class="field__label field__label--required" asp-for="Form.Name"></label>
+                <input class="field__input input--text" asp-for="Form.Name" type="text" placeholder="e.g. J.K. Rowling" required data-trim autofocus />
+                <span class="field__error" asp-validation-for="Form.Name"></span>
+            </div>
+
+            <div class="form__action">
+                <button class="form__button form__button--reset js-cancel-modal" type="button">Cancel</button>
+                <button class="form__button form__button--submit" type="submit">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal" id="modal-delete">
+    <div class="modal__container">
+        <div class="modal__header">
+            <h2 class="modal__title">Confirm Delete</h2>
+            <button class="modal__close js-close-modal">
+                <svg class="close__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000">
+                    <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/>
+                </svg>
+            </button>
+        </div>
+
+        <p class="modal__text">
+            Are you sure you want to delete '<span class="text--highlight js-delete-name"></span>'?
+            This action cannot be undone.
+        </p>
+
+        <form class="form__action" asp-action="DeleteAuthor" method="post">
+            <input type="hidden" name="id" value="" />
+            <button class="form__button form__button--reset js-cancel-delete" type="button">Cancel</button>
+            <button class="form__button form__button--danger" type="submit">Delete</button>
+        </form>
+    </div>
+</div>
+
+@if (TempData["ShowModal"] as bool? == true)
+{
+    <div id="server-modal-trigger"></div>
+}
+
 @section foot {
     <script src="/js/book.js" asp-append-version="true"></script>
 }

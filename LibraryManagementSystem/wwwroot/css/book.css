@@ -90,22 +90,22 @@
     cursor: pointer;
 }
 
-.button--reset {
+.form__button--reset {
     border: 1px solid var(--color-gray-300);
     background-color: var(--color-gray-100);
     color: var(--color-black);
 }
 
-.button--reset:hover {
+.form__button--reset:hover {
     background-color: var(--color-gray-200);
 }
 
-.button--submit {
+.form__button--submit {
     background-color: var(--color-primary-base);
     color: var(--color-white);
 }
 
-.button--submit:hover {
+.form__button--submit:hover {
     background-color: var(--color-primary-semi-dark);
 }
 
@@ -538,3 +538,178 @@
 /*  ===========================================================================
     PAGE: MANAGE GENRE & AUTHOR 
     =========================================================================== */
+
+.manage__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    /* padding: var(--spacing-md); */
+    height: 100%;
+}
+
+.manage__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: var(--spacing-sm);
+    background-color: var(--color-white);
+    padding: var(--spacing-md) var(--spacing-lg);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.header__title {
+    color: var(--color-gray-900);
+    font-size: var(--text-xl);
+}
+
+.manage__table--wrapper {
+    flex: 1;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border-radius: var(--spacing-sm);
+    background-color: var(--color-white);
+    padding: var(--spacing-md);
+    overflow: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    text-align: left;
+}
+
+.table__header {
+    position: sticky;
+    top: 0;
+    z-index: 0;
+    background-color: var(--color-gray-100);
+    color: var(--color-gray-700);
+    font-weight: var(--weight-bold);
+}
+
+.table__cell {
+    border-bottom: 1px solid var(--color-gray-200);
+    padding: var(--spacing-md);
+    white-space: nowrap;
+    font-size: var(--text-lg);
+}
+
+.table__cell:last-child .table__cell {
+    border-bottom: none;
+}
+
+.table__row:hover {
+    background-color: var(--color-primary-light);
+}
+
+.table__actions {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.action__button {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: none;
+    border-radius: var(--spacing-xs);
+    background: transparent;
+    padding: var(--spacing-xs);
+    color: var(--color-gray-600);
+}
+
+.action__button:hover {
+    background-color: var(--color-primary-semi-light);
+    color: var(--color-white);
+}
+
+.action__button:hover .button__icon {
+    fill: var(--color-white);
+}
+
+.action__button--delete:hover {
+    background-color: var(--color-error);
+    color: #fdecec;
+}
+
+.action__button--delete:hover .button__icon {
+    fill: #fdecec;
+}
+
+.modal {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    visibility: hidden;
+    opacity: 0;
+    transition: all 0.3s ease;
+    background-color: rgba(0, 0, 0, 0.5);
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(4px);
+}
+
+.modal.active {
+    visibility: visible;
+    opacity: 1;
+}
+
+.modal__container {
+    transform: translateY(20px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    border-radius: var(--spacing-md);
+    background-color: var(--color-white);
+    padding: var(--spacing-lg);
+    width: 100%;
+    max-width: 500px;
+}
+
+.modal.active .modal__container {
+    transform: translateY(0);
+}
+
+.modal__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+}
+
+.modal__title {
+    font-size: 2rem;
+}
+
+.modal__close {
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    width: 32px;
+    height: 32px;
+}
+
+.form__button--danger {
+    background-color: var(--color-error);
+    color: var(--color-white);
+}
+
+.form__button--danger:hover {
+    background-color: #d32f2f;
+}
+
+.modal__text {
+    margin-bottom: var(--spacing-lg);
+    color: var(--color-gray-700);
+    font-size: var(--text-lg);
+}
+
+.text--highlight {
+    color: var(--color-gray-900);
+    font-weight: var(--weight-bold);
+}
