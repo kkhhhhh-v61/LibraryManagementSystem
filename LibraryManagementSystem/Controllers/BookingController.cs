@@ -1,49 +1,166 @@
 ﻿using LibraryManagementSystem.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using static LibraryManagementSystem.Models.Booking;
 using static LibraryManagementSystem.Models.Room;
 
 namespace LibraryManagementSystem.Controllers
 {
+    [Authorize(Roles = "MEMBER")]
     public class BookingController(LMSDB db) : Controller
     {
-        public IActionResult Index(string? categoryId, string? date)
+        // GET: Booking Page
+        public IActionResult Index(string? roomCategoryId, string? date)
         {
-            // 1. 默认日期
-            DateTime selectedDate = string.IsNullOrEmpty(date) ? DateTime.Today : DateTime.Parse(date);
+            DateTime targetDate = string.IsNullOrEmpty(date) ? DateTime.Today : DateTime.Parse(date);
+            if (targetDate < DateTime.Today) targetDate = DateTime.Today;
 
-            // 2. 加载所有 Category (用于顶部导航)
             var allCategories = db.RoomCategories.OrderBy(c => c.Id).ToList();
+            string activeCatId = roomCategoryId ?? allCategories.FirstOrDefault()?.Id ?? "";
 
-            // 3. 确定当前 Category (默认取第一个)
-            string activeCatId = categoryId ?? allCategories.FirstOrDefault()?.Id ?? "";
+            ViewBag.Categories = allCategories;
 
-            // 4. 构建 VM
-            var vm = new BookingIndexVM
+            var now = DateTime.Now;
+            int nextHour = now.Hour + 1;
+            if (nextHour < 9) nextHour = 9;
+            if (nextHour >= 19) nextHour = 9;
+
+            var vm = new BookingCreateVM
             {
-                BookingDate = selectedDate,
-                CurrentCategoryId = activeCatId,
-                Categories = allCategories,
+                BookingDate = targetDate,
+                RoomCategoryId = activeCatId,
 
-                // 默认 9:00 - 11:00
-                StartTime = selectedDate.Date.AddHours(9),
-                EndTime = selectedDate.Date.AddHours(11),
+                StartTime = new TimeSpan(nextHour, 0, 0),
+                EndTime = new TimeSpan(nextHour + 2, 0, 0),
 
-                // 以下列表设为空，因为我们不再用 Timeline 了
-                CurrentCategoryRooms = new List<Room>(),
-                DailyBookings = new Dictionary<string, List<Booking>>()
+                CategoryList = allCategories.Select(c => new SelectListItem
+                {
+                    Value = c.Id,
+                    Text = c.Name
+                }).ToList()
             };
 
             return View(vm);
         }
 
+        // POST: Create Booking
         [HttpPost]
-        public IActionResult Create(BookingIndexVM vm)
+        [Authorize(Roles = "MEMBER")]
+        [ValidateAntiForgeryToken]
+        public IActionResult Create(BookingCreateVM vm)
         {
-            // 这里处理提交逻辑 (System Auto-Assign)
-            // 暂时重定向回 Index
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId)) return RedirectToAction("Login", "Account");
+
+            DateTime reqStart = vm.BookingDate.Date + vm.StartTime;
+            DateTime reqEnd = vm.BookingDate.Date + vm.EndTime;
+
+            if (reqStart < DateTime.Now)
+            {
+                ModelState.AddModelError("StartTime", "Start time must be in the future.");
+            }
+
+            if (reqEnd <= reqStart)
+            {
+                ModelState.AddModelError("EndTime", "End time must be after start time.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                ReloadViewData(vm);
+                TempData["Error"] = "Please check your time selection.";
+                return View("Index", vm);
+            }
+
+            var occupiedRoomIds = db.Bookings
+                .Where(b => b.Status != BookingStatus.CANCELLED) 
+                .Where(b => reqStart < b.EndTime && b.StartTime < reqEnd) 
+                .Select(b => b.RoomId);
+
+            var availableRoom = db.Rooms
+                .Where(r => r.RoomCategoryId == vm.RoomCategoryId)
+                .Where(r => r.Status == RoomStatus.AVAILABLE)
+                .Where(r => !occupiedRoomIds.Contains(r.Id))
+                .FirstOrDefault();
+
+            if (availableRoom == null)
+            {
+
+                TempData["Error"] = "No rooms available for this specific time slot.";
+                ReloadViewData(vm);
+                return View("Index", vm);
+            }
+
+            var category = db.RoomCategories.Find(vm.RoomCategoryId);
+            decimal hours = (decimal)(reqEnd - reqStart).TotalHours;
+            decimal totalPrice = hours * category.HourlyRate;
+
+            var newBooking = new Booking
+            {
+                Id = GenerateBookingId(),
+                RoomId = availableRoom.Id,
+                UserId = userId,
+
+                BookingDate = DateTime.Now,
+
+                StartTime = reqStart,
+                EndTime = reqEnd,
+
+                TotalPrice = totalPrice,
+                Status = BookingStatus.PENDING
+            };
+
+            db.Bookings.Add(newBooking);
+            db.SaveChanges();
+
+            TempData["Success"] = "Booking created successfully!";
             return RedirectToAction("Index");
+        }
+
+        private void ReloadViewData(BookingCreateVM vm)
+        {
+            var allCategories = db.RoomCategories.OrderBy(c => c.Id).ToList();
+            ViewBag.Categories = allCategories;
+            vm.CategoryList = allCategories.Select(c => new SelectListItem
+            {
+                Value = c.Id,
+                Text = c.Name
+            }).ToList();
+        }
+
+        public IActionResult BookingHistory()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var list = db.Bookings.Include(b => b.Room).ThenInclude(r => r.RoomCategory)
+                         .Where(b => b.UserId == userId).OrderByDescending(b => b.BookingDate).ToList();
+            return View(list);
+        }
+
+        [HttpPost]
+        public IActionResult Cancel(string id)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var booking = db.Bookings.FirstOrDefault(b => b.Id == id && b.UserId == userId);
+
+            if (booking != null && booking.Status != BookingStatus.COMPLETED && booking.Status != BookingStatus.CANCELLED)
+            {
+                booking.Status = BookingStatus.CANCELLED;
+                booking.CancelledAt = DateTime.Now;
+                db.SaveChanges();
+                TempData["Success"] = "Booking cancelled.";
+            }
+            return RedirectToAction("BookingHistory");
+        }
+
+        private string GenerateBookingId()
+        {
+            var lastId = db.Bookings.OrderByDescending(b => b.Id).Select(b => b.Id).FirstOrDefault();
+            if (string.IsNullOrEmpty(lastId)) return "B00001";
+            if (lastId.Length >= 6 && int.TryParse(lastId.Substring(1), out int num)) return "B" + (num + 1).ToString("D5");
+            return "B" + Guid.NewGuid().ToString("N").Substring(0, 5).ToUpper();
         }
     }
 }

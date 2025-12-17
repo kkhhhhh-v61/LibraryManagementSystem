@@ -1,21 +1,14 @@
-﻿@model BookingIndexVM
+﻿@model BookingCreateVM
 @{
-    ViewBag.Title = "Book a Room";
+    ViewBag.Title = "New Booking";
 
-    var activeCategory = Model.Categories.FirstOrDefault(c => c.Id == Model.CurrentCategoryId);
-    var dateString = Model.BookingDate.ToString("yyyy-MM-dd");
+    var allCategories = ViewBag.Categories as List<RoomCategory>;
+    var activeCat = allCategories?.FirstOrDefault(c => c.Id == Model.RoomCategoryId);
 
-    string imgName = activeCategory?.ImageURL;
-    string imgSrc;
-
-    if (string.IsNullOrEmpty(imgName))
-    {
-        imgSrc = "https://placehold.co/1200x800/e2e8f0/64748b?text=No+Image+Uploaded";
-    }
-    else
-    {
-        imgSrc = $"/images/categories/{imgName}?v={DateTime.Now.Ticks}";
-    }
+    string imgName = activeCat?.ImageURL;
+    string imgSrc = string.IsNullOrEmpty(imgName)
+        ? "https://placehold.co/1200x900/e2e8f0/64748b?text=Select+Category"
+        : $"/images/categories/{imgName}?v={DateTime.Now.Ticks}";
 }
 
 @section head {
@@ -23,101 +16,89 @@
     <link href="~/css/booking.css" rel="stylesheet" asp-append-version="true" />
 }
 
-<div class="booking-page-wrapper">
 
-    <div class="category-header">
-        <div class="category-label">Choose Room Type</div>
-        <div class="category-scroll-container">
-            <div class="category-track" id="categoryTrack">
-                @foreach (var cat in Model.Categories)
-                {
-                    bool isActive = cat.Id == Model.CurrentCategoryId;
+<div class="dashboard-container">
 
-                    <a href="?categoryId=@cat.Id&date=@dateString"
-                       class="cat-card @(isActive ? "active" : "")"
-                       id="cat-@cat.Id">
-                        <span class="cat-name">@cat.Name</span>
-                    </a>
-                }
-            </div>
-        </div>
-    </div>
+    <div class="booking-card">
 
-    <div class="main-content">
+        <div class="layout-left-img">
+            <img src="@imgSrc" class="img-cover"
+                 onerror="this.onerror=null; this.src='https://placehold.co/1200x900/e2e8f0/64748b?text=Image+Error';" />
 
-        <div class="visual-section">
-
-            <div class="price-floater">
-                <span class="curr">RM</span>
-                <span class="val">@(activeCategory?.HourlyRate.ToString("F2") ?? "0.00")</span>
-                <span class="unit">/ hr</span>
-            </div>
-
-            <img src="@imgSrc"
-                 alt="@activeCategory?.Name"
-                 class="room-bg"
-                 onerror="this.onerror=null; this.src='https://placehold.co/1200x800/f1f5f9/94a3b8?text=Image+Not+Found';" />
-
-            <div class="info-overlay">
-                <h1 class="info-title">@activeCategory?.Name</h1>
-                <p class="info-desc">
-                    @(string.IsNullOrEmpty(activeCategory?.Description)
-                                        ? "A perfect space for your needs. Book now to secure your slot."
-                                        : activeCategory.Description)
-                </p>
+            <div class="img-overlay">
+                <div class="overlay-title">@(activeCat?.Name ?? "Book a Room")</div>
+                <div class="overlay-desc">
+                    @(string.IsNullOrEmpty(activeCat?.Description) ? "Select a category to view pricing and details." : activeCat.Description)
+                </div>
             </div>
         </div>
 
-        <div class="form-section">
-            <div class="form-head">
-                <h3>Make a Room Reservation</h3>
-                <p>Select your date and time (09:00 - 21:00)</p>
+        <div class="layout-right-form">
+
+            <div class="form-content-wrapper">
+
+                <div class="form-header">
+                    <h2>New Reservation</h2>
+                    <p>Please fill in the details below to book your slot.</p>
+                </div>
+
+                <form asp-action="Create" method="post">
+                    <input type="hidden" id="hourlyRate" value="@(activeCat?.HourlyRate ?? 0)" />
+
+                    <div class="form-group">
+                        <label class="form-label">Room Category</label>
+                        <select asp-for="RoomCategoryId" asp-items="Model.CategoryList" class="form-input"
+                                onchange="window.location.href='?date=@Model.BookingDate.ToString("yyyy-MM-dd")&roomCategoryId=' + this.value">
+                            <option value="">-- Select Category --</option>
+                        </select>
+                        <span asp-validation-for="RoomCategoryId" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Date</label>
+                        <input asp-for="BookingDate" class="form-input"
+                               min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                        <span asp-validation-for="BookingDate" class="text-danger"></span>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label class="form-label">Start Time</label>
+                            <input asp-for="StartTime" type="time" id="inputStart" class="form-input" onchange="calculateTotal()" />
+                            <span asp-validation-for="StartTime" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">End Time</label>
+                            <input asp-for="EndTime" type="time" id="inputEnd" class="form-input" onchange="calculateTotal()" />
+                            <span asp-validation-for="EndTime" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div style="font-size:0.85rem; color:var(--warning); font-weight:600; margin-bottom:20px; display:flex; align-items:center; gap:5px;">
+                        <span>
+                            <svg xmlns="http://www.w3.org/2000/svg" height="25px" viewBox="0 -960 960 960" width="40px" fill="#0000F5"><path d="m622-288.67 48.67-48.66-155.34-156v-195.34h-66.66v222l173.33 178ZM480-80q-82.33 0-155.33-31.5-73-31.5-127.34-85.83Q143-251.67 111.5-324.67T80-480q0-82.33 31.5-155.33 31.5-73 85.83-127.34Q251.67-817 324.67-848.5T480-880q82.33 0 155.33 31.5 73 31.5 127.34 85.83Q817-708.33 848.5-635.33T880-480q0 82.33-31.5 155.33-31.5 73-85.83 127.34Q708.33-143 635.33-111.5T480-80Zm0-400Zm0 333.33q137.67 0 235.5-97.83 97.83-97.83 97.83-235.5 0-137.67-97.83-235.5-97.83-97.83-235.5-97.83-137.67 0-235.5 97.83-97.83 97.83-97.83 235.5 0 137.67 97.83 235.5 97.83 97.83 235.5 97.83Z" /></svg>
+                        </span> Operating Hours: 09:00 - 21:00
+                    </div>
+
+                    <div class="cost-box">
+                        <div class="cost-row">
+                            <span>Hourly Rate</span>
+                            <span>RM @(activeCat?.HourlyRate.ToString("F2") ?? "0.00") / hr</span>
+                        </div>
+                        <div class="cost-row">
+                            <span>Duration</span>
+                            <span><span id="displayDuration">0.0</span> hrs</span>
+                        </div>
+                        <div class="cost-total">
+                            <span>Total Estimate</span>
+                            <span>RM <span id="displayPrice">0.00</span></span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-save">Confirm Booking</button>
+                </form>
+
             </div>
-
-            <form asp-action="Create" method="post" class="booking-form">
-
-                <input type="hidden" asp-for="RoomCategoryId" value="@Model.CurrentCategoryId" />
-                <input type="hidden" id="hourlyRate" value="@(activeCategory?.HourlyRate ?? 0)" />
-
-                <div class="field-group">
-                    <label>Date</label>
-                    <input asp-for="BookingDate" type="date" id="inputDate" class="field-input"
-                           min="@DateTime.Today.ToString("yyyy-MM-dd")" />
-                    <span asp-validation-for="BookingDate" class="val-error"></span>
-                </div>
-
-                <div class="row-split">
-                    <div class="field-group">
-                        <label>Start Time</label>
-                        <input asp-for="StartTime" type="time" id="inputStart" class="field-input"
-                               min="09:00" max="21:00" onchange="calculateTotal()" />
-                        <span asp-validation-for="StartTime" class="val-error"></span>
-                    </div>
-                    <div class="field-group">
-                        <label>End Time</label>
-                        <input asp-for="EndTime" type="time" id="inputEnd" class="field-input"
-                               min="09:00" max="21:00" onchange="calculateTotal()" />
-                        <span asp-validation-for="EndTime" class="val-error"></span>
-                    </div>
-                </div>
-                <div class="op-hours">⚠️ Operating Hours: 9 AM - 9 PM</div>
-
-                <div class="estimate-box">
-                    <div class="est-row">
-                        <span>Duration</span>
-                        <span><span id="displayDuration">0</span> hrs</span>
-                    </div>
-                    <div class="est-row final">
-                        <span class="est-label">Total Estimate</span>
-                        <span class="est-amount">RM <span id="displayPrice">0.00</span></span>
-                    </div>
-                </div>
-
-                <button type="submit" class="btn-book">
-                    Confirm Booking
-                </button>
-
-            </form>
         </div>
     </div>
 </div>
@@ -126,38 +107,29 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    <script src="~/js/booking.js" asp-append-version="true"></script>
 
     <script>
-        function calculateTotal() {
-            const startVal = document.getElementById('inputStart').value;
-            const endVal = document.getElementById('inputEnd').value;
-            const rate = parseFloat(document.getElementById('hourlyRate').value) || 0;
-
-            if (startVal && endVal) {
-                const base = "2000-01-01T";
-                const s = new Date(base + startVal);
-                const e = new Date(base + endVal);
-
-                let diffMs = e - s;
-                let hours = diffMs / 1000 / 60 / 60;
-
-                if (hours < 0) hours = 0;
-
-                document.getElementById('displayDuration').innerText = hours.toFixed(1);
-
-                const total = hours * rate;
-                document.getElementById('displayPrice').innerText = total.toFixed(2);
-            } else {
-                document.getElementById('displayDuration').innerText = "0";
-                document.getElementById('displayPrice').innerText = "0.00";
+        $(document).ready(function () {
+            @if (TempData["Success"] != null)
+            {
+                    <text>
+                        showToast('@TempData["Success"]', 'success');
+                    </text>
             }
-        }
 
-        document.addEventListener("DOMContentLoaded", function() {
-            calculateTotal();
-            const activeCard = document.querySelector('.cat-card.active');
-            if (activeCard) {
-                activeCard.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            @if (TempData["Error"] != null)
+            {
+                    <text>
+                        showToast('@TempData["Error"]', 'error');
+                    </text>
+            }
+
+            @if (!ViewData.ModelState.IsValid && TempData["Error"] == null)
+            {
+                    <text>
+                        showToast('Please check input fields.', 'error');
+                    </text>
             }
         });
     </script>

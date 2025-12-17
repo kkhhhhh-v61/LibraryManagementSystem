@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using static LibraryManagementSystem.Models.Room;
+using static LibraryManagementSystem.Models.Booking;
 
 namespace LibraryManagementSystem.Models;
 
@@ -284,28 +285,26 @@ public class RoomUpdatePageVM
 
 
 /* -------------------- Booking ------------------ */
-public class BookingIndexVM : IValidatableObject
+public class BookingCreateVM : IValidatableObject
 {
-    public string RoomCategoryId { get; set; } 
+    [DisplayName("Room Category")]
+    [Required(ErrorMessage = "System Error: Room Category is missing.")]
+    public string RoomCategoryId { get; set; }
 
     [DisplayName("Date")]
-    [Required]
+    [Required(ErrorMessage = "Please select a date.")]
     [DataType(DataType.Date)]
     public DateTime BookingDate { get; set; } = DateTime.Today;
 
     [DisplayName("Start Time")]
-    [Required]
-    public DateTime StartTime { get; set; } 
+    [Required(ErrorMessage = "Please select a start time.")]
+    public TimeSpan StartTime { get; set; }
 
     [DisplayName("End Time")]
-    [Required]
-    public DateTime EndTime { get; set; }   
+    [Required(ErrorMessage = "Please select an end time.")]
+    public TimeSpan EndTime { get; set; }
 
-    public string CurrentCategoryId { get; set; } 
-    public List<RoomCategory> Categories { get; set; } = new(); 
-    public List<Room> CurrentCategoryRooms { get; set; } = new();
-
-    public Dictionary<string, List<Booking>> DailyBookings { get; set; } = new();
+    public List<SelectListItem> CategoryList { get; set; } = new();
 
     public int OpenHour { get; set; } = 9;
     public int CloseHour { get; set; } = 21;
@@ -313,13 +312,27 @@ public class BookingIndexVM : IValidatableObject
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
         if (BookingDate.Date < DateTime.Today)
-            yield return new ValidationResult("Cannot book past dates.", new[] { nameof(BookingDate) });
+            yield return new ValidationResult("Cannot book dates in the past.", new[] { nameof(BookingDate) });
 
-        if (StartTime.TimeOfDay >= EndTime.TimeOfDay)
-            yield return new ValidationResult("End Time must be later than Start Time.", new[] { nameof(EndTime) });
+        if (BookingDate.Date == DateTime.Today)
+        {
+            if (StartTime < DateTime.Now.TimeOfDay.Add(TimeSpan.FromMinutes(-1)))
+                yield return new ValidationResult("Start time has already passed.", new[] { nameof(StartTime) });
+        }
 
-        if (StartTime.Hour < OpenHour || EndTime.Hour > CloseHour)
-            yield return new ValidationResult($"Library hours are {OpenHour}:00 to {CloseHour}:00.", new[] { nameof(StartTime) });
+        if (EndTime <= StartTime)
+            yield return new ValidationResult("End time must be later than start time.", new[] { nameof(EndTime) });
+
+        TimeSpan duration = EndTime - StartTime;
+        if (duration.TotalHours > 2)
+            yield return new ValidationResult("Maximum booking duration is 2 hours.", new[] { nameof(EndTime) });
+        if (duration.TotalMinutes < 30)
+            yield return new ValidationResult("Minimum booking duration is 30 minutes.", new[] { nameof(EndTime) });
+
+        if (StartTime.Hours < OpenHour || StartTime.Hours >= CloseHour)
+            yield return new ValidationResult($"Operating hours: {OpenHour}:00 - {CloseHour}:00", new[] { nameof(StartTime) });
+
+        if (EndTime.TotalHours > CloseHour)
+            yield return new ValidationResult($"Library closes at {CloseHour}:00.", new[] { nameof(EndTime) });
     }
-
 }
