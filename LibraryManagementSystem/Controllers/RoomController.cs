@@ -44,6 +44,15 @@ namespace LibraryManagementSystem.Controllers
                 ModelState.AddModelError("CategoryInput.Name", "Category Name already exists.");
             }
 
+            if (vm.CategoryInput.Image != null)
+            {
+                var validationResult = Helper.ValidateImage(vm.CategoryInput.Image);
+                if (validationResult != System.ComponentModel.DataAnnotations.ValidationResult.Success)
+                {
+                    ModelState.AddModelError("CategoryInput.Image", validationResult.ErrorMessage!);
+                }
+            }
+
             if (ModelState.IsValid)
             {
                 string newId = GenerateNextId("Category");
@@ -51,13 +60,7 @@ namespace LibraryManagementSystem.Controllers
 
                 if (vm.CategoryInput.Image != null)
                 {
-                    string uploadFolder = Path.Combine(en.WebRootPath, "images", "categories");
-                    Directory.CreateDirectory(uploadFolder);
-                    uniqueFileName = Guid.NewGuid().ToString() + "_" + vm.CategoryInput.Image.FileName;
-                    using (var stream = new FileStream(Path.Combine(uploadFolder, uniqueFileName), FileMode.Create))
-                    {
-                        vm.CategoryInput.Image.CopyTo(stream);
-                    }
+                    uniqueFileName = Helper.SaveImage(vm.CategoryInput.Image, "categories", en.WebRootPath);
                 }
 
                 var newCategory = new RoomCategory
@@ -211,8 +214,6 @@ namespace LibraryManagementSystem.Controllers
             ModelState.Remove("CategoryDisplay.Id");
             ModelState.Remove("CategoryDisplay");
 
-            ModelState.Remove("CategoryUpdate.Image");
-
             ModelState.Remove("RoomUpdate.RoomId");
             ModelState.Remove("RoomUpdate.Name");
             ModelState.Remove("RoomUpdate.Location");
@@ -227,6 +228,15 @@ namespace LibraryManagementSystem.Controllers
                 ModelState.AddModelError("CategoryUpdate.Name", "Category Name already exists.");
             }
 
+            if (vm.CategoryUpdate.Image != null)
+            {
+                var validationResult = Helper.ValidateImage(vm.CategoryUpdate.Image);
+                if (validationResult != System.ComponentModel.DataAnnotations.ValidationResult.Success)
+                {
+                    ModelState.AddModelError("CategoryUpdate.Image", validationResult.ErrorMessage!);
+                }
+            }
+
             if (ModelState.IsValid)
             {
                 var existingCategory = db.RoomCategories.FirstOrDefault(c => c.Id == vm.CategoryUpdate.Id);
@@ -239,33 +249,35 @@ namespace LibraryManagementSystem.Controllers
 
                     if (vm.CategoryUpdate.Image != null)
                     {
-                        string uploadFolder = Path.Combine(en.WebRootPath, "images", "categories");
-                        Directory.CreateDirectory(uploadFolder);
-                        string uniqueFileName = Guid.NewGuid().ToString() + "_" + vm.CategoryUpdate.Image.FileName;
+                        string newFileName = Helper.SaveImage(vm.CategoryUpdate.Image, "categories", en.WebRootPath);
 
-                        using (var stream = new FileStream(Path.Combine(uploadFolder, uniqueFileName), FileMode.Create))
+                        if (!string.IsNullOrEmpty(existingCategory.ImageURL))
                         {
-                            vm.CategoryUpdate.Image.CopyTo(stream);
+                            string oldPath = Path.Combine(en.WebRootPath, "images", "categories", existingCategory.ImageURL);
+                            if (System.IO.File.Exists(oldPath))
+                            {
+                                System.IO.File.Delete(oldPath);
+                            }
                         }
 
-                        existingCategory.ImageURL = uniqueFileName;
+                        existingCategory.ImageURL = newFileName;
                     }
 
                     db.SaveChanges();
 
-                    TempData["Success"] = "Category details updated!";
+                    TempData["Success"] = "Category updated successfully!";
                     return RedirectToAction("Edit", new { id = vm.CategoryUpdate.Id });
                 }
             }
 
-            TempData["Error"] = "Failed to update category. Please check inputs.";
+            TempData["Error"] = "Failed to update category.";
 
             var categoryId = vm.CategoryUpdate.Id;
             var freshData = db.RoomCategories.Include(c => c.Rooms).FirstOrDefault(c => c.Id == categoryId);
-
             if (freshData != null)
             {
                 vm.CategoryDisplay = freshData;
+                vm.CategoryUpdate.ExistingImageURL = freshData.ImageURL;
             }
 
             return View("Edit", vm);
