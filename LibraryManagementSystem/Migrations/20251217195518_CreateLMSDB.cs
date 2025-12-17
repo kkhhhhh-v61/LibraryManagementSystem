@@ -202,7 +202,7 @@ namespace LibraryManagementSystem.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PasswordResetToken",
+                name: "PasswordResetTokens",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -214,9 +214,9 @@ namespace LibraryManagementSystem.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PasswordResetToken", x => x.Id);
+                    table.PrimaryKey("PK_PasswordResetTokens", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PasswordResetToken_Users_UserId",
+                        name: "FK_PasswordResetTokens_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
@@ -435,8 +435,8 @@ namespace LibraryManagementSystem.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PasswordResetToken_UserId",
-                table: "PasswordResetToken",
+                name: "IX_PasswordResetTokens_UserId",
+                table: "PasswordResetTokens",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
@@ -476,7 +476,7 @@ namespace LibraryManagementSystem.Migrations
                 name: "BookGenre");
 
             migrationBuilder.DropTable(
-                name: "PasswordResetToken");
+                name: "PasswordResetTokens");
 
             migrationBuilder.DropTable(
                 name: "Payments");

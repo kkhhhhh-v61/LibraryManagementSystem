@@ -26,45 +26,63 @@ public class LoginVM
 public class RegisterVM
 {
     [DisplayName("Username")]
+    // Prevents empty submissions
     [Required(ErrorMessage = "{0} is required.")]
-    [StringLength(50, MinimumLength = 3, ErrorMessage = "{0} must be between 3 and 50 characters.")]
+    // Enforces length constraints for database consistency
+    [StringLength(20, MinimumLength = 3, ErrorMessage = "{0} must be between 3 and 20 characters.")]
+    // Allow only: Letters (a-z), Numbers (0-9), and Underscores (_)
+    [RegularExpression(@"^[a-zA-Z0-9_]+$", ErrorMessage = "{0} can only contain letters, numbers, and underscores.")]
     public string Username { get; set; }
 
     [DisplayName("Password")]
     [Required(ErrorMessage = "{0} is required.")]
-    [StringLength(100, MinimumLength = 6, ErrorMessage = "{0} must be at least 6 characters long.")]
+    // Minimum 8 characters for security
+    [StringLength(100, MinimumLength = 8, ErrorMessage = "{0} must be at least 8 characters long.")]
+    // Strong Password Policy: Must contain 1 Upper, 1 Lower, 1 Digit, 1 Special Char
+    [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$",
+        ErrorMessage = "{0} must have 1 Uppercase, 1 Lowercase, 1 Number, and 1 Special Character.")]
+    // Hides the characters in the input field
     [DataType(DataType.Password)]
     public string Password { get; set; }
 
     [DisplayName("Confirm Password")]
     [Required(ErrorMessage = "{0} is required.")]
     [DataType(DataType.Password)]
+    // Ensures this field matches the 'Password' field exactly
     [Compare("Password", ErrorMessage = "Password and confirmation password do not match.")]
     public string ConfirmPassword { get; set; }
 
     [DisplayName("First Name")]
     [Required(ErrorMessage = "{0} is required.")]
     [StringLength(50, MinimumLength = 1, ErrorMessage = "{0} must be between 1 and 50 characters.")]
+    // Allow only: Letters, Spaces, and Hyphens (e.g. "Mary-Anne")
+    [RegularExpression(@"^[a-zA-Z\s\-]+$", ErrorMessage = "{0} can only contain letters.")]
     public string FirstName { get; set; }
 
     [DisplayName("Last Name")]
     [Required(ErrorMessage = "{0} is required.")]
     [StringLength(50, MinimumLength = 1, ErrorMessage = "{0} must be between 1 and 50 characters.")]
+    // Allow only: Letters, Spaces, and Hyphens
+    [RegularExpression(@"^[a-zA-Z\s\-]+$", ErrorMessage = "{0} can only contain letters.")]
     public string LastName { get; set; }
 
     [DisplayName("Email")]
     [Required(ErrorMessage = "{0} is required.")]
+    // Built-in check for basic format
     [EmailAddress(ErrorMessage = "Invalid Email Address.")]
+    // STRICT check: Requires @ symbol, domain name, and extension (like .com)
+    [RegularExpression(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", ErrorMessage = "Email must contain a valid domain (e.g., user@example.com).")]
     public string Email { get; set; }
 
     [DisplayName("Contact No.")]
     [Required(ErrorMessage = "{0} is required.")]
-    [RegularExpression(@"^\d{10,15}$", ErrorMessage = "{0} must be a valid phone number (10-15 digits).")]
+    // Flexible Phone Format: Supports optional country code (+), brackets (), and dashes (-)
+    [RegularExpression(@"^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$",
+        ErrorMessage = "Please enter a valid phone number (e.g., 012-3456789).")]
     public string ContactNo { get; set; }
 
-    // --- NEW ADDITION ---
-    // This is required to receive the file from the View
     [DisplayName("Profile Photo")]
+    // Custom validation logic for file type/size is handled in the Controller/Helper
     public IFormFile? ProfilePhoto { get; set; }
 }
 

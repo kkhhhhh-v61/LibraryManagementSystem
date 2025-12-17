@@ -21,6 +21,7 @@ public class LMSDB(DbContextOptions options) : DbContext(options)
     public DbSet<Payment> Payments { get; set; }
     public DbSet<Fine> Fines { get; set; }
     public DbSet<Booking> Bookings { get; set; }
+    public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
 
 }
 

@@ -1,8 +1,9 @@
 ﻿@model LibraryManagementSystem.Models.RegisterVM
-
 @{
     ViewData["Title"] = "Register";
 }
+
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
 <div class="auth-wrapper">
     <div class="auth-card">
@@ -11,7 +12,7 @@
             <p class="auth-subtitle">Start your journey with BookBase.</p>
         </div>
 
-        <form asp-controller="Account" asp-action="Register" method="post" enctype="multipart/form-data" autocomplete="off">
+        <form id="registerForm" asp-controller="Account" asp-action="Register" method="post" enctype="multipart/form-data" autocomplete="off">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
             <div style="display: flex; gap: 15px;">
@@ -50,6 +51,7 @@
                 <input asp-for="ProfilePhoto" type="file" class="auth-input" accept="image/*" style="padding-top: 10px;" />
                 <span asp-validation-for="ProfilePhoto" class="text-danger"></span>
             </div>
+
             <div class="auth-group">
                 <label asp-for="Password" class="auth-label">Password</label>
                 <div class="password-wrapper">
@@ -68,6 +70,12 @@
                 <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
             </div>
 
+            <div class="auth-group" id="recaptcha-container" style="display: inline-block; border-radius: 4px;">
+                <div class="g-recaptcha" data-sitekey="6LcE1C4sAAAAAMdvUuiRI8GX6Nz-7b_AQMHNaedS"></div>
+            </div>
+
+            <div class="text-danger mb-3">@TempData["CaptchaError"]</div>
+
             <button type="submit" class="auth-btn">Create Account</button>
         </form>
 
@@ -81,4 +89,6 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script src="~/js/app.js"></script>
 }

@@ -153,6 +153,7 @@
     <script src="/js/jquery.validate.min.js" asp-append-version="true"></script>
     <script src="/js/jquery.validate.unobtrusive.min.js" asp-append-version="true"></script>
     <script src="/js/app.js" asp-append-version="true"></script>
+    <script src="/js/app.js" asp-append-version="true"></script>
     @await RenderSectionAsync("foot", false)
     @await RenderSectionAsync("Scripts", required: false)
 
@@ -160,22 +161,11 @@
     {
         <script>
             document.addEventListener("DOMContentLoaded", function () {
-                var isBackNavigation = false;
-                if (window.performance && window.performance.getEntriesByType) {
-                    var navEntries = window.performance.getEntriesByType("navigation");
-                    if (navEntries.length > 0 && navEntries[0].type === "back_forward") {
-                        isBackNavigation = true;
-                    }
-                } else if (window.performance && window.performance.navigation) {
-                    if (window.performance.navigation.type === 2) {
-                        isBackNavigation = true;
-                    }
-                }
-                if (!isBackNavigation) {
-                    var message = @Json.Serialize(TempData["ToastMessage"]);
-                    var type = @Json.Serialize(TempData["ToastType"]);
-                    showToast(message, type);
-                }
+                // Pass the data from Server (Razor) to Client (JS Function)
+                window.showToastOnLoad(
+                    @Json.Serialize(TempData["ToastMessage"]),
+                    @Json.Serialize(TempData["ToastType"])
+                );
             });
         </script>
     }

@@ -66,7 +66,7 @@ window.showToast = (message, type = "info", duration = 5000) => {
         hideToast();
     });
 };
-// Toggle Password Visibility
+    // Toggle Password Visibility
 function togglePassword(inputId, icon) {
     var input = document.getElementById(inputId);
 
@@ -80,3 +80,63 @@ function togglePassword(inputId, icon) {
         icon.classList.add("fa-eye");
     }
 }
+/**
+ * Checks if the page was loaded via a "Back" button.
+ * If not, it displays the toast.
+ */
+window.showToastOnLoad = (message, type) => {
+    let isBackNavigation = false;
+
+    // Check performance entries
+    if (window.performance && window.performance.getEntriesByType) {
+        const navEntries = window.performance.getEntriesByType("navigation");
+        if (navEntries.length > 0 && navEntries[0].type === "back_forward") {
+            isBackNavigation = true;
+        }
+    }
+    // Fallback for older browsers
+    else if (window.performance && window.performance.navigation) {
+        if (window.performance.navigation.type === 2) {
+            isBackNavigation = true;
+        }
+    }
+
+    // Only show if it's a fresh load
+    if (!isBackNavigation && message) {
+        window.showToast(message, type);
+    }
+};
+// 2. reCAPTCHA Shake Logic
+document.addEventListener("DOMContentLoaded", function () {
+
+    // Find the form
+    var registerForm = document.getElementById("registerForm");
+
+    // Only run this code if the form actually exists on this page
+    if (registerForm) {
+
+        registerForm.addEventListener("submit", function (event) {
+
+            // Check if reCAPTCHA is ticked
+            // Note: grecaptcha is a global object provided by Google's script
+            var captchaResponse = grecaptcha.getResponse();
+
+            if (captchaResponse.length === 0) {
+                // STOP the form submission
+                event.preventDefault();
+
+                // Find the box
+                var container = document.getElementById("recaptcha-container");
+
+                // Add shake class
+                container.classList.add("shake-error");
+
+                // Remove shake class after 0.4s (so it can be triggered again)
+                setTimeout(function () {
+                    container.classList.remove("shake-error");
+                }, 400);
+            }
+        });
+    }
+});
+

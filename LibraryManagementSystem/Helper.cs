@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using SixLabors.ImageSharp;
+using System.Text.Json;
 
 namespace LibraryManagementSystem;
 
@@ -112,7 +113,7 @@ public static class Helper
 
             return null;
         }
-        
+
         private static ValidationResult? ValidateISBN10(string isbn)
         {
             int sum = 0;
@@ -149,6 +150,23 @@ public static class Helper
             }
 
             return null;
+        }
+    }
+    //ReCaptcha Implementation
+    public static async Task<bool> VerifyReCaptcha(string responseToken, string secretKey)
+    {
+        if (string.IsNullOrEmpty(responseToken)) return false;
+
+        using (var client = new HttpClient())
+        {
+            var response = await client.GetStringAsync(
+                $"https://www.google.com/recaptcha/api/siteverify?secret={secretKey}&response={responseToken}");
+
+            using (var document = JsonDocument.Parse(response))
+            {
+                // Check if "success" is true
+                return document.RootElement.GetProperty("success").GetBoolean();
+            }
         }
     }
 }

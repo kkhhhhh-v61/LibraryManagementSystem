@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LibraryManagementSystem.Migrations
 {
     [DbContext(typeof(LMSDB))]
-    [Migration("20251216170241_CreateLMSDB")]
+    [Migration("20251217195518_CreateLMSDB")]
     partial class CreateLMSDB
     {
         /// <inheritdoc />
@@ -320,7 +320,7 @@ namespace LibraryManagementSystem.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("PasswordResetToken");
+                    b.ToTable("PasswordResetTokens");
                 });
 
             modelBuilder.Entity("LibraryManagementSystem.Models.Payment", b =>

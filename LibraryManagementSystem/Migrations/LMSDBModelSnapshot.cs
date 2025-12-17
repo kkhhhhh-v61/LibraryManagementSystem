@@ -317,7 +317,7 @@ namespace LibraryManagementSystem.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("PasswordResetToken");
+                    b.ToTable("PasswordResetTokens");
                 });
 
             modelBuilder.Entity("LibraryManagementSystem.Models.Payment", b =>
