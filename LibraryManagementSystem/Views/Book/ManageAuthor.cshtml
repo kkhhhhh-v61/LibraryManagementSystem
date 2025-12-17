@@ -28,9 +28,30 @@
                     <th class="table__cell table__cell--checkbox">
                         <input class="checkbox-styled" id="selectAll" type="checkbox" />
                     </th>
-                    <th class="table__cell">ID</th>
-                    <th class="table__cell" style="width: 100%;">Name</th>
-                    <th class="table__cell">Books</th>
+                    <th class="table__cell">
+                        <a class="sort-link" asp-action="ManageAuthor" asp-route-sortOrder="@ViewData["IdSortParm"]">
+                            ID
+                            @if (ViewData["CurrentSort"]?.ToString() == "id") { <span class="sort-icon">&uarr;</span> }
+                            else if (ViewData["CurrentSort"]?.ToString() == "id_desc") { <span class="sort-icon">&darr;</span> }
+                            else { <span class="sort-icon-faded">&Dagger;</span> }
+                        </a>
+                    </th>
+                    <th class="table__cell" style="width: 100%;">
+                        <a class="sort-link" asp-action="ManageAuthor" asp-route-sortOrder="@ViewData["NameSortParm"]">
+                            Name
+                            @if (string.IsNullOrEmpty(ViewData["CurrentSort"]?.ToString())) { <span class="sort-icon">&uarr;</span> }
+                            else if (ViewData["CurrentSort"]?.ToString() == "name_desc") { <span class="sort-icon">&darr;</span> }
+                            else { <span class="sort-icon-faded">&Dagger;</span> }
+                        </a>
+                    </th>
+                    <th class="table__cell">
+                        <a class="sort-link" asp-action="ManageAuthor" asp-route-sortOrder="@ViewData["CountSortParm"]">
+                            Books
+                            @if (ViewData["CurrentSort"]?.ToString() == "count") { <span class="sort-icon">&uarr;</span> }
+                            else if (ViewData["CurrentSort"]?.ToString() == "count_desc") { <span class="sort-icon">&darr;</span> }
+                            else { <span class="sort-icon-faded">&Dagger;</span> }
+                        </a>
+                    </th>
                     <th class="table__cell">Actions</th>
                 </tr>
             </thead>

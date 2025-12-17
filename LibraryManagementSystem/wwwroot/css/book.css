@@ -602,6 +602,29 @@
     background-color: var(--color-primary-light);
 }
 
+.sort-link {
+    color: var(--color-gray-700);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.sort-link:hover {
+    color: var(--color-primary-base);
+}
+
+.sort-icon {
+    transform: translateY(-2px);
+}
+
+.sort-icon-faded {
+    opacity: 0.3;
+    font-size: 0.8em;
+}
+
 .table__actions {
     display: flex;
     gap: var(--spacing-sm);
