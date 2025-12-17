@@ -30,7 +30,7 @@ $(document).ready(function () {
  * @param {string} type - 'success', 'error', 'warning', or 'info' (default).
  * @param {number} duration - Duration in ms (default 3000).
  */
-window.showToast = (message, type = "info", duration = 3000) => {
+window.showToast = (message, type = "info", duration = 5000) => {
     const $container = $("#toast-container");
 
     // 1. Create elements
@@ -80,4 +80,3 @@ function togglePassword(inputId, icon) {
         icon.classList.add("fa-eye");
     }
 }
-

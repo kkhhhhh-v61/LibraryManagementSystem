@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 
 namespace LibraryManagementSystem.Controllers;
 
@@ -170,13 +171,27 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
     [HttpPost]
     public IActionResult DeleteGenre(string id)
     {
-        var genre = db.Genres.Find(id);
+        // 1. Fetch Genres with all related Books
+        var genre = db.Genres
+                      .Include(g => g.Books)
+                      .FirstOrDefault(g => g.Id == id);
+
         if (genre != null)
         {
-            db.Genres.Remove(genre);
-            db.SaveChanges();
-            TempData["ToastMessage"] = $"Genre '{genre.Name}' deleted successfully.";
-            TempData["ToastType"] = "success";
+            // 2. Check if any books are linked to the genre
+            if (genre.Books.Count > 0)
+            {
+                TempData["ToastMessage"] = $"Cannot delete '{genre.Name}' because it is used by {genre.Books.Count} book(s).";
+                TempData["ToastType"] = "error";
+            }
+            else
+            {
+                // 3. No books linked, safe to delete
+                db.Genres.Remove(genre);
+                db.SaveChanges();
+                TempData["ToastMessage"] = $"Genre '{genre.Name}' deleted successfully.";
+                TempData["ToastType"] = "success";
+            }
         }
         else
         {
@@ -246,15 +261,30 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         return RedirectToAction("ManageAuthor");
     }
 
+    [HttpPost]
     public IActionResult DeleteAuthor(string id)
     {
-        var author = db.Authors.Find(id);
+        // 1. Fetch Authors with all related Books
+        var author = db.Authors
+                      .Include(a => a.Books)
+                      .FirstOrDefault(a => a.Id == id);
+
         if (author != null)
         {
-            db.Authors.Remove(author);
-            db.SaveChanges();
-            TempData["ToastMessage"] = $"Author '{author.Name}' deleted successfully.";
-            TempData["ToastType"] = "success";
+            // 2. Check if any books are linked to the genre
+            if (author.Books.Count > 0)
+            {
+                TempData["ToastMessage"] = $"Cannot delete '{author.Name}' because it is used by {author.Books.Count} book(s).";
+                TempData["ToastType"] = "error";
+            }
+            else
+            {
+                // 3. No books linked, safe to delete
+                db.Authors.Remove(author);
+                db.SaveChanges();
+                TempData["ToastMessage"] = $"Author '{author.Name}' deleted successfully.";
+                TempData["ToastType"] = "success";
+            }
         }
         else
         {
