@@ -30,7 +30,7 @@ $(document).ready(function () {
  * @param {string} type - 'success', 'error', 'warning', or 'info' (default).
  * @param {number} duration - Duration in ms (default 3000).
  */
-window.showToast = (message, type = "info", duration = 3000) => {
+window.showToast = (message, type = "info", duration = 5000) => {
     const $container = $("#toast-container");
 
     // 1. Create elements
@@ -66,3 +66,17 @@ window.showToast = (message, type = "info", duration = 3000) => {
         hideToast();
     });
 };
+// Toggle Password Visibility
+function togglePassword(inputId, icon) {
+    var input = document.getElementById(inputId);
+
+    if (input.type === "password") {
+        input.type = "text";
+        icon.classList.remove("fa-eye");
+        icon.classList.add("fa-eye-slash");
+    } else {
+        input.type = "password";
+        icon.classList.remove("fa-eye-slash");
+        icon.classList.add("fa-eye");
+    }
+}

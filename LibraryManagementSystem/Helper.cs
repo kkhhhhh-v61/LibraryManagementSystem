@@ -3,39 +3,50 @@ using SixLabors.ImageSharp;
 
 namespace LibraryManagementSystem;
 
-public class Helper
+public static class Helper
 {
     public static ValidationResult ValidateImage(IFormFile image)
     {
-        // 1. Check the file extension
-        string extension = Path.GetExtension(image.FileName).ToUpper();
-        if (extension != ".JPEG" && extension != ".JPG" && extension != ".PNG")
+        // 1. Check File Extension
+        string extension = Path.GetExtension(image.FileName);
+        string[] allowedExtensions = { ".jpg", ".jpeg", ".png" };
+
+        if (!allowedExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
         {
             return new ValidationResult("Only JPEG, JPG, and PNG files are allowed.");
         }
 
-        // 2. Check the file content type
-        if (image.ContentType == null || !image.ContentType.StartsWith("image/"))
+        // 2. Check MIME Type
+        if (image.ContentType is null || !image.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
         {
             return new ValidationResult("The file must be an image.");
         }
 
-        // 3. Check the file size
+        // 3. Check File Size (1MB Limit)
         if (image.Length > 1 * 1024 * 1024)
         {
-            return new ValidationResult("The file size cannot be more than 1MB.");
+            return new ValidationResult("The file size cannot exceed 1MB.");
         }
 
-        // 4. Check the file type using magic bytes
-        byte[] magicBytes = [0xFF, 0xD8, 0xFF];
-        byte[] imageBytes = new byte[magicBytes.Length];
-        using (var stream = image.OpenReadStream())
+        // 4. Check Magic Bytes
+        try
         {
-            stream.ReadExactly(imageBytes, 0, magicBytes.Length);
+            using var stream = image.OpenReadStream();
+            byte[] header = new byte[3];
+            stream.ReadExactly(header, 0, 3);
+
+            // Valid Signatures
+            bool isJpeg = header[0] == 0xFF && header[1] == 0xD8 && header[2] == 0xFF;
+            bool isPng = header[0] == 0x89 && header[1] == 0x50 && header[2] == 0x4E;
+
+            if (!isJpeg && !isPng)
+            {
+                return new ValidationResult("The file signature is invalid.");
+            }
         }
-        if (!magicBytes.SequenceEqual(imageBytes))
+        catch
         {
-            return new ValidationResult("The file must be a valid image.");
+            return new ValidationResult("Cannot read file stream.");
         }
 
         return ValidationResult.Success!;
@@ -43,129 +54,101 @@ public class Helper
 
     public static string SaveImage(IFormFile image, string folder, string webRootPath)
     {
-        // 1. Generate a GUID file name and force the extension to .jpg
+        // 1. Generate unique filename
         string filename = Guid.NewGuid().ToString("N") + ".jpg";
 
-        // 2. Create the full file path
+        // 2. Paths
         string folderPath = Path.Combine(webRootPath, "images", folder);
         string fullPath = Path.Combine(folderPath, filename);
 
-        // 3. Ensure directory exists
-        if (!Directory.Exists(folderPath))
-        {
-            Directory.CreateDirectory(folderPath);
-        }
+        // 3. Create Directory
+        Directory.CreateDirectory(folderPath);
 
-        // 4. Save the Image
-        using (var stream = image.OpenReadStream())
-        using (var img = Image.Load(stream))
-        {
-            img.Save(fullPath);
-        }
+        // 4. Save and Re-encode
+        using var stream = image.OpenReadStream();
+        using var img = Image.Load(stream);
+        img.Save(fullPath);
 
         return filename;
     }
-}
 
-public class ISBNValidationAttribute : ValidationAttribute
-{
-    protected override ValidationResult IsValid(object? value, ValidationContext validationContext)
+    public class ISBNValidationAttribute : ValidationAttribute
     {
-        if (value == null) return ValidationResult.Success!;
-
-        string isbn = value.ToString()!;
-
-        // 1. Remove hyphens and spaces to get raw numbers
-        string cleanIsbn = isbn.Replace("-", "").Trim().Replace(" ", "").ToUpper();
-
-        // 2. Check Length
-        if (cleanIsbn.Length != 10 && cleanIsbn.Length != 13)
+        protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
         {
-            return new ValidationResult("ISBN must be exactly 10 or 13 digits.");
-        }
+            if (value is not string isbn) return ValidationResult.Success!;
 
-        // 3. Route to corresponding algorithm validation
-        string? error = cleanIsbn.Length == 13
-                      ? ValidateISBN13(cleanIsbn)
-                      : ValidateISBN10(cleanIsbn);
+            // 1. Normalize
+            string cleanISBN = isbn.Replace("-", "").Trim().Replace(" ", "").ToUpper();
 
-        if (error != null)
-        {
-            return new ValidationResult(error);
-        }
-
-        return ValidationResult.Success!;
-    }
-
-    // Alhgorithm for ISBN-13 (mod 10)
-    private static string? ValidateISBN13(string isbn)
-    {
-        // 1. Check format for only digits
-        if (!long.TryParse(isbn, out _))
-        {
-            return "ISBN-13 must only contain digits.";
-        }
-
-        // 2. Checksum
-        int sum = 0;
-        for (int i = 0; i < 12; i++)
-        {
-            int digit = int.Parse(isbn[i].ToString());
-            // Weight 1 for even indices (0, 2, 4...), Weight 3 for odd indices (1, 3, 5...)
-            sum += (i % 2 == 0) ? digit * 1 : digit * 3;
-        }
-
-        int remainder = sum % 10;
-        int checkDigit = (10 - remainder) % 10;
-
-        if (checkDigit != int.Parse(isbn[12].ToString()))
-        {
-            return "The check digit (last digit) is mathematically incorrect.";
-        }
-
-        return null; // Success
-    }
-
-    // Algorithm for ISBN-10 (mod 11)
-    private static string? ValidateISBN10(string isbn)
-    {
-        // 1. Check format (first 9 characters must be digits)
-        for (int i = 0; i < 9; i++)
-        {
-            if (!char.IsDigit(isbn[i]))
+            // 2. Route Validation
+            return cleanISBN.Length switch
             {
-                return "The first 9 characters must be digits.";
+                13 => ValidateISBN13(cleanISBN) ?? ValidationResult.Success!,
+                10 => ValidateISBN10(cleanISBN) ?? ValidationResult.Success!,
+                _ => new ValidationResult("ISBN must be exactly 10 or 13 digits."),
+            };
+        }
+
+        private static ValidationResult? ValidateISBN13(string isbn)
+        {
+            if (!long.TryParse(isbn, out _)) return new ValidationResult("ISBN-13 must only contain digits.");
+
+            int sum = 0;
+            for (int i = 0; i < 12; i++)
+            {
+                int digit = isbn[i] - '0';
+                sum += (i % 2 == 0) ? digit : digit * 3;
             }
-        }
 
-        // 2. Check format (last character must be digit or 'X')
-        char lastChar = isbn[9];
-        if (lastChar != 'X' && !char.IsDigit(lastChar))
-        {
-            return "The last character must be a digit or 'X'.";
-        }
+            int remainder = sum % 10;
+            int checkDigit = (10 - remainder) % 10;
+            int actualCheckDigit = isbn[12] - '0';
 
-        // 3. Checksum
-        int sum = 0;
-        for (int i = 0; i < 9; i++)
-        {
-            sum += int.Parse(isbn[i].ToString()) * (10 - i);
-        }
+            if (checkDigit != actualCheckDigit)
+            {
+                return new ValidationResult("Invalid ISBN-13 checksum.");
+            }
 
-        if (lastChar == 'X')
-        {
-            sum += 10;
+            return null;
         }
-        else
+        
+        private static ValidationResult? ValidateISBN10(string isbn)
         {
-            sum += int.Parse(lastChar.ToString());
-        }
+            int sum = 0;
 
-        if (sum % 11 != 0)
-        {
-            return "The check digit (last digit) is mathematically incorrect.";
-        }
+            for (int i = 0; i < 9; i++)
+            {
+                char c = isbn[i];
+                if (!char.IsDigit(c)) return new ValidationResult("First 9 characters of ISBN-10 must be digits.");
 
-        return null; // Success
+                sum += (c - '0') * (10 - i);
+            }
+            
+            char lastChar = isbn[9];
+            int lastValue;
+
+            if (lastChar == 'X')
+            {
+                lastValue = 10;
+            }
+            else if (char.IsDigit(lastChar))
+            {
+                lastValue = lastChar - '0';
+            }
+            else
+            {
+                return new ValidationResult("Last character of ISBN-10 must be a digit or 'X'.");
+            }
+
+            sum += lastValue;
+
+            if (sum % 11 != 0)
+            {
+                return new ValidationResult("Invalid ISBN-10 checksum.");
+            }
+
+            return null;
+        }
     }
 }

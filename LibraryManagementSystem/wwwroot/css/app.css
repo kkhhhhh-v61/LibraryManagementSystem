@@ -18,8 +18,10 @@
 
     /* Brand Colors */
     --color-primary-base: #0080ff;
-    --color-primary-dark: #004080;
-    --color-primary-light: #80c0ff;
+    --color-primary-dark: #000d1a;
+    --color-primary-semi-dark: #005ab3;
+    --color-primary-semi-light: #4da6ff;
+    --color-primary-light: #e6f2ff;
 
     /* Functional Colors */
     --color-success: #22c55e;
@@ -129,7 +131,7 @@ body {
 .layout__header {
     flex-shrink: 0;
     background-color: var(--color-gray-100);
-    height: 100px;
+    height: 80px;
 }
 
 .layout__content {
@@ -349,7 +351,7 @@ body {
 
 .sidebar-subnav__link--active:hover {
     background-color: var(--color-gray-100);
-    color: var(--color-primary-dark);
+    color: var(--color-primary-semi-dark);
 }
 
 .sidebar-subnav__separator {
@@ -574,8 +576,8 @@ body {
     transition: background-color 0.2s ease;
     cursor: pointer;
     border-radius: 50%;
-    padding: 4px;
     background-color: transparent;
+    padding: 4px;
 }
 
 .toast__close:hover {
@@ -649,4 +651,46 @@ body {
     .layout__details {
         display: none;
     }
+}
+/* Header Button Styles */
+.header-main__actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.btn {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.2s;
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+}
+
+/* Register Button (Blue) */
+.btn-primary {
+    background-color: var(--color-primary-base);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--color-primary-dark);
+}
+
+/* Login Button (White/Gray) */
+.btn-secondary {
+    border: 1px solid var(--color-gray-300);
+    background-color: transparent;
+    color: var(--color-gray-700);
+}
+
+.btn-secondary:hover {
+    border-color: var(--color-gray-400);
+    background-color: var(--color-gray-100);
 }

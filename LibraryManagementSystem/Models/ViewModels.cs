@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using static LibraryManagementSystem.Helper;
 using static LibraryManagementSystem.Models.Room;
 using static LibraryManagementSystem.Models.Booking;
 
@@ -60,15 +61,21 @@ public class RegisterVM
     [Required(ErrorMessage = "{0} is required.")]
     [RegularExpression(@"^\d{10,15}$", ErrorMessage = "{0} must be a valid phone number (10-15 digits).")]
     public string ContactNo { get; set; }
+
+    // --- NEW ADDITION ---
+    // This is required to receive the file from the View
+    [DisplayName("Profile Photo")]
+    public IFormFile? ProfilePhoto { get; set; }
 }
+
+
 
 /* ------------------------------ TAN KAI HAO ------------------------------ */
 
 public class BookInsertVM
 {
+    [DisplayName("Cover Image")]
     public IFormFile? Image { get; set; }
-
-    public string? TempImage { get; set; }
 
     [Required(ErrorMessage = "{0} is required.")]
     [StringLength(255, ErrorMessage = "{0} must be between 1 and 255 characters.")]
@@ -105,13 +112,17 @@ public class BookInsertVM
 
     public List<SelectListItem> AuthorList { get; set; } = new();
 
+    [DisplayName("Featured")]
     public bool IsFeatured { get; set; } = false;
 
+    [DisplayName("Archived")]
     public bool IsArchived { get; set; } = false;
 }
 
 public class GenreVM
 {
+    public string? Id { get; set; }
+
     [DisplayName("Genre Name")]
     [Required(ErrorMessage = "{0} is required.")]
     [StringLength(50, MinimumLength = 3, ErrorMessage = "{0} must be between 3 and 50 characters.")]
@@ -120,19 +131,37 @@ public class GenreVM
     public string Name { get; set; }
 }
 
+public class GenreManagementVM
+{
+    public List<Genre> ExistingGenres { get; set; } = new();
+
+    public GenreVM Form { get; set; } = new();
+}
+
 
 public class AuthorVM
 {
+    public string? Id { get; set; }
+
     [DisplayName("Author Name")]
     [Required(ErrorMessage = "{0} is required.")]
     [StringLength(100, MinimumLength = 1, ErrorMessage = "{0} must be between 1 and 100 characters.")]
-    [RegularExpression(@"^[a-zA-Z]+(?:(?:[\s\-\']|\. ?)[a-zA-Z]+)*\.?$", 
+    [RegularExpression(@"^[a-zA-Z]+(?:(?:[\s\-\']|\. ?)[a-zA-Z]+)*\.?$",
     ErrorMessage = "{0} must start with a letter, and symbols (', -, .) must be between letters.")]
     public string Name { get; set; }
 }
 
+public class AuthorManagementVM
+{
+    public List<Author> ExistingAuthors { get; set; } = new();
+
+    public AuthorVM Form { get; set; } = new();
+}
+
+
 
 /* ------------------------------ JASON TYE HONG YI ------------------------------ */
+
 public class ReservationVM
 {
     [Display(Name = "Reservation ID")]
@@ -168,6 +197,8 @@ public class ReservationVM
     [DisplayName("Book")]
     public List<SelectListItem> BookList { get; set; } = new();
 }
+
+
 
 /* ------------------------------ BRIAN OOI SHU YI ------------------------------ */
 

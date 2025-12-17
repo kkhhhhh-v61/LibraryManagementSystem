@@ -218,9 +218,14 @@ namespace LibraryManagementSystem.Migrations
                         .HasPrecision(8, 2)
                         .HasColumnType("decimal(8,2)");
 
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(6)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("LoanId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Fines");
                 });
@@ -282,6 +287,37 @@ namespace LibraryManagementSystem.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Loans");
+                });
+
+            modelBuilder.Entity("LibraryManagementSystem.Models.PasswordResetToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("ExpiryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(6)
+                        .HasColumnType("nvarchar(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("PasswordResetToken");
                 });
 
             modelBuilder.Entity("LibraryManagementSystem.Models.Payment", b =>
@@ -456,10 +492,16 @@ namespace LibraryManagementSystem.Migrations
                         .HasMaxLength(15)
                         .HasColumnType("nvarchar(15)");
 
+                    b.Property<int>("CredibilityScore")
+                        .HasColumnType("int");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
+
+                    b.Property<int>("FailedLoginAttempts")
+                        .HasColumnType("int");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
@@ -467,14 +509,19 @@ namespace LibraryManagementSystem.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("ImageURL")
-                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
+
+                    b.Property<bool>("IsProfilePublic")
+                        .HasColumnType("bit");
 
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime?>("LockoutEnd")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
@@ -556,7 +603,7 @@ namespace LibraryManagementSystem.Migrations
                         .IsRequired();
 
                     b.HasOne("LibraryManagementSystem.Models.User", "User")
-                        .WithMany()
+                        .WithMany("Bookings")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -585,6 +632,10 @@ namespace LibraryManagementSystem.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("LibraryManagementSystem.Models.User", null)
+                        .WithMany("Fines")
+                        .HasForeignKey("UserId");
+
                     b.Navigation("Loan");
                 });
 
@@ -597,12 +648,23 @@ namespace LibraryManagementSystem.Migrations
                         .IsRequired();
 
                     b.HasOne("LibraryManagementSystem.Models.User", "User")
-                        .WithMany()
+                        .WithMany("Loans")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Copy");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("LibraryManagementSystem.Models.PasswordResetToken", b =>
+                {
+                    b.HasOne("LibraryManagementSystem.Models.User", "User")
+                        .WithMany("PasswordResetTokens")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -653,7 +715,7 @@ namespace LibraryManagementSystem.Migrations
                         .IsRequired();
 
                     b.HasOne("LibraryManagementSystem.Models.User", "User")
-                        .WithMany()
+                        .WithMany("Wishlists")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -676,6 +738,19 @@ namespace LibraryManagementSystem.Migrations
             modelBuilder.Entity("LibraryManagementSystem.Models.RoomCategory", b =>
                 {
                     b.Navigation("Rooms");
+                });
+
+            modelBuilder.Entity("LibraryManagementSystem.Models.User", b =>
+                {
+                    b.Navigation("Bookings");
+
+                    b.Navigation("Fines");
+
+                    b.Navigation("Loans");
+
+                    b.Navigation("PasswordResetTokens");
+
+                    b.Navigation("Wishlists");
                 });
 #pragma warning restore 612, 618
         }

@@ -11,30 +11,60 @@
             <p class="auth-subtitle">Start your journey with BookBase.</p>
         </div>
 
-        <form asp-controller="Account" asp-action="Register" method="post">
+        <form asp-controller="Account" asp-action="Register" method="post" enctype="multipart/form-data" autocomplete="off">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div style="display: flex; gap: 15px;">
+                <div class="auth-group" style="flex: 1;">
+                    <label asp-for="FirstName" class="auth-label">First Name</label>
+                    <input asp-for="FirstName" class="auth-input" placeholder="John" />
+                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                </div>
+                <div class="auth-group" style="flex: 1;">
+                    <label asp-for="LastName" class="auth-label">Last Name</label>
+                    <input asp-for="LastName" class="auth-input" placeholder="Doe" />
+                    <span asp-validation-for="LastName" class="text-danger"></span>
+                </div>
+            </div>
 
             <div class="auth-group">
                 <label asp-for="Username" class="auth-label">Username</label>
-                <input asp-for="Username" class="auth-input" placeholder="Choose a username" />
+                <input asp-for="Username" class="auth-input" placeholder="Enter your username" />
                 <span asp-validation-for="Username" class="text-danger"></span>
             </div>
 
             <div class="auth-group">
                 <label asp-for="Email" class="auth-label">Email Address</label>
-                <input asp-for="Email" type="email" class="auth-input" placeholder="name@company.com" />
+                <input asp-for="Email" type="email" class="auth-input" placeholder="name@domain.com" />
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>
 
             <div class="auth-group">
+                <label asp-for="ContactNo" class="auth-label">Contact Number</label>
+                <input asp-for="ContactNo" class="auth-input" placeholder="012-3456789" />
+                <span asp-validation-for="ContactNo" class="text-danger"></span>
+            </div>
+
+            <div class="auth-group">
+                <label asp-for="ProfilePhoto" class="auth-label">Profile Photo (Optional)</label>
+                <input asp-for="ProfilePhoto" type="file" class="auth-input" accept="image/*" style="padding-top: 10px;" />
+                <span asp-validation-for="ProfilePhoto" class="text-danger"></span>
+            </div>
+            <div class="auth-group">
                 <label asp-for="Password" class="auth-label">Password</label>
-                <input asp-for="Password" type="password" class="auth-input" placeholder="••••••••" />
+                <div class="password-wrapper">
+                    <input asp-for="Password" type="password" class="auth-input" id="passwordInput" placeholder="Password" style="padding-right: 40px;" autocomplete="new-password" />
+                    <i class="fa-solid fa-eye password-toggle" onclick="togglePassword('passwordInput', this)"></i>
+                </div>
                 <span asp-validation-for="Password" class="text-danger"></span>
             </div>
 
             <div class="auth-group">
                 <label asp-for="ConfirmPassword" class="auth-label">Confirm Password</label>
-                <input asp-for="ConfirmPassword" type="password" class="auth-input" placeholder="••••••••" />
+                <div class="password-wrapper">
+                    <input asp-for="ConfirmPassword" type="password" class="auth-input" id="confirmPasswordInput" placeholder="Confirm Password" style="padding-right: 40px;" autocomplete="new-password" />
+                    <i class="fa-solid fa-eye password-toggle" onclick="togglePassword('confirmPasswordInput', this)"></i>
+                </div>
                 <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
             </div>
 
