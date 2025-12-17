@@ -724,7 +724,7 @@
     display: none;
     color: var(--color-gray-600);
     font-weight: var(--weight-bold);
-    font-size: var(--text-md);
+    font-size: var(--text-lg);
     margin-right: var(--spacing-xs);
 }
 
