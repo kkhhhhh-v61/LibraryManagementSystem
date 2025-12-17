@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Hosting;
+using LMSUser = LibraryManagementSystem.Models.User; 
 
 namespace LibraryManagementSystem.Controllers
 {
@@ -19,8 +19,19 @@ namespace LibraryManagementSystem.Controllers
             _webHostEnvironment = webHostEnvironment;
         }
 
+        [HttpGet]
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
+
+        [HttpGet]
         public IActionResult Login()
         {
+            if (User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("AccessDenied", "Account");
+            }
             return View();
         }
 
@@ -33,29 +44,13 @@ namespace LibraryManagementSystem.Controllers
 
                 if (user != null && BCrypt.Net.BCrypt.Verify(model.Password, user.PasswordHash))
                 {
-                    // --- FIX 1: Use full name 'LibraryManagementSystem.Models.User' ---
-                    if (user.Status == LibraryManagementSystem.Models.User.UserStatus.LOCKED ||
-                        user.Status == LibraryManagementSystem.Models.User.UserStatus.INACTIVE)
+                    if (user.Status == LMSUser.UserStatus.LOCKED || user.Status == LMSUser.UserStatus.INACTIVE)
                     {
                         ModelState.AddModelError(string.Empty, "Account is locked or inactive.");
                         return View(model);
                     }
 
-                    var claims = new List<Claim>
-                    {
-                        new Claim(ClaimTypes.NameIdentifier, user.Id),
-                        new Claim(ClaimTypes.Name, user.Username),
-                        new Claim(ClaimTypes.Role, user.Role.ToString()),
-                        new Claim("ProfilePicture", user.ImageURL ?? "default-profile.png")
-
-                    };
-
-                    var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-
-                    await HttpContext.SignInAsync(
-                        CookieAuthenticationDefaults.AuthenticationScheme,
-                        new ClaimsPrincipal(claimsIdentity));
-
+                    await SignInUser(user);
                     return RedirectToAction("Index", "Home");
                 }
                 ModelState.AddModelError(string.Empty, "Invalid login attempt.");
@@ -63,8 +58,13 @@ namespace LibraryManagementSystem.Controllers
             return View(model);
         }
 
+        [HttpGet]
         public IActionResult Register()
         {
+            if (User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("AccessDenied", "Account");
+            }
             return View();
         }
 
@@ -73,19 +73,52 @@ namespace LibraryManagementSystem.Controllers
         {
             if (ModelState.IsValid)
             {
+                // specific validation checks
                 if (await _db.Users.AnyAsync(u => u.Username == model.Username))
                 {
                     ModelState.AddModelError("Username", "Username already exists.");
                     return View(model);
                 }
-
                 if (await _db.Users.AnyAsync(u => u.Email == model.Email))
                 {
                     ModelState.AddModelError("Email", "Email already exists.");
                     return View(model);
                 }
 
-                // IMAGE UPLOAD LOGIC
+                // ---------------------------------------------------------
+                // ID Generation Logic (Format: U00001, U00002...)
+                // ---------------------------------------------------------
+
+                // Retrieve the most recent user ID that matches the 'U' pattern
+                var lastUser = await _db.Users
+                    .Where(u => u.Id.StartsWith("U"))
+                    .OrderByDescending(u => u.Id)
+                    .FirstOrDefaultAsync();
+
+                string newUserId;
+
+                if (lastUser == null)
+                {
+                    // Initialize sequence if no previous users exist
+                    newUserId = "U00001";
+                }
+                else
+                {
+                    string numericPart = lastUser.Id.Substring(1);
+                    if (int.TryParse(numericPart, out int currentIdNum))
+                    {
+                        newUserId = "U" + (currentIdNum + 1).ToString("D5");
+                    }
+                    else
+                    {
+                        // Fallback to start of sequence if parsing fails
+                        newUserId = "U00001";
+                    }
+                }
+
+                // ---------------------------------------------------------
+                // Image Upload Logic
+                // ---------------------------------------------------------
                 string stringFileName = "default-profile.png";
 
                 if (model.ProfilePhoto != null)
@@ -102,9 +135,8 @@ namespace LibraryManagementSystem.Controllers
                     }
                 }
 
-                var newUserId = Guid.NewGuid().ToString().Substring(0, 6).ToUpper();
-
-                var user = new User
+                // Create new user entity
+                var user = new LMSUser
                 {
                     Id = newUserId,
                     Username = model.Username,
@@ -113,31 +145,16 @@ namespace LibraryManagementSystem.Controllers
                     LastName = model.LastName,
                     Email = model.Email,
                     ContactNo = model.ContactNo,
-                    // --- FIX 2: Use full name here as well ---
-                    Role = LibraryManagementSystem.Models.User.UserRole.MEMBER,
-                    Status = LibraryManagementSystem.Models.User.UserStatus.ACTIVE,
+                    Role = LMSUser.UserRole.MEMBER,
+                    Status = LMSUser.UserStatus.ACTIVE,
                     ImageURL = stringFileName
                 };
 
                 _db.Users.Add(user);
                 await _db.SaveChangesAsync();
 
-                // Auto Login
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.NameIdentifier, user.Id),
-                    new Claim(ClaimTypes.Name, user.Username),
-                    new Claim(ClaimTypes.Role, user.Role.ToString()),
-                    new Claim("ProfilePicture", user.ImageURL ?? "default-profile.png")
-                };
-
-
-                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-
-                await HttpContext.SignInAsync(
-                    CookieAuthenticationDefaults.AuthenticationScheme,
-                    new ClaimsPrincipal(claimsIdentity));
-
+                // Automatically sign in the user after registration
+                await SignInUser(user);
                 return RedirectToAction("Index", "Home");
             }
             return View(model);
@@ -149,6 +166,21 @@ namespace LibraryManagementSystem.Controllers
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Login", "Account");
+        }
+
+       
+        private async Task SignInUser(LMSUser user)
+        {
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Role, user.Role.ToString()),
+                new Claim("ProfilePicture", user.ImageURL ?? "default-profile.png")
+            };
+
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
         }
     }
 }
