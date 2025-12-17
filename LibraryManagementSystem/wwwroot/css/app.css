@@ -595,7 +595,6 @@ body {
     SECTION: RESPONSIVE DESIGN
     =========================================================================== */
 
-/* TODO: Adjust breakpoint later as needed */
 @media (max-width: 1024px) {
     .layout__sidebar {
         width: 90px;
@@ -652,6 +651,7 @@ body {
         display: none;
     }
 }
+
 /* Header Button Styles */
 .header-main__actions {
     display: flex;

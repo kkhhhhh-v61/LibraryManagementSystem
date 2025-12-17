@@ -1,24 +1,17 @@
-﻿document.documentElement.classList.add("js-enabled");
+﻿/* ===========================================================================
+   MULTI-SELECT DROPDOWN
+   =========================================================================== */
 
-document.addEventListener("DOMContentLoaded", () => {
-    if (sessionStorage.getItem("submissionSuccess") === "true") {
-        sessionStorage.removeItem("temp_image_data");
-        sessionStorage.removeItem("submissionSuccess");
-    }
-});
-
-document.addEventListener("DOMContentLoaded", () => {
-    const multiSelects = document.querySelectorAll(".field__multi-select");
-    multiSelects.forEach(loadMultiSelect);
-});
-
+/**
+ * Initializes a custom multi-select dropdown component.
+ * @param {HTMLElement} wrapper - The main container element for the multi-select component.
+ */
 function loadMultiSelect(wrapper) {
     const searchContainer = wrapper.querySelector(".multi-select__search");
     const searchInput = wrapper.querySelector(".search__input");
     const dropdown = wrapper.querySelector(".multi-select__dropdown");
     const select = wrapper.querySelector(".multi-select__select");
 
-    // Render chips and mark selected options
     Array.from(select.options).forEach((option) => {
         if (option.selected) {
             createChip(option.value, option.text);
@@ -29,19 +22,16 @@ function loadMultiSelect(wrapper) {
         }
     });
 
-    // Open dropdown when search input is focused
     searchInput.addEventListener("focus", () => {
         dropdown.classList.add("active");
     });
 
-    // Close dropdown when clicking outside
     document.addEventListener("click", (e) => {
         if (!wrapper.contains(e.target)) {
             dropdown.classList.remove("active");
         }
     });
 
-    // Filter dropdown options based on user input
     searchInput.addEventListener("input", (e) => {
         const term = e.target.value.toLowerCase();
         const options = dropdown.querySelectorAll(".dropdown__option");
@@ -54,14 +44,12 @@ function loadMultiSelect(wrapper) {
             if (isVisible) hasVisibleOptions = true;
         });
 
-        // Open dropdown if there are visible options
         dropdown.classList.toggle("active", hasVisibleOptions);
     });
 
-    // Select option when clicked
     dropdown.addEventListener("click", (e) => {
         const option = e.target.closest(".dropdown__option");
-        if (!option) return; // Not an option
+        if (!option) return;
 
         const value = option.dataset.value;
         const text = option.innerText;
@@ -75,7 +63,6 @@ function loadMultiSelect(wrapper) {
         searchInput.focus();
     });
 
-    // Remove chips when 'X' button is clicked
     searchContainer.addEventListener("click", (e) => {
         const removeButton = e.target.closest(".chip__remove");
         if (removeButton) {
@@ -83,7 +70,6 @@ function loadMultiSelect(wrapper) {
             const chip = removeButton.closest(".multi-select__chip");
             const value = chip.dataset.value;
 
-            // Find the corresponding option and un-highlight it
             const dropdownOption = dropdown.querySelector(
                 `.dropdown__option[data-value="${value}"]`
             );
@@ -92,20 +78,16 @@ function loadMultiSelect(wrapper) {
     });
 
     function toggleOption(value, text, option) {
-        // Find the actual option
         const selectOption = select.querySelector(`option[value="${value}"]`);
         if (!selectOption) return;
 
-        // Toggle selected state for actual option
         const isNowSelected = !selectOption.selected;
         selectOption.selected = isNowSelected;
 
         if (isNowSelected) {
-            // Add chip and highlight option
             createChip(value, text);
             option.classList.add("selected");
         } else {
-            // Remove chip and un-highlight option
             const chip = searchContainer.querySelector(
                 `.multi-select__chip[data-value="${value}"]`
             );
@@ -130,18 +112,20 @@ function loadMultiSelect(wrapper) {
     }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    const uploadWrappers = document.querySelectorAll(".upload__wrapper");
-    uploadWrappers.forEach(setupImageUpload);
-});
+/* ===========================================================================
+   IMAGE UPLOAD HANDLING
+   =========================================================================== */
 
+/**
+ * Sets up the image upload component with preview and session storage persistence.
+ * @param {HTMLElement} wrapper - The main container element for the upload component.
+ */
 function setupImageUpload(wrapper) {
     const input = wrapper.querySelector(".upload__input");
     const preview = wrapper.querySelector(".upload__preview");
     const removeButton = wrapper.querySelector(".upload__remove");
     const form = wrapper.closest("form");
     const STORAGE_KEY = "temp_image_data";
-
     input.addEventListener("change", (e) => {
         const file = e.target.files[0];
         handleFileUpdate(file);
@@ -169,7 +153,6 @@ function setupImageUpload(wrapper) {
     function handleFileUpdate(file) {
         if (!file) return;
 
-        // Read file and show preview
         const reader = new FileReader();
         reader.onload = (e) => {
             const base64String = e.target.result;
@@ -208,17 +191,16 @@ function setupImageUpload(wrapper) {
     }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    /*  ===========================================================================
-        BATCH DELETE
-        =========================================================================== */
+/* ===========================================================================
+   TABLE MANAGEMENT (MANAGE GENRE / AUTHOR)
+   =========================================================================== */
 
+function initializeTableManagement() {
     const selectAll = document.getElementById("selectAll");
     const rowCheckboxes = document.querySelectorAll(".row-checkbox");
     const batchButton = document.getElementById("batchDeleteButton");
     const batchForm = document.getElementById("batchForm");
     const selectionCountSpan = document.getElementById("selectionCount");
-
     if (selectAll && batchForm && batchButton) {
         const updateBatchButton = () => {
             const count = document.querySelectorAll(
@@ -239,7 +221,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         };
 
-        // 1. Select All Header Click
         selectAll.addEventListener("click", function () {
             const visibleRows = Array.from(rowCheckboxes).filter(
                 (cb) => cb.closest(".table__row").style.display !== "none"
@@ -251,7 +232,6 @@ document.addEventListener("DOMContentLoaded", () => {
             updateBatchButton();
         });
 
-        // 2. Individual Row Click
         rowCheckboxes.forEach((cb) => {
             cb.addEventListener("change", function () {
                 if (!this.checked) selectAll.checked = false;
@@ -267,7 +247,6 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
 
-        // 3. Batch Button Confirmation
         batchButton.addEventListener("click", function () {
             const count = document.querySelectorAll(
                 ".row-checkbox:checked"
@@ -284,13 +263,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    /*  ===========================================================================
-        EDIT MODAL
-        =========================================================================== */
-
     const editModal = document.getElementById("modal-edit");
-
-    if (!editModal) return;
 
     const modalTitle = editModal.querySelector(".modal__title");
     const formIdInput = editModal.querySelector("input[name='Form.Id']");
@@ -299,48 +272,47 @@ document.addEventListener("DOMContentLoaded", () => {
     const closeButton = editModal.querySelector(".js-close-modal");
     const cancelButton = editModal.querySelector(".js-cancel-modal");
 
-    openButtons.forEach((button) => {
-        button.addEventListener("click", () => {
-            const id = button.dataset.id;
-            const name = button.dataset.name;
-            const type = button.dataset.type;
+    if (editModal) {
+        openButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+                const id = button.dataset.id;
+                const name = button.dataset.name;
+                const type = button.dataset.type;
 
-            if (id) {
-                modalTitle.textContent = `Edit ${type}`;
-                formIdInput.value = id;
-                formNameInput.value = name;
-            } else {
-                modalTitle.textContent = `Add ${type}`;
-                formIdInput.value = "";
-                formNameInput.value = "";
+                if (id) {
+                    modalTitle.textContent = `Edit ${type}`;
+                    formIdInput.value = id;
+                    formNameInput.value = name;
+                } else {
+                    modalTitle.textContent = `Add ${type}`;
+                    formIdInput.value = "";
+                    formNameInput.value = "";
 
-                editModal
-                    .querySelectorAll(".field-validation-error")
-                    .forEach((el) => (el.innerHTML = ""));
-                editModal
-                    .querySelectorAll(".input-validation-error")
-                    .forEach((el) =>
-                        el.classList.remove("input-validation-error")
-                    );
-            }
-            editModal.classList.add("active");
+                    editModal
+                        .querySelectorAll(".field-validation-error")
+                        .forEach((el) => (el.innerHTML = ""));
+                    editModal
+                        .querySelectorAll(".input-validation-error")
+                        .forEach((el) =>
+                            el.classList.remove("input-validation-error")
+                        );
+                }
+                editModal.classList.add("active");
+            });
         });
-    });
 
-    const closeEditModal = () => editModal.classList.remove("active");
-    if (closeButton) closeButton.addEventListener("click", closeEditModal);
-    if (cancelButton) cancelButton.addEventListener("click", closeEditModal);
+        const closeEditModal = () => editModal.classList.remove("active");
+        if (closeButton) closeButton.addEventListener("click", closeEditModal);
+        if (cancelButton)
+            cancelButton.addEventListener("click", closeEditModal);
 
-    editModal.addEventListener("click", (e) => {
-        if (e.target === editModal) closeEditModal();
-    });
+        editModal.addEventListener("click", (e) => {
+            if (e.target === editModal) closeEditModal();
+        });
 
-    const shouldOpen = document.getElementById("server-modal-trigger");
-    if (shouldOpen) editModal.classList.add("active");
-
-    /*  ===========================================================================
-        DELETE MODAL
-        =========================================================================== */
+        const shouldOpen = document.getElementById("server-modal-trigger");
+        if (shouldOpen) editModal.classList.add("active");
+    }
 
     const deleteModal = document.getElementById("modal-delete");
 
@@ -352,37 +324,33 @@ document.addEventListener("DOMContentLoaded", () => {
     const closeDeleteButton = deleteModal.querySelector(".js-close-modal");
     const cancelDeleteButton = deleteModal.querySelector(".js-cancel-delete");
 
-    deleteButtons.forEach((button) => {
-        button.addEventListener("click", () => {
-            const id = button.dataset.id;
-            const name = button.dataset.name;
+    if (deleteModal) {
+        deleteButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+                const id = button.dataset.id;
+                const name = button.dataset.name;
 
-            deleteIdInput.value = id;
-            if (deleteNameDisplay) deleteNameDisplay.textContent = name;
+                deleteIdInput.value = id;
+                if (deleteNameDisplay) deleteNameDisplay.textContent = name;
 
-            deleteModal.classList.add("active");
+                deleteModal.classList.add("active");
+            });
         });
-    });
 
-    const closeDeleteModal = () => deleteModal.classList.remove("active");
+        const closeDeleteModal = () => deleteModal.classList.remove("active");
 
-    if (closeDeleteButton)
-        closeDeleteButton.addEventListener("click", closeDeleteModal);
-    if (cancelDeleteButton)
-        cancelDeleteButton.addEventListener("click", closeDeleteModal);
+        if (closeDeleteButton)
+            closeDeleteButton.addEventListener("click", closeDeleteModal);
+        if (cancelDeleteButton)
+            cancelDeleteButton.addEventListener("click", closeDeleteModal);
 
-    deleteModal.addEventListener("click", (e) => {
-        if (e.target === deleteModal) closeDeleteModal();
-    });
-});
+        deleteModal.addEventListener("click", (e) => {
+            if (e.target === deleteModal) closeDeleteModal();
+        });
+    }
 
-document.addEventListener("DOMContentLoaded", () => {
-    /* ===========================================================================
-        REAL-TIME SEARCH
-        =========================================================================== */
     const searchInput = document.getElementById("nameSearchInput");
     const tableBody = document.querySelector(".table tbody");
-
     if (searchInput && tableBody) {
         searchInput.addEventListener("input", function (e) {
             const term = e.target.value.toLowerCase();
@@ -425,4 +393,29 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
+}
+
+/* ===========================================================================
+   INITIALIZATION
+   =========================================================================== */
+
+document.documentElement.classList.add("js-enabled");
+
+document.addEventListener("DOMContentLoaded", () => {
+    // Clear stored image on successful form submission
+    if (sessionStorage.getItem("submissionSuccess") === "true") {
+        sessionStorage.removeItem("temp_image_data");
+        sessionStorage.removeItem("submissionSuccess");
+    }
+
+    // Initialize all multi-select components on the page
+    const multiSelects = document.querySelectorAll(".field__multi-select");
+    multiSelects.forEach(loadMultiSelect);
+
+    // Initialize all image upload components on the page
+    const uploadWrappers = document.querySelectorAll(".upload__wrapper");
+    uploadWrappers.forEach(setupImageUpload);
+
+    // Initialize features for management tables (Genre/Author)
+    initializeTableManagement();
 });
