@@ -467,6 +467,9 @@ public class Booking
     public decimal TotalPrice { get; set; }
 
     public BookingStatus Status { get; set; }
+        
+    [MaxLength(500)]
+    public string? Description { get; set; }
 
     [MaxLength(250)]
     public string? CancellationReason { get; set; }

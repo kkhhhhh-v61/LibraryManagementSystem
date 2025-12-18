@@ -234,7 +234,7 @@ public class RoomCategoryCreateVM
 
     [Required(ErrorMessage = "{0} is required.")]
     [StringLength(500, ErrorMessage = "{0} cannot exceed 500 characters.")]
-    [RegularExpression(@"^[a-zA-Z0-9,. ]+$", ErrorMessage = "{0} can only contain alphabets, punctuations and numbers.")]
+    [RegularExpression(@"^[a-zA-Z0-9-,._' ]+$", ErrorMessage = "{0} can only contain alphabets, punctuations and numbers.")]
     public string Description { get; set; }
 
     [DisplayName("Hourly Rate")]

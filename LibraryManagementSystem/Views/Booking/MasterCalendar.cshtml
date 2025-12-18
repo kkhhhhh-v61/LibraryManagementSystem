@@ -1,0 +1,213 @@
+﻿@{
+    ViewBag.Title = "Master Schedule";
+}
+
+@section head {
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar-scheduler@6.1.10/index.global.min.js'></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/calendar.css" asp-append-version="true" />
+}
+
+<style>
+    .container, .container-fluid, .body-content, .dashboard-container {
+        max-width: 100vw !important;
+        width: 100vw !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    body {
+        overflow-x: hidden;
+    }
+</style>
+
+<div id="calendar-wrapper">
+    <div id="drawer-backdrop" onclick="closeDrawer()"></div>
+
+    <div id="calendar-card">
+        <div class="calendar-header">
+
+            <div class="header-left">
+                <div class="brand-wrapper">
+                    <svg class="brand-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                    <span class="page-title">Schedule</span>
+                </div>
+
+                <div class="header-separator"></div>
+
+                <div class="custom-nav">
+                    <button class="nav-btn" onclick="calendar.prev()" title="Previous Day">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+                    </button>
+
+                    <button class="date-btn" onclick="calendar.today()" id="cal-date-title" title="Go to Today">
+                        Loading...
+                    </button>
+
+                    <button class="nav-btn" onclick="calendar.next()" title="Next Day">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="header-right">
+                <div class="legend-group">
+                    <div class="legend-item"><span class="dot" style="background:#3b82f6;"></span> Paid</div>
+                    <div class="legend-item"><span class="dot" style="background:#f59e0b;"></span> Pending</div>
+                    <div class="legend-item"><span class="dot" style="background:#cbd5e1;"></span> Maint.</div>
+                </div>
+                <select id="categoryFilter" class="modern-select">
+                    <option value="">All Rooms</option>
+                    @foreach (var cat in ViewBag.Categories)
+                    {
+                        <option value="@cat.Id">@cat.Name</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div id="calendar"></div>
+    </div>
+
+    <div id="details-drawer">
+        <div class="drawer-header">
+            <h3 class="drawer-title">Details</h3>
+            <button class="btn-close" onclick="closeDrawer()">✕</button>
+        </div>
+        <div class="drawer-body">
+            <div id="dStatus" class="status-pill sp-confirmed">CONFIRMED</div>
+
+            <div class="info-block">
+                <span class="lbl">Room</span>
+                <div id="dRoom" class="val-lg">Room Name</div>
+            </div>
+
+            <div class="info-block">
+                <span class="lbl">User</span>
+                <div class="val">
+                    <div style="width:20px; height:20px; background:#eff6ff; color:#3b82f6; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.7rem; font-weight:700;">U</div>
+                    <span id="dUser">User Name</span>
+                </div>
+            </div>
+
+            <div class="info-block" style="display:flex; justify-content:space-between;">
+                <div><span class="lbl">In</span><div id="dStart" class="val">10:00</div></div>
+                <div style="text-align:right;"><span class="lbl">Out</span><div id="dEnd" class="val">12:00</div></div>
+            </div>
+
+            <div class="info-block" style="margin-top:30px; padding-top:20px; border-top:1px solid #f1f5f9; text-align:center;">
+                <span class="lbl" style="color:#3b82f6;">Price</span>
+                <div style="font-size:1.5rem; font-weight:800; color:#0f172a;">RM <span id="dPrice">0.00</span></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section foot {
+    <script>
+        var calendar;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            var categorySelect = document.getElementById('categoryFilter');
+
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
+                initialView: 'resourceTimelineDay',
+                headerToolbar: false,
+
+                // ★ 紧凑布局核心 ★
+                height: '100%',
+                resourceAreaWidth: '160px',
+
+                // ★ 关键修改：关闭自动撑开，让 CSS 的 45px 高度生效 ★
+                expandRows: false,
+
+                // 30分钟一格
+                slotDuration: '00:30:00',
+                slotLabelInterval: '01:00',
+                slotMinTime: '09:00:00',
+                slotMaxTime: '22:00:00',
+                nowIndicator: true,
+
+                // 数据加载
+                resources: function(info, success, failure) {
+                    var catId = categorySelect.value;
+                    fetch('@Url.Action("GetResources", "Booking")?categoryId=' + catId)
+                        .then(r => r.json()).then(d => success(d)).catch(e => failure(e));
+                },
+                events: function(info, success, failure) {
+                    var catId = categorySelect.value;
+                    fetch('@Url.Action("GetCalendarData", "Booking")?categoryId=' + catId)
+                        .then(r => r.json()).then(d => success(d)).catch(e => failure(e));
+                },
+
+                // 自定义事件渲染 (CSS 类控制样式)
+                eventContent: function(arg) {
+                    let statusClass = arg.event.extendedProps.status === 'PENDING' ? 'bg-pending' : 'bg-confirmed';
+                    let title = arg.event.title;
+                    let time = arg.event.start.toLocaleTimeString([], {hour: 'numeric', minute:'2-digit'}) + ' - ' + arg.event.end.toLocaleTimeString([], {hour: 'numeric', minute:'2-digit'});
+
+                    return { html: `
+                        <div class="fc-event-main-content ${statusClass}">
+                            <span class="evt-title">${title}</span>
+                            <span class="evt-time">${time}</span>
+                        </div>
+                    `};
+                },
+
+                // ★ 维护行 CSS 类注入 ★
+                resourceLaneClassNames: function(arg) {
+                    return arg.resource.extendedProps.status === 'MAINTENANCE' ? [ 'row-maintenance' ] : [];
+                },
+
+                // 维护行左侧加个小锁头
+                resourceLabelDidMount: function(info) {
+                    if (info.resource.extendedProps.status === 'MAINTENANCE') {
+                        info.el.querySelector('.fc-datagrid-cell-main').innerHTML +=
+                            ' <span style="font-size:0.8em; margin-left:4px;">🔒</span>';
+                    }
+                },
+
+                eventClick: function(info) { openDrawer(info.event); },
+                datesSet: function(info) { document.getElementById('cal-date-title').innerText = info.view.title; }
+            });
+
+            calendar.render();
+
+            categorySelect.addEventListener('change', function() {
+                calendar.refetchResources();
+                calendar.refetchEvents();
+            });
+        });
+
+        function openDrawer(event) {
+            var p = event.extendedProps;
+            document.getElementById('dRoom').innerText = p.roomName;
+            document.getElementById('dUser').innerText = p.userName;
+            document.getElementById('dPrice').innerText = p.price.toFixed(2);
+            document.getElementById('dStart').innerText = event.start.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+            document.getElementById('dEnd').innerText = event.end.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+
+            var badge = document.getElementById('dStatus');
+            if (p.status === 'PENDING') {
+                badge.className = 'status-pill sp-pending';
+                badge.innerHTML = '<span class="dot" style="background:currentColor"></span> PENDING';
+            } else if (p.status === 'MAINTENANCE') {
+                badge.className = 'status-pill sp-maint';
+                badge.innerHTML = 'MAINTENANCE';
+            } else {
+                badge.className = 'status-pill sp-confirmed';
+                badge.innerHTML = '<span class="dot" style="background:currentColor"></span> CONFIRMED';
+            }
+
+            document.getElementById('details-drawer').classList.add('open');
+            document.getElementById('drawer-backdrop').classList.add('active');
+        }
+
+        function closeDrawer() {
+            document.getElementById('details-drawer').classList.remove('open');
+            document.getElementById('drawer-backdrop').classList.remove('active');
+        }
+    </script>
+}

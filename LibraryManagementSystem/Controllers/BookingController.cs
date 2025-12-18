@@ -162,5 +162,103 @@ namespace LibraryManagementSystem.Controllers
             if (lastId.Length >= 6 && int.TryParse(lastId.Substring(1), out int num)) return "B" + (num + 1).ToString("D5");
             return "B" + Guid.NewGuid().ToString("N").Substring(0, 5).ToUpper();
         }
+
+
+        // Calender
+        //[Authorize(Roles = "ADMIN")]
+        public IActionResult MasterCalendar()
+        {
+            ViewBag.Categories = db.RoomCategories.ToList();
+            // 页面入口
+            return View();
+        }
+
+        // 1. 获取左侧的“资源” (即房间列表)
+        //[Authorize(Roles = "ADMIN")]
+        [HttpGet]
+        public IActionResult GetResources(string? categoryId)
+        {
+            var query = db.Rooms
+                .Include(r => r.RoomCategory)
+                .AsQueryable();
+
+            // ★ 新增逻辑：如果传了 categoryId，就只查这个分类下的房间
+            if (!string.IsNullOrEmpty(categoryId))
+            {
+                query = query.Where(r => r.RoomCategoryId == categoryId);
+            }
+
+            var rooms = query
+                .OrderBy(r => r.RoomCategoryId)
+                .ThenBy(r => r.Name)
+                .Select(r => new
+                {
+                    id = r.Id,
+                    title = r.Name,
+                    // 扩展属性，用于前端变灰处理
+                    extendedProps = new { status = r.Status.ToString() }
+                })
+                .ToList();
+
+            return Json(rooms);
+        }
+
+        // 2. 获取预订数据 (必须包含 resourceId)
+        //[Authorize(Roles = "ADMIN")]
+        [HttpGet]
+        public IActionResult GetCalendarData(string? categoryId)
+        {
+            var query = db.Bookings
+                .Include(b => b.Room)
+                .Include(b => b.User)
+                // 注意：BookingStatus 也是 Enum，所以这里用 != 是对的
+                .Where(b => b.Status != Booking.BookingStatus.CANCELLED)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(categoryId))
+            {
+                query = query.Where(b => b.Room.RoomCategoryId == categoryId);
+            }
+
+            var bookings = query.ToList();
+
+            var events = bookings.Select(b => {
+
+                // ★ 核心修正：直接对比 Enum
+                // 不再需要 string.Equals，也不需要 Trim() 或 ToUpper()
+                bool isMaintenance = (b.Room.Status == Room.RoomStatus.MAINTENANCE);
+
+                return new
+                {
+                    id = b.Id,
+                    resourceId = b.RoomId,
+                    title = b.User.Username,
+                    start = b.StartTime.ToString("yyyy-MM-ddTHH:mm:ss"),
+                    end = b.EndTime.ToString("yyyy-MM-ddTHH:mm:ss"),
+
+                    // 颜色逻辑
+                    backgroundColor = isMaintenance
+                                      ? "#94a3b8" // 灰色
+                                      : (b.Status == Booking.BookingStatus.PENDING ? "#f59e0b" : "#10b981"),
+
+                    borderColor = isMaintenance
+                                  ? "#94a3b8"
+                                  : (b.Status == Booking.BookingStatus.PENDING ? "#f59e0b" : "#10b981"),
+
+                    textColor = "#ffffff",
+
+                    extendedProps = new
+                    {
+                        roomName = b.Room.Name,
+                        userName = b.User.Username,
+                        price = b.TotalPrice,
+                        // 显示状态文本
+                        status = isMaintenance ? "MAINTENANCE" : b.Status.ToString()
+                    }
+                };
+            }).ToList();
+
+            return Json(events);
+        }
     }
 }
