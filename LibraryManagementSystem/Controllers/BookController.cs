@@ -2,23 +2,34 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using LibraryManagementSystem.Extensions;
 
 namespace LibraryManagementSystem.Controllers;
 
 public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
 {
-    public IActionResult ManageBook()
+    public IActionResult ManageBook(string? search)
     {
-        var books = db.Books
+        var query = db.Books
             .Include(b => b.Authors)
             .Include(b => b.Genres)
-            .OrderByDescending(b => b.DateAdded)
-            .ToList();
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            search = search.Trim();
+            query = query.Where(b => b.Title.Contains(search) || b.ISBN.Contains(search));
+        }
 
         var vm = new BookManagementVM
         {
-            ExistingBooks = books
+            ExistingBooks = query.OrderByDescending(b => b.DateAdded).ToList()
         };
+
+        if (Request.IsAjax())
+        {
+            return PartialView("_TableBook", vm);
+        }
 
         return View(vm);
     }
@@ -277,14 +288,25 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         return RedirectToAction("ManageBook");
     }
 
-    public IActionResult ManageGenre()
+    public IActionResult ManageGenre(string? search)
     {
-        var genres = db.Genres.Include(g => g.Books).OrderBy(g => g.Name);
+        var query = db.Genres.Include(g => g.Books).AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            search = search.Trim();
+            query = query.Where(g => g.Name.Contains(search));
+        }
 
         var vm = new GenreManagementVM
         {
-            ExistingGenres = genres.ToList(),
+            ExistingGenres = query.OrderBy(g => g.Name).ToList(),
         };
+
+        if (Request.IsAjax())
+        {
+            return PartialView("_TableGenre", vm);
+        }
 
         return View(vm);
     }
@@ -414,15 +436,26 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         return RedirectToAction("ManageGenre");
     }
 
-    public IActionResult ManageAuthor()
+    public IActionResult ManageAuthor(string? search)
     {
-        var authors = db.Authors.Include(a => a.Books).OrderBy(a => a.Name);
+        var query = db.Authors.Include(a => a.Books).AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            search = search.Trim();
+            query = query.Where(a => a.Name.Contains(search));
+        }
 
         var vm = new AuthorManagementVM
         {
-            ExistingAuthors = authors.ToList(),
+            ExistingAuthors = query.OrderBy(a => a.Name).ToList(),
         };
         
+        if (Request.IsAjax())
+        {
+            return PartialView("_TableAuthor", vm);
+        }
+
         return View(vm);
     }
 

@@ -1,0 +1,108 @@
+@model BookManagementVM
+
+<table class="table">
+    <thead>
+        <tr class="table__header">
+            <th class="table__cell table__cell--checkbox">
+                <input class="checkbox-styled" id="selectAll" type="checkbox" />
+            </th>
+            <th class="table__cell" style="width: 80px;">ID</th>
+            <th class="table__cell" style="width: 60px;">Image</th>
+            <th class="table__cell">Title</th>
+            <th class="table__cell" style="width: 20%;">Description</th>
+            <th class="table__cell" style="width: 160px;">ISBN</th>
+            <th class="table__cell" style="width: 80px;">Year</th>
+            <th class="table__cell" style="width: 60px;">Ed.</th>
+            <th class="table__cell" style="width: 15%;">Authors</th>
+            <th class="table__cell" style="width: 10%;">Genres</th>
+            <th class="table__cell" style="width: 120px;">Status</th>
+            <th class="table__cell table__cell--actions" style="width: 100px;">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (!Model.ExistingBooks.Any())
+        {
+            <tr class="table__row">
+                <td class="table__cell" colspan="12" style="text-align:center; color: var(--color-gray-500);">
+                    No books found.
+                </td>
+            </tr>
+        }
+        else 
+        {
+            @foreach (var book in Model.ExistingBooks)
+            {
+                <tr class="table__row">
+                    <td class="table__cell table__cell--checkbox">
+                        <input class="row-checkbox checkbox-styled" type="checkbox" name="ids" value="@book.Id" data-name="@book.Title" />
+                    </td>
+                    <td class="table__cell table__cell--id">@book.Id</td>
+                    <td class="table__cell">
+                        <img src="@(string.IsNullOrEmpty(book.ImageURL) ? "/images/assets/default-book.png" : $"/images/books/{book.ImageURL}")" 
+                             alt="@book.Title" 
+                             style="width: 40px; height: 60px; object-fit: cover; border-radius: 4px; border: 1px solid var(--color-gray-200);" />
+                    </td>
+                    <td class="table__cell table__cell--main">@book.Title</td>
+                    <td class="table__cell">
+                        <div style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="@book.Description">@book.Description</div>
+                    </td>
+                    <td class="table__cell">@book.ISBN</td>
+                    <td class="table__cell">@book.PublicationYear</td>
+                    <td class="table__cell">@book.Edition</td>
+                    <td class="table__cell">
+                        @if (book.Authors.Any())
+                        {
+                            @string.Join(", ", book.Authors.Select(a => a.Name))
+                        }
+                        else
+                        {
+                            <span style="color: var(--color-gray-400);">-</span>
+                        }
+                    </td>
+                    <td class="table__cell">
+                        <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                            @foreach(var genre in book.Genres)
+                            {
+                                <span class="badge badge--neutral">@genre.Name</span>
+                            }
+                        </div>
+                    </td>
+                    <td class="table__cell">
+                        <div style="display: flex; gap: 4px;">
+                            @if (book.IsFeatured)
+                            {
+                                <span class="badge badge--primary">Featured</span>
+                            }
+                            @if (book.IsArchived)
+                            {
+                                <span class="badge badge--neutral">Archived</span>
+                            }
+                            @if (!book.IsFeatured && !book.IsArchived)
+                            {
+                                <span style="color: var(--color-gray-400);">-</span>
+                            }
+                        </div>
+                    </td>
+                    <td class="table__cell table__cell--actions">
+                        <div class="table__actions">
+                            <a asp-action="EditBook" asp-route-id="@book.Id" class="action__button" title="Edit">
+                                <svg class="button__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000">
+                                    <path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/>
+                                </svg>
+                            </a>
+                            <button class="action__button action__button--delete js-delete-trigger" 
+                                    data-id="@book.Id" 
+                                    data-name="@book.Title" 
+                                    title="Delete"
+                                    type="button">
+                                <svg class="button__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000">
+                                    <path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>

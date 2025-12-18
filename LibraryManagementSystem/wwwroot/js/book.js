@@ -213,60 +213,208 @@ function setupImageUpload(wrapper) {
    =========================================================================== */
 
 function initializeTableManagement() {
+    const searchInput = document.getElementById("nameSearchInput");
+    const searchClear = document.getElementById("searchClearButton");
+    const tableContainer = document.getElementById("tableContainer");
+    const deselectButton = document.getElementById("deselectAllButton");
+
+    // Determine if we are using AJAX search (Genre/Author) or Client-side (Book)
+    const isAjax = tableContainer !== null;
+
+    if (searchInput) {
+        let debounceTimer;
+
+        searchInput.addEventListener("input", function (e) {
+            const term = e.target.value;
+
+            // Toggle Clear Button
+            if (searchClear) {
+                if (term.length > 0) searchClear.classList.add("active");
+                else searchClear.classList.remove("active");
+            }
+
+            if (isAjax) {
+                // AJAX Search
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    performAjaxSearch(term);
+                }, 300);
+            } else {
+                // Client-side Search (Legacy for ManageBook)
+                performClientSideSearch(term);
+            }
+        });
+
+        if (searchClear) {
+            searchClear.addEventListener("click", () => {
+                searchInput.value = "";
+                searchClear.classList.remove("active");
+                searchInput.dispatchEvent(new Event("input"));
+                searchInput.focus();
+            });
+        }
+    }
+
+    if (deselectButton) {
+        deselectButton.addEventListener("click", function () {
+            const rowCheckboxes = document.querySelectorAll(".row-checkbox");
+            const selectAll = document.getElementById("selectAll");
+            rowCheckboxes.forEach((cb) => (cb.checked = false));
+            if (selectAll) selectAll.checked = false;
+            updateBatchButtonState();
+        });
+    }
+
+    // Initial binding of table content events
+    bindTableContentEvents();
+
+    // Bind static modal events (Edit/Delete/Batch)
+    bindStaticModalEvents();
+}
+
+function performAjaxSearch(term) {
+    const tableContainer = document.getElementById("tableContainer");
+    const url = new URL(window.location.href);
+    url.searchParams.set("search", term);
+
+    fetch(url, {
+        headers: { "X-Requested-With": "XMLHttpRequest" },
+    })
+        .then((response) => response.text())
+        .then((html) => {
+            tableContainer.innerHTML = html;
+            bindTableContentEvents(); // Re-bind events for new content
+        })
+        .catch((err) => console.error("Search failed", err));
+}
+
+function performClientSideSearch(term) {
+    const tableBody = document.querySelector(".table tbody");
+    if (!tableBody) return;
+
+    const rows = tableBody.querySelectorAll(".table__row");
+    let hasResults = false;
+    const lowerTerm = term.toLowerCase();
+
+    rows.forEach((row) => {
+        const nameCell = row.querySelector(".table__cell--main");
+        if (nameCell) {
+            const text = nameCell.textContent.toLowerCase();
+            if (text.includes(lowerTerm)) {
+                row.style.display = "";
+                hasResults = true;
+            } else {
+                row.style.display = "none";
+            }
+        }
+    });
+
+    updateNoResultsRow(tableBody, hasResults, term);
+    updateSelectAllState();
+}
+
+function updateNoResultsRow(tableBody, hasResults, term) {
+    let noResultRow = document.getElementById("search-no-results");
+    if (!hasResults && term !== "") {
+        if (!noResultRow) {
+            noResultRow = document.createElement("tr");
+            noResultRow.id = "search-no-results";
+            noResultRow.innerHTML = `
+                <td colspan="7" style="text-align:center; padding: 2rem; color: var(--color-gray-500);">
+                    No results found for "${term}"
+                </td>`;
+            tableBody.appendChild(noResultRow);
+        } else {
+            noResultRow.querySelector(
+                "td"
+            ).textContent = `No results found for "${term}"`;
+            noResultRow.style.display = "";
+        }
+    } else {
+        if (noResultRow) noResultRow.remove();
+    }
+}
+
+function updateSelectAllState() {
     const selectAll = document.getElementById("selectAll");
     const rowCheckboxes = document.querySelectorAll(".row-checkbox");
+
+    if (selectAll) {
+        const visibleCheckboxes = Array.from(rowCheckboxes).filter(
+            (cb) => cb.closest(".table__row").style.display !== "none"
+        );
+
+        if (visibleCheckboxes.length > 0) {
+            selectAll.checked = visibleCheckboxes.every((cb) => cb.checked);
+        } else {
+            selectAll.checked = false;
+        }
+    }
+}
+
+function updateBatchButtonState() {
     const batchButton = document.getElementById("batchDeleteButton");
     const deselectButton = document.getElementById("deselectAllButton");
-    const batchForm = document.getElementById("batchForm");
     const selectionCountSpan = document.getElementById("selectionCount");
-    if (selectAll && batchForm && batchButton) {
-        const updateBatchButton = () => {
-            const count = document.querySelectorAll(
-                ".row-checkbox:checked"
-            ).length;
 
-            if (count > 0) {
-                if (selectionCountSpan) {
-                    selectionCountSpan.textContent = `${count} Selected`;
-                    selectionCountSpan.classList.add("active");
-                }
+    if (!batchButton) return;
 
-                batchButton.classList.add("active");
-                if (deselectButton) deselectButton.classList.add("active");
-            } else {
-                if (selectionCountSpan)
-                    selectionCountSpan.classList.remove("active");
-                batchButton.classList.remove("active");
-                if (deselectButton) deselectButton.classList.remove("active");
-            }
-        };
+    const count = document.querySelectorAll(".row-checkbox:checked").length;
 
+    if (count > 0) {
+        if (selectionCountSpan) {
+            selectionCountSpan.textContent = `${count} Selected`;
+            selectionCountSpan.classList.add("active");
+        }
+        batchButton.classList.add("active");
+        if (deselectButton) deselectButton.classList.add("active");
+    } else {
+        if (selectionCountSpan) selectionCountSpan.classList.remove("active");
+        batchButton.classList.remove("active");
+        if (deselectButton) deselectButton.classList.remove("active");
+    }
+}
+
+function bindTableContentEvents() {
+    const selectAll = document.getElementById("selectAll");
+    const rowCheckboxes = document.querySelectorAll(".row-checkbox");
+
+    if (selectAll) {
+        // Remove old listener if possible, but simpler to just re-bind on new element
         selectAll.addEventListener("click", function () {
             const visibleRows = Array.from(rowCheckboxes).filter(
                 (cb) => cb.closest(".table__row").style.display !== "none"
             );
-
             const isChecked = this.checked;
             visibleRows.forEach((cb) => (cb.checked = isChecked));
-
-            updateBatchButton();
+            updateBatchButtonState();
         });
+    }
 
-        rowCheckboxes.forEach((cb) => {
-            cb.addEventListener("change", function () {
-                if (!this.checked) selectAll.checked = false;
+    rowCheckboxes.forEach((cb) => {
+        cb.addEventListener("change", function () {
+            if (!this.checked && selectAll) selectAll.checked = false;
 
-                const visibleCheckboxes = Array.from(rowCheckboxes).filter(
-                    (cb) => cb.closest(".table__row").style.display !== "none"
-                );
-                const allChecked = visibleCheckboxes.every((cb) => cb.checked);
+            // Check if all visible are checked
+            const visibleCheckboxes = Array.from(rowCheckboxes).filter(
+                (cb) => cb.closest(".table__row").style.display !== "none"
+            );
+            const allChecked = visibleCheckboxes.every((cb) => cb.checked);
 
-                if (allChecked) selectAll.checked = true;
-
-                updateBatchButton();
-            });
+            if (allChecked && selectAll) selectAll.checked = true;
+            updateBatchButtonState();
         });
+    });
 
+    // Bind Edit/Delete buttons inside the table
+    bindDynamicModalTriggers();
+}
+
+function bindStaticModalEvents() {
+    const batchButton = document.getElementById("batchDeleteButton");
+    const batchForm = document.getElementById("batchForm");
+
+    if (batchButton && batchForm) {
         batchButton.addEventListener("click", function () {
             const count = document.querySelectorAll(
                 ".row-checkbox:checked"
@@ -329,18 +477,43 @@ function initializeTableManagement() {
                 };
             }
         });
-
-        if (deselectButton) {
-            deselectButton.addEventListener("click", function () {
-                rowCheckboxes.forEach((cb) => (cb.checked = false));
-                if (selectAll) selectAll.checked = false;
-                updateBatchButton();
-            });
-        }
     }
 
+    // Edit Modal Static Events
     const editModal = document.getElementById("modal-edit");
+    if (editModal) {
+        const closeButton = editModal.querySelector(".js-close-modal");
+        const cancelButton = editModal.querySelector(".js-cancel-modal");
+        const closeEditModal = () => editModal.classList.remove("active");
 
+        if (closeButton) closeButton.addEventListener("click", closeEditModal);
+        if (cancelButton)
+            cancelButton.addEventListener("click", closeEditModal);
+        editModal.addEventListener("click", (e) => {
+            if (e.target === editModal) closeEditModal();
+        });
+    }
+
+    // Delete Modal Static Events
+    const deleteModal = document.getElementById("modal-delete");
+    if (deleteModal) {
+        const closeDeleteButton = deleteModal.querySelector(".js-close-modal");
+        const cancelDeleteButton =
+            deleteModal.querySelector(".js-cancel-delete");
+        const closeDeleteModal = () => deleteModal.classList.remove("active");
+
+        if (closeDeleteButton)
+            closeDeleteButton.addEventListener("click", closeDeleteModal);
+        if (cancelDeleteButton)
+            cancelDeleteButton.addEventListener("click", closeDeleteModal);
+        deleteModal.addEventListener("click", (e) => {
+            if (e.target === deleteModal) closeDeleteModal();
+        });
+    }
+}
+
+function bindDynamicModalTriggers() {
+    const editModal = document.getElementById("modal-edit");
     if (editModal) {
         const modalTitle = editModal.querySelector(".modal__title");
         const formIdInput = editModal.querySelector("input[name='Form.Id']");
@@ -348,8 +521,6 @@ function initializeTableManagement() {
             "input[name='Form.Name']"
         );
         const openButtons = document.querySelectorAll(".js-open-modal");
-        const closeButton = editModal.querySelector(".js-close-modal");
-        const cancelButton = editModal.querySelector(".js-cancel-modal");
 
         openButtons.forEach((button) => {
             button.addEventListener("click", () => {
@@ -380,15 +551,6 @@ function initializeTableManagement() {
             });
         });
 
-        const closeEditModal = () => editModal.classList.remove("active");
-        if (closeButton) closeButton.addEventListener("click", closeEditModal);
-        if (cancelButton)
-            cancelButton.addEventListener("click", closeEditModal);
-
-        editModal.addEventListener("click", (e) => {
-            if (e.target === editModal) closeEditModal();
-        });
-
         const shouldOpen = document.getElementById("server-modal-trigger");
         if (shouldOpen) {
             editModal.classList.add("active");
@@ -396,17 +558,13 @@ function initializeTableManagement() {
         }
     }
 
+    // Delete Triggers
     const deleteModal = document.getElementById("modal-delete");
-
-    if (!deleteModal) return;
-
-    const deleteIdInput = deleteModal.querySelector("input[name='id']");
-    const deleteNameDisplay = deleteModal.querySelector(".js-delete-name");
-    const deleteButtons = document.querySelectorAll(".js-delete-trigger");
-    const closeDeleteButton = deleteModal.querySelector(".js-close-modal");
-    const cancelDeleteButton = deleteModal.querySelector(".js-cancel-delete");
-
     if (deleteModal) {
+        const deleteIdInput = deleteModal.querySelector("input[name='id']");
+        const deleteNameDisplay = deleteModal.querySelector(".js-delete-name");
+        const deleteButtons = document.querySelectorAll(".js-delete-trigger");
+
         deleteButtons.forEach((button) => {
             button.addEventListener("click", () => {
                 const id = button.dataset.id;
@@ -418,91 +576,6 @@ function initializeTableManagement() {
                 deleteModal.classList.add("active");
             });
         });
-
-        const closeDeleteModal = () => deleteModal.classList.remove("active");
-
-        if (closeDeleteButton)
-            closeDeleteButton.addEventListener("click", closeDeleteModal);
-        if (cancelDeleteButton)
-            cancelDeleteButton.addEventListener("click", closeDeleteModal);
-
-        deleteModal.addEventListener("click", (e) => {
-            if (e.target === deleteModal) closeDeleteModal();
-        });
-    }
-
-    const searchInput = document.getElementById("nameSearchInput");
-    const searchClear = document.getElementById("searchClearButton");
-    const tableBody = document.querySelector(".table tbody");
-    if (searchInput && tableBody) {
-        searchInput.addEventListener("input", function (e) {
-            if (searchClear) {
-                if (this.value.length > 0) searchClear.classList.add("active");
-                else searchClear.classList.remove("active");
-            }
-
-            const term = e.target.value.toLowerCase();
-            const rows = tableBody.querySelectorAll(".table__row");
-            let hasResults = false;
-
-            rows.forEach((row) => {
-                const nameCell = row.querySelector(".table__cell--main");
-
-                if (nameCell) {
-                    const text = nameCell.textContent.toLowerCase();
-                    if (text.includes(term)) {
-                        row.style.display = "";
-                        hasResults = true;
-                    } else {
-                        row.style.display = "none";
-                    }
-                }
-            });
-
-            let noResultRow = document.getElementById("search-no-results");
-
-            if (!hasResults && term !== "") {
-                if (!noResultRow) {
-                    noResultRow = document.createElement("tr");
-                    noResultRow.id = "search-no-results";
-                    noResultRow.innerHTML = `
-                        <td colspan="5" style="text-align:center; padding: 2rem; color: var(--color-gray-500);">
-                            No results found for "${e.target.value}"
-                        </td>`;
-                    tableBody.appendChild(noResultRow);
-                } else {
-                    noResultRow.querySelector(
-                        "td"
-                    ).textContent = `No results found for "${e.target.value}"`;
-                    noResultRow.style.display = "";
-                }
-            } else {
-                if (noResultRow) noResultRow.remove();
-            }
-
-            if (selectAll) {
-                const visibleCheckboxes = Array.from(rowCheckboxes).filter(
-                    (cb) => cb.closest(".table__row").style.display !== "none"
-                );
-
-                if (visibleCheckboxes.length > 0) {
-                    selectAll.checked = visibleCheckboxes.every(
-                        (cb) => cb.checked
-                    );
-                } else {
-                    selectAll.checked = false;
-                }
-            }
-        });
-
-        if (searchClear) {
-            searchClear.addEventListener("click", () => {
-                searchInput.value = "";
-                searchClear.classList.remove("active");
-                searchInput.dispatchEvent(new Event("input"));
-                searchInput.focus();
-            });
-        }
     }
 }
 
