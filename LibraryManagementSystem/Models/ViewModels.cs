@@ -355,7 +355,7 @@ public class RoomCategoryCreateVM
 
     [DisplayName("Hourly Rate")]
     [Required(ErrorMessage = "{0} is required.")]
-    [Range(0, 100, ErrorMessage = "{0} must be between RM 0 and RM 100.")]
+    [Range(1, 100, ErrorMessage = "{0} must be between RM 1 and RM 100.")]
     public decimal HourlyRate { get; set; }
 
     [DisplayName("Room Image")]
@@ -398,7 +398,7 @@ public class RoomCategoryUpdateVM
 
     [DisplayName("Hourly Rate")]
     [Required(ErrorMessage = "{0} is required.")]
-    [Range(0, 100, ErrorMessage = "{0} must be between RM 0 and RM 100.")]
+    [Range(1, 100, ErrorMessage = "{0} must be between RM 1 and RM 100.")]
     public decimal HourlyRate { get; set; }
 
     [Required(ErrorMessage = "{0} is required.")]

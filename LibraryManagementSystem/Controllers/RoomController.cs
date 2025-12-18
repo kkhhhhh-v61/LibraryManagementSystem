@@ -506,5 +506,47 @@ namespace LibraryManagementSystem.Controllers
             return View("Edit", vm);
         }
 
+        public IActionResult GetRoomListAjax(string id, string search = "", string sortOrder = "")
+        {
+            var category = db.RoomCategories.Find(id);
+            if (category == null) return NotFound();
+
+            ViewData["CurrentFilter"] = search;
+            ViewData["CurrentSort"] = sortOrder;
+
+            ViewData["IdSortParm"] = string.IsNullOrEmpty(sortOrder) ? "id_desc" : "";
+            ViewData["NameSortParm"] = sortOrder == "name" ? "name_desc" : "name";
+
+            var query = db.Rooms.Where(r => r.RoomCategoryId == id);
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                search = search.Trim();
+                query = query.Where(r => r.Name.Contains(search) || r.Location.Contains(search));
+            }
+
+            switch (sortOrder)
+            {
+                case "id_desc":
+                    query = query.OrderByDescending(r => r.Id);
+                    break;
+                case "name":
+                    query = query.OrderBy(r => r.Name);
+                    break;
+                case "name_desc":
+                    query = query.OrderByDescending(r => r.Name);
+                    break;
+                default:
+                    query = query.OrderBy(r => r.Id);
+                    break;
+            }
+
+            category.Rooms = query.ToList();
+
+            var vm = new RoomUpdatePageVM { CategoryDisplay = category };
+
+            return PartialView("_RoomListTable", vm);
+        }
+
     }
 }

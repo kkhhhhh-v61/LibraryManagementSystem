@@ -1,0 +1,103 @@
+﻿@using LibraryManagementSystem.Models
+@model RoomUpdatePageVM
+
+<table class="modern-table">
+    <thead>
+        <tr>
+            <th style="width: 15%;">
+                <a asp-action="GetRoomListAjax"
+                   asp-route-id="@Model.CategoryDisplay.Id"
+                   asp-route-sortOrder="@ViewData["IdSortParm"]"
+                   asp-route-search="@ViewData["CurrentFilter"]"
+                   data-ajax="true"
+                   data-ajax-update="#roomListContainer"
+                   data-ajax-loading="#tableLoader"
+                   style="color: inherit; text-decoration: none; cursor: pointer; display:flex; align-items:center; gap:5px;">
+                    ID
+                    @if (string.IsNullOrEmpty(ViewData["CurrentSort"]?.ToString()))
+                    {
+                        <span>▲</span>
+                    }
+                    else if (ViewData["CurrentSort"]?.ToString() == "id_desc")
+                    {
+
+                        <span>▼</span>
+                    }
+                    else
+                    {
+
+                        <span style="opacity:0.3">⇅</span>
+                    }
+                </a>
+            </th>
+
+            <th style="width: 25%;">
+                <a asp-action="GetRoomListAjax"
+                   asp-route-id="@Model.CategoryDisplay.Id"
+                   asp-route-sortOrder="@ViewData["NameSortParm"]"
+                   asp-route-search="@ViewData["CurrentFilter"]"
+                   data-ajax="true"
+                   data-ajax-update="#roomListContainer"
+                   data-ajax-loading="#tableLoader"
+                   style="color: inherit; text-decoration: none; cursor: pointer; display:flex; align-items:center; gap:5px;">
+                    Name
+                    @if (ViewData["CurrentSort"]?.ToString() == "name")
+                    {
+                        <span>▲</span>
+                    }
+                    else if (ViewData["CurrentSort"]?.ToString() == "name_desc")
+                    {
+
+                        <span>▼</span>
+                    }
+                    else
+                    {
+
+                        <span style="opacity:0.3">⇅</span>
+                    }
+                </a>
+            </th>
+
+            <th style="width: 25%;">Location</th>
+            <th style="width: 10%;">Capacity</th>
+            <th style="width: 15%;">Status</th>
+            <th style="width: 10%; text-align: right;">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.CategoryDisplay != null && Model.CategoryDisplay.Rooms != null)
+        {
+            @foreach (var room in Model.CategoryDisplay.Rooms)
+            {
+                <tr>
+                    <td><strong>@room.Id</strong></td>
+                    <td>@room.Name</td>
+                    <td>@room.Location</td>
+                    <td style="color:var(--text-body);">@room.Capacity Pax</td>
+                    <td>
+                        @if (room.Status.ToString() == "AVAILABLE")
+                        {
+                            <span class="badge badge-success">Available</span>
+                        }
+                        else if (room.Status.ToString() == "MAINTENANCE")
+                        {
+                            <span class="badge badge-warning">Maintenance</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-neutral">Occupied</span>
+                        }
+                    </td>
+                    <td style="text-align: right;">
+                        <button class="btn-icon" type="button" onclick="openEditModal('@room.Id', '@room.Name', '@room.Location', @room.Capacity, '@room.Status')">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#666666"><path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z" /></svg>
+                        </button>
+                        <button class="btn-icon btn-delete" type="button" onclick="openDeleteModal('/Room/DeleteRoom/@room.Id', '@room.Name')">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#666666"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z" /></svg>
+                        </button>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
