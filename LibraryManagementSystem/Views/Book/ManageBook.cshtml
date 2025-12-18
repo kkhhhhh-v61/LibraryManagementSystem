@@ -124,4 +124,12 @@
 
 @section foot {
     <script src="/js/book.js" asp-append-version="true"></script>
+
+    @if (TempData["BookInsertSuccess"] != null)
+    {
+        <script>
+            sessionStorage.removeItem("temp_image_data");
+            sessionStorage.removeItem("form_submitting");
+        </script>
+    }
 }

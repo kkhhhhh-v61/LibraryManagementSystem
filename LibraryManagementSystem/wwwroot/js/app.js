@@ -1,4 +1,4 @@
-﻿﻿/* ===========================================================================
+﻿﻿﻿/* ===========================================================================
    GLOBAL FORM HELPERS
    =========================================================================== */
 
@@ -83,7 +83,7 @@ window.togglePassword = (inputId, icon) => {
         icon.classList.remove("fa-eye-slash");
         icon.classList.add("fa-eye");
     }
-}
+};
 /**
  * Checks if the page was loaded via a "Back" button.
  * If not, it displays the toast.
@@ -112,13 +112,41 @@ window.showToastOnLoad = (message, type) => {
 };
 
 /* ===========================================================================
-   INITIALIZATION
+   UNSAVED CHANGES WARNING
    =========================================================================== */
 
-$(document).ready(function () {
-    initializeFormHelpers();
-    initializeSidebar();
-});
+function initializeUnsavedChangesWarning() {
+    const forms = document.querySelectorAll("form.js-warn-unsaved");
+
+    forms.forEach((form) => {
+        let isDirty = false;
+
+        // Track changes
+        form.addEventListener("change", () => (isDirty = true));
+        form.addEventListener("input", () => (isDirty = true));
+
+        // Allow submit without warning
+        form.addEventListener("submit", () => {
+            isDirty = false;
+        });
+
+        // Handle Reset buttons (prevent warning on reload)
+        const resetBtns = form.querySelectorAll("[type='reset']");
+        resetBtns.forEach((btn) => {
+            btn.addEventListener("click", () => {
+                isDirty = false;
+            });
+        });
+
+        // Warn on navigation
+        window.addEventListener("beforeunload", (e) => {
+            if (isDirty) {
+                e.preventDefault();
+                e.returnValue = ""; // Chrome requires returnValue to be set
+            }
+        });
+    });
+}
 
 /* ===========================================================================
    INITIALIZATION
@@ -127,6 +155,8 @@ $(document).ready(function () {
 $(document).ready(function () {
     if (typeof initializeFormHelpers === "function") initializeFormHelpers();
     if (typeof initializeSidebar === "function") initializeSidebar();
+    if (typeof initializeUnsavedChangesWarning === "function")
+        initializeUnsavedChangesWarning();
 });
 
 /* ===========================================================================
@@ -138,15 +168,14 @@ $(document).ready(function () {
 
     if ($form.length) {
         $form.on("submit", function (e) {
-
             // 1. CHECK TEXT FIELDS (Name, Email, Password)
             var isTextFormValid = $(this).valid();
 
             // 2. CHECK RECAPTCHA
             var isCaptchaValid = false;
-            if (typeof grecaptcha !== 'undefined') {
+            if (typeof grecaptcha !== "undefined") {
                 var captchaResponse = grecaptcha.getResponse();
-                isCaptchaValid = (captchaResponse.length > 0);
+                isCaptchaValid = captchaResponse.length > 0;
             }
 
             // 3. IF RECAPTCHA IS EMPTY -> SHAKE IT (Always)
@@ -170,11 +199,20 @@ $(document).ready(function () {
                 if (window.showToast) {
                     // Determine which message to show
                     if (!isTextFormValid && !isCaptchaValid) {
-                        window.showToast("Please fill in required fields and verify captcha.", "error");
+                        window.showToast(
+                            "Please fill in required fields and verify captcha.",
+                            "error"
+                        );
                     } else if (!isCaptchaValid) {
-                        window.showToast("Please verify you are not a robot.", "error");
+                        window.showToast(
+                            "Please verify you are not a robot.",
+                            "error"
+                        );
                     } else {
-                        window.showToast("Please fill in all required information.", "error");
+                        window.showToast(
+                            "Please fill in all required information.",
+                            "error"
+                        );
                     }
                 }
                 return false;

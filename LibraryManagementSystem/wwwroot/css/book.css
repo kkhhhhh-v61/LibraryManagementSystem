@@ -966,6 +966,16 @@
     transform: translateY(-2px);
 }
 
+a.count-badge {
+    text-decoration: none;
+    cursor: pointer;
+}
+
+a.count-badge:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 .table__actions {
     display: flex;
     gap: var(--spacing-sm);

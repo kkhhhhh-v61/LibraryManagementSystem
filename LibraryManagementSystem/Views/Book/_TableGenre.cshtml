@@ -32,12 +32,24 @@
                     <td class="table__cell table__cell--id">@genre.Id</td>
                     <td class="table__cell table__cell--main">@genre.Name</td>
                     <td class="table__cell">
-                        <div class="count-badge @(genre.Books.Count > 0 ? "count-badge--active" : "count-badge--empty")" title="@genre.Books.Count books linked">
+                        @{
+                            var bookTitles = genre.Books.OrderBy(b => b.Title).Take(5).Select(b => b.Title).ToList();
+                            string tooltip = "No books linked";
+                            if (bookTitles.Any())
+                            {
+                                tooltip = string.Join("\n", bookTitles);
+                                if (genre.Books.Count > 5)
+                                {
+                                    tooltip += $"\n... and {genre.Books.Count - 5} more";
+                                }
+                            }
+                        }
+                        <a href="@Url.Action("ManageBook", "Book", new { genreId = genre.Id })" class="count-badge @(genre.Books.Count > 0 ? "count-badge--active" : "count-badge--empty")" title="@tooltip">
                             <svg class="count-badge__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
                                 <path d="M260-320q47 0 91.5 10.5T440-278v-394q-36-14-74.5-21T260-700q-47 0-91.5 10.5T80-658v394q36-14 74.5-21T260-320Zm260 42q44-21 88.5-31.5T700-320q47 0 84.5 7t75.5 21v-394q-43-14-80.5-21T700-700q-47 0-91.5 10.5T520-658v394Zm-60 208q-54-27-109-40.5T260-124q-56 0-111 13.5T40-60v-540q51-24 107-36t113-12q57 0 113 12t107 36v540ZM520-70v-540q51-24 107-36t113-12q57 0 113 12t107 36v540q-56-50-111-63.5T700-124q-54 0-109 13.5T520-70Zm-40-508Z"/>
                             </svg>
                             <span>@genre.Books.Count</span>
-                        </div>
+                        </a>
                     </td>
                     <td class="table__cell table__cell--actions">
                         <div class="table__actions">

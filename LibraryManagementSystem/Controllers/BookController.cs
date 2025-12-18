@@ -8,7 +8,7 @@ namespace LibraryManagementSystem.Controllers;
 
 public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
 {
-    public IActionResult ManageBook(string? search, int page = 1)
+    public IActionResult ManageBook(string? search, string? authorId, string? genreId, int page = 1)
     {
         var query = db.Books
             .Include(b => b.Authors)
@@ -19,6 +19,16 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         {
             search = search.Trim();
             query = query.Where(b => b.Title.Contains(search) || b.ISBN.Contains(search));
+        }
+
+        if (!string.IsNullOrWhiteSpace(authorId))
+        {
+            query = query.Where(b => b.Authors.Any(a => a.Id == authorId));
+        }
+
+        if (!string.IsNullOrWhiteSpace(genreId))
+        {
+            query = query.Where(b => b.Genres.Any(g => g.Id == genreId));
         }
 
         int pageSize = 10;

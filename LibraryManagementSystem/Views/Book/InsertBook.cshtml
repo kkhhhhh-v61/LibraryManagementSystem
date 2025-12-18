@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="/css/book.css" asp-append-version="true" />
 }
 
-<form class="form" asp-action="InsertBook" method="post" enctype="multipart/form-data">
+<form class="form js-warn-unsaved" asp-action="InsertBook" method="post" enctype="multipart/form-data">
     <h1 class="form__title">Insert Book</h1>
     <div class="form__content">
         <div class="form__group form__group--left">
@@ -142,12 +142,4 @@
 
 @section foot {
     <script src="/js/book.js" asp-append-version="true"></script>
-
-    @if (TempData["BookInsertSuccess"] != null)
-    {
-        <script>
-            // Directly clear the specific key
-            sessionStorage.removeItem("temp_image_data");
-        </script>
-    }
 }
