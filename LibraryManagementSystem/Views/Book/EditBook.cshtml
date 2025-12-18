@@ -1,0 +1,149 @@
+﻿@model BookEditVM
+
+@{
+    ViewBag.Title = "Book Edit";
+}
+
+@section head {
+    <link rel="stylesheet" href="/css/book.css" asp-append-version="true" />
+}
+
+<form class="form" asp-action="EditBook" method="post" enctype="multipart/form-data">
+    <h1 class="form__title">Edit Book</h1>
+    <div class="form__content">
+        <div class="form__group form__group--left">
+            <div class="form__field">
+                <label class="field__label" asp-for="Image"></label>
+                <div class="upload__wrapper" data-existing-image="@(string.IsNullOrEmpty(Model.ExistingImageURL) ? "" : $"/images/books/{Model.ExistingImageURL}")">
+                    <label class="upload__zone">
+                        <div class="upload__placeholder">
+                            <svg class="upload__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
+                                <path d="M440-320v-326L336-542l-56-58 200-200 200 200-56 58-104-104v326h-80ZM240-160q-33 0-56.5-23.5T160-240v-120h80v120h480v-120h80v120q0 33-23.5 56.5T720-160H240Z"/>
+                            </svg>
+                            <span class="upload__text">Upload Image File</span>
+                        </div>
+                        <img class="upload__preview" />
+                        <input class="upload__input" asp-for="Image" type="file" accept="image/jpeg, image/jpg, image/png" />
+                    </label>
+                    <button class="upload__remove" type="button">
+                        <svg class="upload__remove-icon" xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#ffffff">
+                            <path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/>
+                        </svg>
+                    </button>
+                </div>
+                <span class="field__error" asp-validation-for="Image"></span>
+            </div>
+        </div>
+        <div class="form__group form__group--right">
+            <div class="form__field">
+                <label class="field__label" asp-for="Id"></label>
+                <input class="field__input input--text" asp-for="Id" type="text" readonly style="background-color: var(--color-gray-100); color: var(--color-gray-500); cursor: default;" />
+            </div>
+            <div class="form__field">
+                <label class="field__label field__label--required" asp-for="Title"></label>
+                <input class="field__input input--text" asp-for="Title" type="text" required data-trim autofocus />
+                <span class="field__error" asp-validation-for="Title"></span>
+            </div>
+            <div class="form__field">
+                <label class="field__label field__label--required" asp-for="Description"></label>
+                <textarea class="field__input input--textarea" asp-for="Description" required data-trim></textarea>
+                <span class="field__error" asp-validation-for="Description"></span>
+            </div>
+            <div class="form__field">
+                <label class="field__label field__label--required" asp-for="ISBN"></label>
+                <input class="field__input input--text" asp-for="ISBN" type="text" required data-trim />
+                <span class="field__error" asp-validation-for="ISBN"></span>
+            </div>
+            <div class="form__section">
+                <div class="form__field">
+                    <label class="field__label field__label--required" asp-for="PublicationYear"></label>
+                    <input class="field__input input--number" asp-for="PublicationYear" type="number" min="1450" max="2100" step="1" required data-trim />
+                    <span class="field__error" asp-validation-for="PublicationYear"></span>
+                </div>
+                <div class="form__field">
+                    <label class="field__label field__label--required" asp-for="Edition"></label>
+                    <input class="field__input input--number" asp-for="Edition" type="number" min="1" max="10" step="1" required data-trim />
+                    <span class="field__error" asp-validation-for="Edition"></span>
+                </div>
+            </div>
+            <div class="form__section">
+                <div class="form__field">
+                    <label class="field__label field__label--required" asp-for="SelectedGenreIds"></label>
+                    <div class="field__multi-select">
+                        <div class="multi-select__search">
+                            <input class="search__input" type="text" placeholder="Search for genres..." />
+                        </div>
+                        <div class="multi-select__dropdown">
+                            @foreach (var item in Model.GenreList)
+                            {
+                                <div class="dropdown__option" data-value="@item.Value">@item.Text</div>
+                            }
+                        </div>
+                        <select class="multi-select__select" asp-for="SelectedGenreIds" multiple>
+                            @foreach (var item in Model.GenreList)
+                            {
+                                <option class="select__option" value="@item.Value">@item.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <span class="field__error" asp-validation-for="SelectedGenreIds"></span>
+                </div>
+                <div class="form__field">
+                    <label class="field__label field__label--required" asp-for="SelectedAuthorIds"></label>
+                    <div class="field__multi-select">
+                        <div class="multi-select__search">
+                            <input class="search__input" type="text" placeholder="Search for authors..." />
+                        </div>
+                        <div class="multi-select__dropdown">
+                            @foreach (var item in Model.AuthorList)
+                            {
+                                <div class="dropdown__option" data-value="@item.Value">@item.Text</div>
+                            }
+                        </div>
+                        <select class="multi-select__select" asp-for="SelectedAuthorIds" multiple>
+                            @foreach (var item in Model.AuthorList)
+                            {
+                                <option class="select__option" value="@item.Value">@item.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <span class="field__error" asp-validation-for="SelectedAuthorIds"></span>
+                </div>
+            </div>
+            <div class="form__section">
+                <div class="form__field">
+                    <div class="field__switch-box">
+                        <label class="switch-box__header">
+                            <label class="switch-box__label" asp-for="IsFeatured"></label>
+                            <div class="switch-box__toggle">
+                                <input class="toggle__input" asp-for="IsFeatured" type="checkbox" />
+                                <span class="toggle__slider"></span>
+                            </div>
+                        </label>
+                        <p class="switch-box__text">Display this Book in the <b>Featured</b> section of the <b>Home</b> page.</p>
+                    </div>
+                </div>
+                <div class="form__field">
+                    <div class="field__switch-box">
+                        <label class="switch-box__header">
+                            <label class="switch-box__label" asp-for="IsArchived"></label>
+                            <div class="switch-box__toggle">
+                                <input class="toggle__input" asp-for="IsArchived" type="checkbox" />
+                                <span class="toggle__slider"></span>
+                            </div>
+                        </label>
+                        <p class="switch-box__text">Archive this Book from being displayed in the <b>Catalogue</b>.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="form__action">
+                <a asp-action="ManageBook" class="form__button form__button--reset" style="display: flex; justify-content: center; align-items: center; text-decoration: none;">Cancel</a>
+                <button class="form__button form__button--submit" type="submit">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section foot {
+    <script src="/js/book.js" asp-append-version="true"></script>
+}

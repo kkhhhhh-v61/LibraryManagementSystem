@@ -34,4 +34,10 @@ public static class Extensions
         if (string.IsNullOrEmpty(key)) return false;
         return ms.GetFieldValidationState(key) == ModelValidationState.Valid;
     }
+
+    public static bool IsAjax(this HttpRequest request)
+    {
+        if (request == null) throw new ArgumentNullException(nameof(request));
+        return request.Headers["X-Requested-With"] == "XMLHttpRequest";
+    }
 }
