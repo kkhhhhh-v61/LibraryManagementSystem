@@ -128,7 +128,7 @@
                 </div>
             </form>
 
-            <button class="btn-save" type="button" style="width:auto; padding: 4px 12px; font-size:0.8rem;" onclick="openAddRoomModal()">
+            <button class="btn-save" type="button" style="width:auto; padding: 4px 12px; font-size:0.8rem;" onclick="openAddRoomModal()" data-tooltip="Shortcut: Alt + C" ">
                 + Add Room
             </button>
         </div>
@@ -143,7 +143,7 @@
     <div class="modal-box">
         <div class="modal-header">
             <h3>Edit Room Details</h3>
-            <button class="btn-close" onclick="closeEditModal()">&times;</button>
+            <button class="btn-close" onclick="closeEditModal()" data-tooltip="Shortcut: Esc">&times;</button>
         </div>
         <form asp-action="UpdateRoomDetails" method="post">
             <input type="hidden" id="modalRoomIdHidden" asp-for="RoomUpdate.RoomId" />
@@ -205,7 +205,7 @@
     <div class="modal-box">
         <div class="modal-header">
             <h3>Add New Room</h3>
-            <button class="btn-close" type="button" onclick="closeAddRoomModal()">&times;</button>
+            <button class="btn-close" type="button" onclick="closeAddRoomModal()" data-tooltip="Shortcut: Esc">&times;</button>
         </div>
 
         <form asp-action="CreateRoomFromEdit" method="post">
@@ -258,6 +258,14 @@
                 }
             });
         }
+
+        document.addEventListener('keydown', function(e) {
+
+            if (e.altKey && e.key.toLowerCase() === 'c') {
+                e.preventDefault();
+                openAddRoomModal();
+        }
+        });
 
         let roomSearchTimeout = null;
         function submitRoomSearch() {
