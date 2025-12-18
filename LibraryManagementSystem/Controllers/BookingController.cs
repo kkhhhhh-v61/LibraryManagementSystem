@@ -253,12 +253,29 @@ namespace LibraryManagementSystem.Controllers
                         userName = b.User.Username,
                         price = b.TotalPrice,
                         // 显示状态文本
-                        status = isMaintenance ? "MAINTENANCE" : b.Status.ToString()
+                        status = isMaintenance ? "MAINTENANCE" : b.Status.ToString(),
+                        description = b.Description ?? ""
                     }
                 };
             }).ToList();
 
             return Json(events);
+        }
+
+        [HttpPost]
+        //[Authorize(Roles = "ADMIN, STAFF")] // 确保只有管理员/员工能修改
+        public IActionResult UpdateDescription(string id, string description)
+        {
+            var booking = db.Bookings.Find(id);
+            if (booking == null)
+            {
+                return Json(new { success = false, message = "Booking not found" });
+            }
+
+            booking.Description = description;
+            db.SaveChanges();
+
+            return Json(new { success = true, message = "Description updated successfully" });
         }
     }
 }

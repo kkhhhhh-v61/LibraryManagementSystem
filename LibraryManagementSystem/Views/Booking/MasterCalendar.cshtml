@@ -99,115 +99,55 @@
                 <span class="lbl" style="color:#3b82f6;">Price</span>
                 <div style="font-size:1.5rem; font-weight:800; color:#0f172a;">RM <span id="dPrice">0.00</span></div>
             </div>
+
+            <div class="info-block" style="margin-top:20px;">
+                <span class="lbl">Notes / Description</span>
+                <textarea id="dDescription" class="modern-textarea" rows="3" placeholder="Add notes here..."></textarea>
+                <button onclick="saveDescription()" class="btn-save">Update Note</button>
+            </div>
+
+            <input type="hidden" id="dBookingId" />
         </div>
     </div>
 </div>
 
 @section foot {
+    <script src="~/js/calendar.js" asp-append-version="true"></script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
     <script>
-        var calendar;
+        var calendarConfig = {
+            urls: {
+                getResources: '@Url.Action("GetResources", "Booking")',
+                getEvents: '@Url.Action("GetCalendarData", "Booking")',
+                updateDescription: '@Url.Action("UpdateDescription", "Booking")'
+            }
+        };
 
-        document.addEventListener('DOMContentLoaded', function() {
-            var calendarEl = document.getElementById('calendar');
-            var categorySelect = document.getElementById('categoryFilter');
-
-            calendar = new FullCalendar.Calendar(calendarEl, {
-                schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
-                initialView: 'resourceTimelineDay',
-                headerToolbar: false,
-
-                // ★ 紧凑布局核心 ★
-                height: '100%',
-                resourceAreaWidth: '160px',
-
-                // ★ 关键修改：关闭自动撑开，让 CSS 的 45px 高度生效 ★
-                expandRows: false,
-
-                // 30分钟一格
-                slotDuration: '00:30:00',
-                slotLabelInterval: '01:00',
-                slotMinTime: '09:00:00',
-                slotMaxTime: '22:00:00',
-                nowIndicator: true,
-
-                // 数据加载
-                resources: function(info, success, failure) {
-                    var catId = categorySelect.value;
-                    fetch('@Url.Action("GetResources", "Booking")?categoryId=' + catId)
-                        .then(r => r.json()).then(d => success(d)).catch(e => failure(e));
-                },
-                events: function(info, success, failure) {
-                    var catId = categorySelect.value;
-                    fetch('@Url.Action("GetCalendarData", "Booking")?categoryId=' + catId)
-                        .then(r => r.json()).then(d => success(d)).catch(e => failure(e));
-                },
-
-                // 自定义事件渲染 (CSS 类控制样式)
-                eventContent: function(arg) {
-                    let statusClass = arg.event.extendedProps.status === 'PENDING' ? 'bg-pending' : 'bg-confirmed';
-                    let title = arg.event.title;
-                    let time = arg.event.start.toLocaleTimeString([], {hour: 'numeric', minute:'2-digit'}) + ' - ' + arg.event.end.toLocaleTimeString([], {hour: 'numeric', minute:'2-digit'});
-
-                    return { html: `
-                        <div class="fc-event-main-content ${statusClass}">
-                            <span class="evt-title">${title}</span>
-                            <span class="evt-time">${time}</span>
-                        </div>
-                    `};
-                },
-
-                // ★ 维护行 CSS 类注入 ★
-                resourceLaneClassNames: function(arg) {
-                    return arg.resource.extendedProps.status === 'MAINTENANCE' ? [ 'row-maintenance' ] : [];
-                },
-
-                // 维护行左侧加个小锁头
-                resourceLabelDidMount: function(info) {
-                    if (info.resource.extendedProps.status === 'MAINTENANCE') {
-                        info.el.querySelector('.fc-datagrid-cell-main').innerHTML +=
-                            ' <span style="font-size:0.8em; margin-left:4px;">🔒</span>';
-                    }
-                },
-
-                eventClick: function(info) { openDrawer(info.event); },
-                datesSet: function(info) { document.getElementById('cal-date-title').innerText = info.view.title; }
-            });
-
-            calendar.render();
-
-            categorySelect.addEventListener('change', function() {
-                calendar.refetchResources();
-                calendar.refetchEvents();
-            });
-        });
-
-        function openDrawer(event) {
-            var p = event.extendedProps;
-            document.getElementById('dRoom').innerText = p.roomName;
-            document.getElementById('dUser').innerText = p.userName;
-            document.getElementById('dPrice').innerText = p.price.toFixed(2);
-            document.getElementById('dStart').innerText = event.start.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-            document.getElementById('dEnd').innerText = event.end.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-
-            var badge = document.getElementById('dStatus');
-            if (p.status === 'PENDING') {
-                badge.className = 'status-pill sp-pending';
-                badge.innerHTML = '<span class="dot" style="background:currentColor"></span> PENDING';
-            } else if (p.status === 'MAINTENANCE') {
-                badge.className = 'status-pill sp-maint';
-                badge.innerHTML = 'MAINTENANCE';
-            } else {
-                badge.className = 'status-pill sp-confirmed';
-                badge.innerHTML = '<span class="dot" style="background:currentColor"></span> CONFIRMED';
+        $(document).ready(function () {
+            @if (TempData["Success"] != null)
+            {
+                            <text>
+                                showToast('@TempData["Success"]', 'success');
+                            </text>
             }
 
-            document.getElementById('details-drawer').classList.add('open');
-            document.getElementById('drawer-backdrop').classList.add('active');
-        }
+            @if (TempData["Error"] != null)
+            {
+                            <text>
+                                showToast('@TempData["Error"]', 'error');
+                            </text>
+            }
 
-        function closeDrawer() {
-            document.getElementById('details-drawer').classList.remove('open');
-            document.getElementById('drawer-backdrop').classList.remove('active');
-        }
+            @if (!ViewData.ModelState.IsValid && TempData["Error"] == null)
+            {
+                            <text>
+                                showToast('Please check input fields.', 'error');
+                            </text>
+            }
+        });
     </script>
+
+    
 }

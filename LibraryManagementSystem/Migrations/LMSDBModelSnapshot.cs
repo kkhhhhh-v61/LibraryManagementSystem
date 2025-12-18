@@ -129,6 +129,10 @@ namespace LibraryManagementSystem.Migrations
                     b.Property<DateTime?>("CancelledAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("datetime2");
 

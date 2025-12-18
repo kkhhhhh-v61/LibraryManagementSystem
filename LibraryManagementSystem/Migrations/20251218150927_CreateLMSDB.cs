@@ -291,6 +291,7 @@ namespace LibraryManagementSystem.Migrations
                     EndTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     TotalPrice = table.Column<decimal>(type: "decimal(8,2)", precision: 8, scale: 2, nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     CancellationReason = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
                     CancelledAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },

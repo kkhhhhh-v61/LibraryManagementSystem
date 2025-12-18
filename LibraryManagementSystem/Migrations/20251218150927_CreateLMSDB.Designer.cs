@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LibraryManagementSystem.Migrations
 {
     [DbContext(typeof(LMSDB))]
-    [Migration("20251217195518_CreateLMSDB")]
+    [Migration("20251218150927_CreateLMSDB")]
     partial class CreateLMSDB
     {
         /// <inheritdoc />
@@ -131,6 +131,10 @@ namespace LibraryManagementSystem.Migrations
 
                     b.Property<DateTime?>("CancelledAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("datetime2");

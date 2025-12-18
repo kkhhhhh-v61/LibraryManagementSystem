@@ -441,3 +441,42 @@
     color: #475569;
     border: 1px solid #e2e8f0;
 }
+
+.modern-textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    color: #334155;
+    background: #f8fafc;
+    resize: vertical;
+    outline: none;
+    transition: 0.2s;
+    box-sizing: border-box; /* 防止撑破容器 */
+    font-family: 'Inter', sans-serif;
+}
+
+    .modern-textarea:focus {
+        border-color: #3b82f6;
+        background: #fff;
+    }
+
+/* 保存按钮样式 */
+.btn-save {
+    margin-top: 10px;
+    width: 100%;
+    padding: 8px;
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+    .btn-save:hover {
+        background-color: #2563eb;
+    }
