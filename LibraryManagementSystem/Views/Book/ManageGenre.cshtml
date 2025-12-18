@@ -91,7 +91,7 @@
                     {
                         <tr class="table__row">
                             <td class="table__cell table__cell--checkbox">
-                                <input class="row-checkbox checkbox-styled" type="checkbox" name="ids" value="@genre.Id" />
+                                <input class="row-checkbox checkbox-styled" type="checkbox" name="ids" value="@genre.Id" data-name="@genre.Name" data-books="@genre.Books.Count" />
                             </td>
                             <td class="table__cell table__cell--main">@genre.Name</td>
                             <td class="table__cell">
@@ -150,16 +150,18 @@
             </button>
         </div>
 
-        <form class="form__group" asp-action="SaveGenre" method="post">
-            <input asp-for="Form.Id" type="hidden" />
+        <form class="modal__form" asp-action="SaveGenre" method="post">
+            <div class="modal__content">
+                <input asp-for="Form.Id" type="hidden" />
 
-            <div class="form__field">
-                <label class="field__label field__label--required" asp-for="Form.Name"></label>
-                <input class="field__input input--text" asp-for="Form.Name" type="text" placeholder="e.g. Science Fiction" required data-trim autofocus />
-                <span class="field__error" asp-validation-for="Form.Name"></span>
+                <div class="form__field">
+                    <label class="field__label field__label--required" asp-for="Form.Name"></label>
+                    <input class="field__input input--text" asp-for="Form.Name" type="text" placeholder="e.g. Science Fiction" required data-trim autofocus />
+                    <span class="field__error" asp-validation-for="Form.Name"></span>
+                </div>
             </div>
 
-            <div class="form__action" style="margin-top: var(--spacing-sm);">
+            <div class="modal__footer">
                 <button class="form__button form__button--reset js-cancel-modal" type="button">Cancel</button>
                 <button class="form__button form__button--submit" type="submit">Save</button>
             </div>
@@ -178,16 +180,40 @@
             </button>
         </div>
 
-        <p class="modal__text">
-            Are you sure you want to delete '<span class="text--highlight js-delete-name"></span>'?
-            This action cannot be undone.
-        </p>
-
-        <form class="form__action" asp-action="DeleteGenre" method="post">
-            <input type="hidden" name="id" value="" />
-            <button class="form__button form__button--reset js-cancel-delete" type="button">Cancel</button>
-            <button class="form__button form__button--danger" type="submit">Delete</button>
+        <form class="modal__form" asp-action="DeleteGenre" method="post">
+            <div class="modal__content">
+                <p class="modal__text">
+                    Are you sure you want to delete '<span class="text--highlight js-delete-name"></span>'?
+                    This action cannot be undone.
+                </p>
+                <input type="hidden" name="id" value="" />
+            </div>
+            <div class="modal__footer">
+                <button class="form__button form__button--reset js-cancel-delete" type="button">Cancel</button>
+                <button class="form__button form__button--danger" type="submit">Delete</button>
+            </div>
         </form>
+    </div>
+</div>
+
+<div class="modal" id="modal-batch-delete">
+    <div class="modal__container">
+        <div class="modal__header">
+            <h2 class="modal__title">Confirm Batch Delete</h2>
+            <button class="modal__close js-close-modal" type="button">
+                <svg class="close__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000">
+                    <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
+                </svg>
+            </button>
+        </div>
+        <div class="modal__content">
+            <p class="modal__text">The following items will be processed:</p>
+            <div class="delete-list" id="batchDeleteList"></div>
+        </div>
+        <div class="modal__footer">
+            <button class="form__button form__button--reset js-cancel-batch" type="button">Cancel</button>
+            <button class="form__button form__button--danger" id="confirmBatchDelete" type="button">Confirm Delete</button>
+        </div>
     </div>
 </div>
 
