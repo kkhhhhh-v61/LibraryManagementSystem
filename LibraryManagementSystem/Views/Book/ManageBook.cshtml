@@ -13,6 +13,14 @@
         <div class="panel__header">
             <div class="header__start">
                 <h2 class="panel__title">Book Maintenance</h2>
+                <div class="header__filters">
+                    <select id="filterAuthor" class="filter-select" asp-for="SelectedAuthorId" asp-items="Model.AuthorList">
+                        <option value="">All Authors</option>
+                    </select>
+                    <select id="filterGenre" class="filter-select" asp-for="SelectedGenreId" asp-items="Model.GenreList">
+                        <option value="">All Genres</option>
+                    </select>
+                </div>
             </div>
             <div class="search__wrapper">
                 <svg class="search__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#999">

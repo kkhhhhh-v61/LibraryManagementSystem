@@ -53,7 +53,11 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
             TotalPages = totalPages,
             SearchTerm = search,
             SortColumn = sort,
-            SortOrder = order
+            SortOrder = order,
+            SelectedAuthorId = authorId,
+            SelectedGenreId = genreId,
+            AuthorList = db.Authors.OrderBy(a => a.Name).Select(a => new SelectListItem(a.Name, a.Id)).ToList(),
+            GenreList = db.Genres.OrderBy(g => g.Name).Select(g => new SelectListItem(g.Name, g.Id)).ToList()
         };
 
         if (Request.IsAjax())

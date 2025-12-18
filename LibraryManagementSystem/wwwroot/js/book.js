@@ -220,6 +220,8 @@ function initializeTableManagement() {
     const searchClear = document.getElementById("searchClearButton");
     const tableContainer = document.getElementById("tableContainer");
     const deselectButton = document.getElementById("deselectAllButton");
+    const filterAuthor = document.getElementById("filterAuthor");
+    const filterGenre = document.getElementById("filterGenre");
 
     // Determine if we are using AJAX search (Genre/Author) or Client-side (Book)
     const isAjax = tableContainer !== null;
@@ -264,6 +266,18 @@ function initializeTableManagement() {
                 searchInput.focus();
             });
         }
+    }
+
+    if (filterAuthor) {
+        filterAuthor.addEventListener("change", () =>
+            triggerSearch(searchInput)
+        );
+    }
+
+    if (filterGenre) {
+        filterGenre.addEventListener("change", () =>
+            triggerSearch(searchInput)
+        );
     }
 
     if (deselectButton) {
@@ -319,14 +333,42 @@ function initializeTableManagement() {
     }
 }
 
+function triggerSearch(searchInput) {
+    const tableContainer = document.getElementById("tableContainer");
+    const term = searchInput ? searchInput.value : "";
+
+    // Get current sort
+    const activeHeader = tableContainer.querySelector(
+        ".sortable-header.active"
+    );
+    const sort = activeHeader ? activeHeader.dataset.sort : null;
+    const order = activeHeader ? activeHeader.dataset.order : null;
+
+    performAjaxSearch(term, 1, sort, order);
+}
+
 function performAjaxSearch(term, page, sort, order) {
     const tableContainer = document.getElementById("tableContainer");
+    const filterAuthor = document.getElementById("filterAuthor");
+    const filterGenre = document.getElementById("filterGenre");
+
     const url = new URL(window.location.href);
+
     if (term) url.searchParams.set("search", term);
     else url.searchParams.delete("search");
+
     url.searchParams.set("page", page);
+
     if (sort) url.searchParams.set("sort", sort);
     if (order) url.searchParams.set("order", order);
+
+    if (filterAuthor && filterAuthor.value)
+        url.searchParams.set("authorId", filterAuthor.value);
+    else url.searchParams.delete("authorId");
+
+    if (filterGenre && filterGenre.value)
+        url.searchParams.set("genreId", filterGenre.value);
+    else url.searchParams.delete("genreId");
 
     fetch(url, {
         headers: { "X-Requested-With": "XMLHttpRequest" },

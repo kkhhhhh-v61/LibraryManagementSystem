@@ -1,4 +1,4 @@
-﻿﻿using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using static LibraryManagementSystem.Helper;
@@ -154,6 +154,22 @@ public class ProfileVM
 
 /* ------------------------------ TAN KAI HAO ------------------------------ */
 
+public class BookManagementVM
+{
+    public List<Book> ExistingBooks { get; set; } = new();
+
+    public int CurrentPage { get; set; }
+    public int TotalPages { get; set; }
+    public string? SearchTerm { get; set; }
+    public string SortColumn { get; set; } = "Title";
+    public string SortOrder { get; set; } = "asc";
+
+    public string? SelectedAuthorId { get; set; }
+    public string? SelectedGenreId { get; set; }
+    public List<SelectListItem> AuthorList { get; set; } = new();
+    public List<SelectListItem> GenreList { get; set; } = new();
+}
+
 public class BookInsertVM
 {
     [DisplayName("Cover Image")]
@@ -301,17 +317,6 @@ public class AuthorManagementVM
     public int TotalPages { get; set; }
     public string? SearchTerm { get; set; }
     public string SortColumn { get; set; } = "Name";
-    public string SortOrder { get; set; } = "asc";
-}
-
-public class BookManagementVM
-{
-    public List<Book> ExistingBooks { get; set; } = new();
-
-    public int CurrentPage { get; set; }
-    public int TotalPages { get; set; }
-    public string? SearchTerm { get; set; }
-    public string SortColumn { get; set; } = "Title";
     public string SortOrder { get; set; } = "asc";
 }
 
