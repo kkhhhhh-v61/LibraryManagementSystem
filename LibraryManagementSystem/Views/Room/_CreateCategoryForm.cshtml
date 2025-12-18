@@ -47,5 +47,21 @@
             submitSearch();
         }
 
+        var newId = '@ViewData["NewCategoryId"]';
+        var newName = '@ViewData["NewCategoryName"]';
+
+        var dropdown = document.getElementById("RoomInput_RoomCategoryId");
+
+        if (dropdown && newId && newName) {
+            var newOption = new Option(newName, newId);
+
+            dropdown.add(newOption);
+
+            dropdown.style.transition = "background-color 0.5s";
+            dropdown.style.backgroundColor = "#dcfce7";
+            setTimeout(() => {
+                dropdown.style.backgroundColor = "";
+            }, 1000);
+        }
     </script>
 }
