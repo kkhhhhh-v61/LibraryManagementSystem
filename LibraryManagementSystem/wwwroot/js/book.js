@@ -240,7 +240,18 @@ function initializeTableManagement() {
                 // AJAX Search
                 clearTimeout(debounceTimer);
                 debounceTimer = setTimeout(() => {
-                    performAjaxSearch(term, 1);
+                    // Get current sort
+                    const activeHeader = tableContainer.querySelector(
+                        ".sortable-header.active"
+                    );
+                    const sort = activeHeader
+                        ? activeHeader.dataset.sort
+                        : null;
+                    const order = activeHeader
+                        ? activeHeader.dataset.order
+                        : null;
+
+                    performAjaxSearch(term, 1, sort, order);
                 }, 300);
             }
         });
@@ -279,18 +290,43 @@ function initializeTableManagement() {
                 e.preventDefault();
                 const page = e.target.dataset.page;
                 const term = searchInput ? searchInput.value : "";
-                performAjaxSearch(term, page);
+
+                // Get current sort
+                const activeHeader = tableContainer.querySelector(
+                    ".sortable-header.active"
+                );
+                const sort = activeHeader ? activeHeader.dataset.sort : null;
+                const order = activeHeader ? activeHeader.dataset.order : null;
+
+                performAjaxSearch(term, page, sort, order);
+            }
+
+            // Sorting
+            const header = e.target.closest(".sortable-header");
+            if (header) {
+                e.preventDefault();
+                const sort = header.dataset.sort;
+                let order = "asc";
+
+                if (header.classList.contains("active")) {
+                    order = header.dataset.order === "asc" ? "desc" : "asc";
+                }
+
+                const term = searchInput ? searchInput.value : "";
+                performAjaxSearch(term, 1, sort, order);
             }
         });
     }
 }
 
-function performAjaxSearch(term, page) {
+function performAjaxSearch(term, page, sort, order) {
     const tableContainer = document.getElementById("tableContainer");
     const url = new URL(window.location.href);
     if (term) url.searchParams.set("search", term);
     else url.searchParams.delete("search");
     url.searchParams.set("page", page);
+    if (sort) url.searchParams.set("sort", sort);
+    if (order) url.searchParams.set("order", order);
 
     fetch(url, {
         headers: { "X-Requested-With": "XMLHttpRequest" },

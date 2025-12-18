@@ -6,9 +6,27 @@
             <th class="table__cell table__cell--checkbox">
                 <input class="checkbox-styled" id="selectAll" type="checkbox" />
             </th>
-            <th class="table__cell" style="width: 80px;">ID</th>
-            <th class="table__cell">Author Name</th>
-            <th class="table__cell" style="width: 120px;">Books</th>
+            <th class="table__cell sortable-header @(Model.SortColumn == "Id" ? "active" : "")" data-sort="Id" data-order="@(Model.SortColumn == "Id" ? Model.SortOrder : "asc")" style="width: 80px;">
+                ID
+                @if (Model.SortColumn == "Id")
+                {
+                    <span class="sort-icon">@(Model.SortOrder == "asc" ? "▲" : "▼")</span>
+                }
+            </th>
+            <th class="table__cell sortable-header @(Model.SortColumn == "Name" ? "active" : "")" data-sort="Name" data-order="@(Model.SortColumn == "Name" ? Model.SortOrder : "asc")">
+                Author Name
+                @if (Model.SortColumn == "Name")
+                {
+                    <span class="sort-icon">@(Model.SortOrder == "asc" ? "▲" : "▼")</span>
+                }
+            </th>
+            <th class="table__cell sortable-header @(Model.SortColumn == "Books" ? "active" : "")" data-sort="Books" data-order="@(Model.SortColumn == "Books" ? Model.SortOrder : "asc")" style="width: 120px;">
+                Books
+                @if (Model.SortColumn == "Books")
+                {
+                    <span class="sort-icon">@(Model.SortOrder == "asc" ? "▲" : "▼")</span>
+                }
+            </th>
             <th class="table__cell table__cell--actions" style="width: 100px;">Actions</th>
         </tr>
     </thead>

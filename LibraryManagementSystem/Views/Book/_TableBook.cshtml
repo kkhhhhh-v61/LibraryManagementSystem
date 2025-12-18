@@ -8,7 +8,13 @@
             </th>
             <th class="table__cell table__cell--toggle"></th>
             <th class="table__cell" style="width: 60px;">Image</th>
-            <th class="table__cell">Title</th>
+            <th class="table__cell sortable-header @(Model.SortColumn == "Title" ? "active" : "")" data-sort="Title" data-order="@(Model.SortColumn == "Title" ? Model.SortOrder : "asc")">
+                Title
+                @if (Model.SortColumn == "Title")
+                {
+                    <span class="sort-icon">@(Model.SortOrder == "asc" ? "▲" : "▼")</span>
+                }
+            </th>
             <th class="table__cell" style="width: 100px; text-align: center;">Featured</th>
             <th class="table__cell" style="width: 100px; text-align: center;">Archived</th>
             <th class="table__cell table__cell--actions" style="width: 100px;">Actions</th>
