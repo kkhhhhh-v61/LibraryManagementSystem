@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+﻿﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using static LibraryManagementSystem.Helper;
@@ -156,6 +156,11 @@ public class AuthorManagementVM
     public List<Author> ExistingAuthors { get; set; } = new();
 
     public AuthorVM Form { get; set; } = new();
+}
+
+public class BookManagementVM
+{
+    public List<Book> ExistingBooks { get; set; } = new();
 }
 
 

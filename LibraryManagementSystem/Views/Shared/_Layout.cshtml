@@ -43,9 +43,7 @@
                     </a>
 
                     <div class="sidebar-subnav">
-                        <a asp-controller="Book" asp-action="ManageBook" class="sidebar-subnav__link @Html.IsActive("Book", "ManageBook", "sidebar-subnav__link--active")">Browse All</a>
-                        <div class="sidebar-subnav__separator"></div>
-                        <a asp-controller="Book" asp-action="InsertBook" class="sidebar-subnav__link @Html.IsActive("Book", "InsertBook", "sidebar-subnav__link--active")">Insert Book</a>
+                        <a asp-controller="Book" asp-action="ManageBook" class="sidebar-subnav__link @Html.IsActive("Book", "ManageBook", "sidebar-subnav__link--active")">Manage Book</a>
                         <a asp-controller="Book" asp-action="ManageGenre" class="sidebar-subnav__link @Html.IsActive("Book", "ManageGenre", "sidebar-subnav__link--active")">Manage Genre</a>
                         <a asp-controller="Book" asp-action="ManageAuthor" class="sidebar-subnav__link @Html.IsActive("Book", "ManageAuthor", "sidebar-subnav__link--active")">Manage Author</a>
                     </div>

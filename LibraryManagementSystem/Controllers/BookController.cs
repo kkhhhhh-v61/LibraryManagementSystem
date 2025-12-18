@@ -9,7 +9,18 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
 {
     public IActionResult ManageBook()
     {
-        return View();
+        var books = db.Books
+            .Include(b => b.Authors)
+            .Include(b => b.Genres)
+            .OrderByDescending(b => b.DateAdded)
+            .ToList();
+
+        var vm = new BookManagementVM
+        {
+            ExistingBooks = books
+        };
+
+        return View(vm);
     }
 
     public IActionResult InsertBook()
@@ -106,7 +117,47 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         TempData["ToastType"] = "success";
         TempData["BookInsertSuccess"] = true;
 
-        return RedirectToAction("Browse"); // TODO: Redirect to Book Maintenance
+        return RedirectToAction("ManageBook"); // TODO: Redirect to Book Maintenance
+    }
+
+    [HttpPost]
+    public IActionResult DeleteBook(string id)
+    {
+        var book = db.Books.Find(id);
+        if (book != null)
+        {
+            // TODO: Modify this logic after implementing Copy and Loans
+            db.Books.Remove(book);
+            db.SaveChanges();
+            TempData["ToastMessage"] = $"Book '{book.Title}' deleted successfully.";
+            TempData["ToastType"] = "success";
+        }
+        else
+        {
+            TempData["ToastMessage"] = "Book not found.";
+            TempData["ToastType"] = "error";
+        }
+        return RedirectToAction("ManageBook");
+    }
+
+    [HttpPost]
+    public IActionResult BatchDeleteBook(List<string> ids)
+    {
+        if (ids == null || ids.Count == 0)
+        {
+            TempData["ToastMessage"] = "No items selected.";
+            TempData["ToastType"] = "warning";
+            return RedirectToAction("ManageBook");
+        }
+
+        var books = db.Books.Where(b => ids.Contains(b.Id)).ToList();
+        db.Books.RemoveRange(books);
+        db.SaveChanges();
+
+        TempData["ToastMessage"] = $"Successfully deleted {books.Count} book(s).";
+        TempData["ToastType"] = "success";
+
+        return RedirectToAction("ManageBook");
     }
 
     public IActionResult ManageGenre()
