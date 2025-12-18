@@ -1,4 +1,4 @@
-﻿﻿using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using static LibraryManagementSystem.Helper;
@@ -86,6 +86,70 @@ public class RegisterVM
     public IFormFile? ProfilePhoto { get; set; }
 }
 
+/* ------------------ PASSWORD RECOVERY VIEW MODELS ------------------ */
+
+public class ForgotPasswordVM
+{
+    [Required(ErrorMessage = "Please enter your email address.")]
+    [EmailAddress]
+    public required string Email { get; set; }
+}
+
+public class ResetPasswordVM
+{
+    [Required]
+    public string Token { get; set; }
+
+    [Required]
+    [EmailAddress]
+    public string Email { get; set; }
+
+    [Required]
+    [DataType(DataType.Password)]
+    [StringLength(100, MinimumLength = 6)]
+    public string Password { get; set; }
+
+    [DataType(DataType.Password)]
+    [Display(Name = "Confirm password")]
+    [Compare("Password", ErrorMessage = "Passwords do not match.")]
+    public string ConfirmPassword { get; set; }
+}
+
+/* ---------------------- PROFILE VIEW MODEL ---------------------- */
+
+public class ProfileVM
+{
+    public string Username { get; set; } // Read-only usually
+    public string Role { get; set; }     // Read-only
+
+    [Display(Name = "Credibility Score")]
+    public int CredibilityScore { get; set; } // Read-only
+
+    [Required(ErrorMessage = "First Name is required.")]
+    [MaxLength(50)]
+    [Display(Name = "First Name")]
+    public string FirstName { get; set; }
+
+    [Required(ErrorMessage = "Last Name is required.")]
+    [MaxLength(50)]
+    [Display(Name = "Last Name")]
+    public string LastName { get; set; }
+
+    [Required]
+    [EmailAddress]
+    public string Email { get; set; }
+
+    [Required]
+    [RegularExpression(@"^(\+?6?01)[02-46-9]-*[0-9]{7}$|^(\+?6?01)[1]-*[0-9]{8}$",
+        ErrorMessage = "Invalid Malaysian phone number format.")]
+    [Display(Name = "Phone Number")]
+    public string ContactNo { get; set; }
+
+    [Display(Name = "Public Profile")]
+    public bool IsProfilePublic { get; set; }
+
+    public string? ProfilePhotoUrl { get; set; }
+}
 
 
 /* ------------------------------ TAN KAI HAO ------------------------------ */

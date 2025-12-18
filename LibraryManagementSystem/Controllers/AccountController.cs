@@ -1,13 +1,14 @@
 using LibraryManagementSystem.Models;
+using LibraryManagementSystem.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using LMSUser = LibraryManagementSystem.Models.User;
-using LibraryManagementSystem.Services;
-using Microsoft.Extensions.Caching.Memory;
 
 namespace LibraryManagementSystem.Controllers
 {
@@ -392,7 +393,6 @@ namespace LibraryManagementSystem.Controllers
             //Update Password (Using BCrypt to match your Register logic)
             resetToken.User.PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password);
 
-            //Mark token as used
             resetToken.IsUsed = true;
 
             //Clear any locks the user might have had
@@ -444,6 +444,69 @@ namespace LibraryManagementSystem.Controllers
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
+        }
+        [HttpGet]
+        [Authorize] // Ensures only logged-in users can see this
+        public async Task<IActionResult> Profile()
+        {
+            // Get current user ID
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null) return RedirectToAction("Login");
+
+            var user = await _db.Users.FindAsync(userId);
+            if (user == null) return NotFound();
+
+            var model = new ProfileVM
+            {
+                Username = user.Username,
+                Role = user.Role.ToString(),
+                CredibilityScore = user.CredibilityScore,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                ContactNo = user.ContactNo,
+                IsProfilePublic = user.IsProfilePublic,
+                ProfilePhotoUrl = user.ImageURL
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateProfile(ProfileVM model)
+        {
+            if (!ModelState.IsValid)
+            {
+                // Return JSON error list if validation fails
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+                return Json(new { success = false, message = "Validation failed.", errors = errors });
+            }
+
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var user = await _db.Users.FindAsync(userId);
+
+            if (user == null)
+            {
+                return Json(new { success = false, message = "User not found." });
+            }
+
+            // Update Fields
+            user.FirstName = model.FirstName;
+            user.LastName = model.LastName;
+            user.Email = model.Email;
+            user.ContactNo = model.ContactNo;
+            user.IsProfilePublic = model.IsProfilePublic;
+
+            // Check for unique email/phone conflicts (excluding current user)
+            bool emailExists = await _db.Users.AnyAsync(u => u.Email == model.Email && u.Id != userId);
+            if (emailExists) return Json(new { success = false, message = "Email already in use." });
+
+            _db.Users.Update(user);
+            await _db.SaveChangesAsync();
+
+            return Json(new { success = true, message = "Profile updated successfully!" });
         }
     }
 }
