@@ -212,6 +212,9 @@ function setupImageUpload(wrapper) {
    TABLE MANAGEMENT (MANAGE GENRE / AUTHOR)
    =========================================================================== */
 
+// Store selected items (ID -> {name, books}) to persist across searches
+const selectionState = new Map();
+
 function initializeTableManagement() {
     const searchInput = document.getElementById("nameSearchInput");
     const searchClear = document.getElementById("searchClearButton");
@@ -259,6 +262,7 @@ function initializeTableManagement() {
         deselectButton.addEventListener("click", function () {
             const rowCheckboxes = document.querySelectorAll(".row-checkbox");
             const selectAll = document.getElementById("selectAll");
+            selectionState.clear();
             rowCheckboxes.forEach((cb) => (cb.checked = false));
             if (selectAll) selectAll.checked = false;
             updateBatchButtonState();
@@ -359,7 +363,7 @@ function updateBatchButtonState() {
 
     if (!batchButton) return;
 
-    const count = document.querySelectorAll(".row-checkbox:checked").length;
+    const count = selectionState.size;
 
     if (count > 0) {
         if (selectionCountSpan) {
@@ -386,28 +390,94 @@ function bindTableContentEvents() {
                 (cb) => cb.closest(".table__row").style.display !== "none"
             );
             const isChecked = this.checked;
-            visibleRows.forEach((cb) => (cb.checked = isChecked));
+            visibleRows.forEach((cb) => {
+                cb.checked = isChecked;
+                if (isChecked) {
+                    selectionState.set(cb.value, {
+                        name: cb.dataset.name,
+                        books: cb.dataset.books,
+                    });
+                } else {
+                    selectionState.delete(cb.value);
+                }
+            });
             updateBatchButtonState();
         });
     }
 
     rowCheckboxes.forEach((cb) => {
+        // Restore state
+        if (selectionState.has(cb.value)) {
+            cb.checked = true;
+        }
+
         cb.addEventListener("change", function () {
-            if (!this.checked && selectAll) selectAll.checked = false;
+            if (this.checked) {
+                selectionState.set(this.value, {
+                    name: this.dataset.name,
+                    books: this.dataset.books,
+                });
+            } else {
+                selectionState.delete(this.value);
+                if (selectAll) selectAll.checked = false;
+            }
 
             // Check if all visible are checked
             const visibleCheckboxes = Array.from(rowCheckboxes).filter(
                 (cb) => cb.closest(".table__row").style.display !== "none"
             );
-            const allChecked = visibleCheckboxes.every((cb) => cb.checked);
 
-            if (allChecked && selectAll) selectAll.checked = true;
+            if (visibleCheckboxes.length > 0) {
+                const allChecked = visibleCheckboxes.every((cb) => cb.checked);
+                if (allChecked && selectAll) selectAll.checked = true;
+            }
+
             updateBatchButtonState();
         });
     });
 
     // Bind Edit/Delete buttons inside the table
     bindDynamicModalTriggers();
+
+    // Bind Accordion Toggles
+    const toggleButtons = document.querySelectorAll(".js-toggle-detail");
+    toggleButtons.forEach((btn) => {
+        btn.addEventListener("click", function () {
+            const masterRow = this.closest(".table__row--master");
+            const detailRow = masterRow.nextElementSibling;
+            const wrapper = detailRow.querySelector(".detail-wrapper");
+
+            if (
+                detailRow &&
+                detailRow.classList.contains("table__row--detail")
+            ) {
+                this.classList.toggle("active");
+
+                if (this.classList.contains("active")) {
+                    // Open
+                    detailRow.style.display = "table-row";
+                    // Force reflow
+                    void detailRow.offsetWidth;
+                    wrapper.classList.add("open");
+                } else {
+                    // Close
+                    wrapper.classList.remove("open");
+                    wrapper.addEventListener(
+                        "transitionend",
+                        function () {
+                            if (!wrapper.classList.contains("open")) {
+                                detailRow.style.display = "none";
+                            }
+                        },
+                        { once: true }
+                    );
+                }
+            }
+        });
+    });
+
+    // Bind Status Toggles (Featured/Archived)
+    bindStatusToggles();
 }
 
 function bindStaticModalEvents() {
@@ -416,9 +486,7 @@ function bindStaticModalEvents() {
 
     if (batchButton && batchForm) {
         batchButton.addEventListener("click", function () {
-            const count = document.querySelectorAll(
-                ".row-checkbox:checked"
-            ).length;
+            const count = selectionState.size;
             if (count == 0) return;
 
             const batchModal = document.getElementById("modal-batch-delete");
@@ -429,13 +497,10 @@ function bindStaticModalEvents() {
 
             if (batchModal && listContainer) {
                 listContainer.innerHTML = "";
-                const checkedBoxes = document.querySelectorAll(
-                    ".row-checkbox:checked"
-                );
 
-                checkedBoxes.forEach((cb) => {
-                    const name = cb.dataset.name;
-                    const books = parseInt(cb.dataset.books || "0");
+                selectionState.forEach((data, id) => {
+                    const name = data.name;
+                    const books = parseInt(data.books || "0");
                     const isUnsafe = books > 0;
 
                     const item = document.createElement("div");
@@ -467,6 +532,19 @@ function bindStaticModalEvents() {
                     batchModal.classList.remove("active");
 
                 confirmBtn.onclick = () => {
+                    // Ensure all selected IDs are submitted, even if not in DOM
+                    // Clear existing inputs to avoid duplicates if any
+                    const existingHidden =
+                        batchForm.querySelectorAll('input[name="ids"]');
+                    existingHidden.forEach((el) => el.remove());
+
+                    selectionState.forEach((_, id) => {
+                        const input = document.createElement("input");
+                        input.type = "hidden";
+                        input.name = "ids";
+                        input.value = id;
+                        batchForm.appendChild(input);
+                    });
                     batchForm.submit();
                 };
 
@@ -477,6 +555,32 @@ function bindStaticModalEvents() {
                 };
             }
         });
+    }
+
+    // Toggle Confirmation Modal Events
+    const toggleModal = document.getElementById("modal-toggle-confirm");
+    if (toggleModal) {
+        const closeBtn = toggleModal.querySelector(".js-close-modal");
+        const cancelBtn = toggleModal.querySelector(".js-cancel-toggle");
+        const confirmBtn = document.getElementById("confirmToggleBtn");
+
+        const closeToggleModal = () => {
+            toggleModal.classList.remove("active");
+            // If we have a pending toggle that was cancelled, revert it
+            if (window.pendingToggle) {
+                window.pendingToggle.element.checked =
+                    !window.pendingToggle.targetValue;
+                window.pendingToggle = null;
+            }
+        };
+
+        if (closeBtn) closeBtn.addEventListener("click", closeToggleModal);
+        if (cancelBtn) cancelBtn.addEventListener("click", closeToggleModal);
+
+        // Confirm button logic is handled dynamically, but we can bind the click here
+        if (confirmBtn) {
+            confirmBtn.addEventListener("click", executePendingToggle);
+        }
     }
 
     // Edit Modal Static Events
@@ -577,6 +681,98 @@ function bindDynamicModalTriggers() {
             });
         });
     }
+}
+
+function bindStatusToggles() {
+    const toggles = document.querySelectorAll(".js-toggle-status");
+    toggles.forEach((toggle) => {
+        toggle.addEventListener("change", function (e) {
+            const id = this.dataset.id;
+            const field = this.dataset.field;
+            const isChecked = this.checked;
+
+            // Store pending action
+            window.pendingToggle = {
+                element: this,
+                id: id,
+                field: field,
+                targetValue: isChecked,
+            };
+
+            // Check session preference
+            const suppressModal =
+                sessionStorage.getItem("suppressToggleConfirm") === "true";
+
+            if (suppressModal) {
+                executePendingToggle();
+            } else {
+                showToggleModal(field, isChecked);
+            }
+        });
+    });
+}
+
+function showToggleModal(field, isChecked) {
+    const modal = document.getElementById("modal-toggle-confirm");
+    const textEl = document.getElementById("toggleConfirmText");
+    const fieldName = field === "IsFeatured" ? "Featured" : "Archived";
+    const action = isChecked ? "enable" : "disable";
+
+    if (textEl) {
+        textEl.innerHTML = `Are you sure you want to <b>${action}</b> the <b>${fieldName}</b> status for this book?`;
+    }
+
+    if (modal) modal.classList.add("active");
+}
+
+function executePendingToggle() {
+    if (!window.pendingToggle) return;
+
+    const { element, id, field, targetValue } = window.pendingToggle;
+    const modal = document.getElementById("modal-toggle-confirm");
+    const dontAskCheckbox = document.getElementById("dontAskAgain");
+
+    // Save session preference if checked
+    if (
+        modal &&
+        modal.classList.contains("active") &&
+        dontAskCheckbox &&
+        dontAskCheckbox.checked
+    ) {
+        sessionStorage.setItem("suppressToggleConfirm", "true");
+    }
+
+    if (modal) modal.classList.remove("active");
+
+    // Perform AJAX
+    const formData = new FormData();
+    formData.append("id", id);
+    formData.append("field", field);
+    formData.append("value", targetValue);
+
+    fetch("/Book/ToggleBookStatus", {
+        method: "POST",
+        body: formData,
+    })
+        .then((res) => {
+            if (!res.ok) {
+                // Revert on failure
+                element.checked = !targetValue;
+                if (window.showToast)
+                    window.showToast("Failed to update status.", "error");
+            } else {
+                if (window.showToast)
+                    window.showToast("Status updated successfully.", "success");
+            }
+            window.pendingToggle = null;
+        })
+        .catch((err) => {
+            console.error(err);
+            element.checked = !targetValue;
+            if (window.showToast)
+                window.showToast("An error occurred.", "error");
+            window.pendingToggle = null;
+        });
 }
 
 /* ===========================================================================

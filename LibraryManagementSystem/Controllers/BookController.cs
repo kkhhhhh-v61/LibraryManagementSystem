@@ -210,6 +210,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         // 4. Save Image
         if (vm.Image != null)
         {
+            DeleteImage(book.ImageURL);
             book.ImageURL = Helper.SaveImage(vm.Image, "books", en.WebRootPath);
         }
 
@@ -254,6 +255,8 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         var book = db.Books.Find(id);
         if (book != null)
         {
+            DeleteImage(book.ImageURL);
+
             // TODO: Modify this logic after implementing Copy and Loans
             db.Books.Remove(book);
             db.SaveChanges();
@@ -279,6 +282,12 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         }
 
         var books = db.Books.Where(b => ids.Contains(b.Id)).ToList();
+
+        foreach (var book in books)
+        {
+            DeleteImage(book.ImageURL);
+        }
+
         db.Books.RemoveRange(books);
         db.SaveChanges();
 
@@ -286,6 +295,20 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         TempData["ToastType"] = "success";
 
         return RedirectToAction("ManageBook");
+    }
+
+    [HttpPost]
+    public IActionResult ToggleBookStatus(string id, string field, bool value)
+    {
+        var book = db.Books.Find(id);
+        if (book == null) return NotFound();
+
+        if (field == "IsFeatured") book.IsFeatured = value;
+        else if (field == "IsArchived") book.IsArchived = value;
+        else return BadRequest("Invalid field");
+
+        db.SaveChanges();
+        return Ok();
     }
 
     public IActionResult ManageGenre(string? search)
@@ -594,6 +617,18 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
     {
         vm.GenreList = db.Genres.OrderBy(g => g.Name).Select(g => new SelectListItem(g.Name, g.Id)).ToList();
         vm.AuthorList = db.Authors.OrderBy(a => a.Name).Select(a => new SelectListItem(a.Name, a.Id)).ToList();
+    }
+
+    private void DeleteImage(string? imageUrl)
+    {
+        if (!string.IsNullOrEmpty(imageUrl))
+        {
+            string imagePath = System.IO.Path.Combine(en.WebRootPath, "images", "books", imageUrl);
+            if (System.IO.File.Exists(imagePath))
+            {
+                System.IO.File.Delete(imagePath);
+            }
+        }
     }
 
     private static string GenerateNewId(string? lastId, char prefixChar)

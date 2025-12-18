@@ -91,6 +91,32 @@
     </div>
 </div>
 
+<div class="modal" id="modal-toggle-confirm">
+    <div class="modal__container">
+        <div class="modal__header">
+            <h2 class="modal__title">Confirm Action</h2>
+            <button class="modal__close js-close-modal" type="button">
+                <svg class="close__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000">
+                    <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224 224 224 224Z"/>
+                </svg>
+            </button>
+        </div>
+        <div class="modal__content">
+            <p class="modal__text" id="toggleConfirmText">
+                Are you sure you want to change this setting?
+            </p>
+            <div style="margin-top: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                <input type="checkbox" id="dontAskAgain" class="checkbox-styled" />
+                <label for="dontAskAgain" style="color: var(--color-gray-700); cursor: pointer; user-select: none;">Don't ask me again for this session</label>
+            </div>
+        </div>
+        <div class="modal__footer">
+            <button class="form__button form__button--reset js-cancel-toggle" type="button">Cancel</button>
+            <button class="form__button form__button--submit" id="confirmToggleBtn" type="button">Confirm</button>
+        </div>
+    </div>
+</div>
+
 @section foot {
     <script src="/js/book.js" asp-append-version="true"></script>
 }
