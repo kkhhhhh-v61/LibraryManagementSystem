@@ -1,39 +1,45 @@
-﻿﻿$("[type=reset]").on("click", (e) => {
-    e.preventDefault();
-    location = location;
-});
+﻿﻿/* ===========================================================================
+   GLOBAL FORM HELPERS
+   =========================================================================== */
 
-$("[data-trim]").on("change", (e) => {
-    e.target.value = e.target.value.trim();
-});
+function initializeFormHelpers() {
+    $("[type=reset]").on("click", (e) => {
+        e.preventDefault();
+        location.reload();
+    });
 
-$(document).ready(function () {
+    $("[data-trim]").on("change", (e) => {
+        e.target.value = e.target.value.trim();
+    });
+}
+
+/* ===========================================================================
+   SIDEBAR MANAGEMENT
+   =========================================================================== */
+
+function initializeSidebar() {
     const $body = $("body");
     const $logo = $(".logo");
+    const STORAGE_KEY = "sidebar-collapsed";
 
-    const isCollapsed = localStorage.getItem("sidebar-collapsed") === "true";
-    if (isCollapsed) {
+    if (localStorage.getItem(STORAGE_KEY) === "true") {
         $body.addClass("layout--collapsed");
     }
 
     $logo.on("click", function (e) {
         e.preventDefault();
         $body.toggleClass("layout--collapsed");
-        const hasClass = $body.hasClass("layout--collapsed");
-        localStorage.setItem("sidebar-collapsed", hasClass);
+        localStorage.setItem(STORAGE_KEY, $body.hasClass("layout--collapsed"));
     });
-});
+}
 
-/**
- * Displays a global toast notification.
- * @param {string} message - The message to display.
- * @param {string} type - 'success', 'error', 'warning', or 'info' (default).
- * @param {number} duration - Duration in ms (default 3000).
- */
+/* ===========================================================================
+   UI COMPONENTS
+   =========================================================================== */
+
 window.showToast = (message, type = "info", duration = 5000) => {
     const $container = $("#toast-container");
 
-    // 1. Create elements
     const $toast = $("<div>").addClass(`toast toast--${type}`);
     const $message = $("<span>").text(message);
     const $closeButton = $(`
@@ -44,16 +50,13 @@ window.showToast = (message, type = "info", duration = 5000) => {
         </div>
     `);
 
-    // 2. Assemble toast
     $toast.append($message).append($closeButton);
-
     $container.append($toast);
 
-    // 3. Animate in
-    void $toast[0].offsetWidth;
-    $toast.addClass("toast--visible");
+    requestAnimationFrame(() => {
+        $toast.addClass("toast--visible");
+    });
 
-    // 4. Set up removal logic
     const hideToast = () => {
         $toast.removeClass("toast--visible");
         setTimeout(() => $toast.remove(), 300);
@@ -66,8 +69,8 @@ window.showToast = (message, type = "info", duration = 5000) => {
         hideToast();
     });
 };
-    // Toggle Password Visibility
-function togglePassword(inputId, icon) {
+
+window.togglePassword = (inputId, icon) => {
     var input = document.getElementById(inputId);
 
     if (input.type === "password") {
@@ -140,3 +143,13 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
+};
+
+/* ===========================================================================
+   INITIALIZATION
+   =========================================================================== */
+
+$(document).ready(function () {
+    initializeFormHelpers();
+    initializeSidebar();
+});

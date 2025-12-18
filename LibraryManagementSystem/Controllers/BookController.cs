@@ -109,11 +109,40 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         return RedirectToAction("Browse"); // TODO: Redirect to Book Maintenance
     }
 
-    public IActionResult ManageGenre()
+    public IActionResult ManageGenre(string sortOrder)
     {
+        ViewData["CurrentSort"] = sortOrder;
+        ViewData["NameSortParm"] = string.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+        ViewData["IdSortParm"] = sortOrder == "id" ? "id_desc" : "id";
+        ViewData["CountSortParm"] = sortOrder == "count" ? "count_desc" : "count";
+
+        var genres = db.Genres.Include(g => g.Books).AsQueryable();
+
+        switch (sortOrder)
+        {
+            case "name_desc":
+                genres = genres.OrderByDescending(g => g.Name);
+                break;
+            case "id":
+                genres = genres.OrderBy(g => g.Id);
+                break;
+            case "id_desc":
+                genres = genres.OrderByDescending(g => g.Id);
+                break;
+            case "count":
+                genres = genres.OrderBy(g => g.Books.Count);
+                break;
+            case "count_desc":
+                genres = genres.OrderByDescending(g => g.Books.Count);
+                break;
+            default:
+                genres = genres.OrderBy(g => g.Name);
+                break;
+        }
+
         var vm = new GenreManagementVM
         {
-            ExistingGenres = db.Genres.OrderBy(g => g.Name).ToList(),
+            ExistingGenres = genres.ToList(),
         };
 
         return View(vm);
@@ -171,7 +200,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
     [HttpPost]
     public IActionResult DeleteGenre(string id)
     {
-        // 1. Fetch Genres with all related Books
+        // 1. Fetch Genres with all their Books
         var genre = db.Genres
                       .Include(g => g.Books)
                       .FirstOrDefault(g => g.Id == id);
@@ -202,13 +231,84 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         return RedirectToAction("ManageGenre");
     }
 
-    public IActionResult ManageAuthor()
+    [HttpPost]
+    public IActionResult BatchDeleteGenre(List<string> ids)
     {
+        if (ids == null || ids.Count == 0)
+        {
+            TempData["ToastMessage"] = "No items selected.";
+            TempData["ToastType"] = "warning";
+            return RedirectToAction("ManageGenre");
+        }
+
+        // 1. Fetch all selected items with their books
+        var targets = db.Genres
+                        .Include(g => g.Books)
+                        .Where(g => ids.Contains(g.Id))
+                        .ToList();
+
+        // 2. Separate safe and unsafe
+        var safeToDelete = targets.Where(g => g.Books.Count == 0).ToList();
+        var unsafeItems = targets.Where(g => g.Books.Count > 0).ToList();
+
+        // 3. Delete safe items
+        if (safeToDelete.Count > 0)
+        {
+            db.Genres.RemoveRange(safeToDelete);
+            db.SaveChanges();
+        }
+
+        // 4. Generate feedback
+        if (unsafeItems.Count > 0)
+        {
+            TempData["ToastMessage"] = $"Deleted {safeToDelete.Count} genre(s). Skipped {unsafeItems.Count} genre(s) because they are used by books.";
+            TempData["ToastType"] = "warning";
+        }
+        else
+        {
+            TempData["ToastMessage"] = $"Successfully deleted {safeToDelete.Count} genre(s).";
+            TempData["ToastType"] = "success";
+        }
+
+        return RedirectToAction("ManageGenre");
+    }
+
+    public IActionResult ManageAuthor(string sortOrder)
+    {
+        ViewData["CurrentSort"] = sortOrder;
+        ViewData["NameSortParm"] = string.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+        ViewData["IdSortParm"] = sortOrder == "id" ? "id_desc" : "id";
+        ViewData["CountSortParm"] = sortOrder == "count" ? "count_desc" : "count";
+
+        var authors = db.Authors.Include(a => a.Books).AsQueryable();
+
+        switch (sortOrder)
+        {
+            case "name_desc":
+                authors = authors.OrderByDescending(a => a.Name);
+                break;
+            case "id":
+                authors = authors.OrderBy(a => a.Id);
+                break;
+            case "id_desc":
+                authors = authors.OrderByDescending(a => a.Id);
+                break;
+            case "count":
+                authors = authors.OrderBy(a => a.Books.Count);
+                break;
+            case "count_desc":
+                authors = authors.OrderByDescending(a => a.Books.Count);
+                break;
+            default:
+                authors = authors.OrderBy(a => a.Name);
+                break;
+        }
+
         var vm = new AuthorManagementVM
         {
-            ExistingAuthors = db.Authors.OrderBy(a => a.Name).ToList(),
+            ExistingAuthors = authors.ToList(),
         };
-
+        
         return View(vm);
     }
 
@@ -264,7 +364,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
     [HttpPost]
     public IActionResult DeleteAuthor(string id)
     {
-        // 1. Fetch Authors with all related Books
+        // 1. Fetch Authors with all their Books
         var author = db.Authors
                       .Include(a => a.Books)
                       .FirstOrDefault(a => a.Id == id);
@@ -293,6 +393,48 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         }
 
         return RedirectToAction("ManageAuthor");
+    }
+
+    [HttpPost]
+    public IActionResult BatchDeleteAuthor(List<string> ids)
+    {
+        if (ids == null || ids.Count == 0)
+        {
+            TempData["ToastMessage"] = "No items selected.";
+            TempData["ToastType"] = "warning";
+            return RedirectToAction("ManageGenre");
+        }
+
+        // 1. Fetch all selected items with their books
+        var targets = db.Authors
+                        .Include(a => a.Books)
+                        .Where(a => ids.Contains(a.Id))
+                        .ToList();
+
+        // 2. Separate safe and unsafe
+        var safeToDelete = targets.Where(a => a.Books.Count == 0).ToList();
+        var unsafeItems = targets.Where(a => a.Books.Count > 0).ToList();
+
+        // 3. Delete safe items
+        if (safeToDelete.Count > 0)
+        {
+            db.Authors.RemoveRange(safeToDelete);
+            db.SaveChanges();
+        }
+
+        // 4. Generate feedback
+        if (unsafeItems.Count > 0)
+        {
+            TempData["ToastMessage"] = $"Deleted {safeToDelete.Count} author(s). Skipped {unsafeItems.Count} author(s) because they are used by books.";
+            TempData["ToastType"] = "warning";
+        }
+        else
+        {
+            TempData["ToastMessage"] = $"Successfully deleted {safeToDelete.Count} author(s).";
+            TempData["ToastType"] = "success";
+        }
+
+        return RedirectToAction("ManageGenre");
     }
 
     private void PopulateDropdowns(BookInsertVM vm)
