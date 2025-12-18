@@ -70,6 +70,7 @@ window.showToast = (message, type = "info", duration = 5000) => {
     });
 };
 
+//Toggle Password
 window.togglePassword = (inputId, icon) => {
     var input = document.getElementById(inputId);
 
@@ -138,41 +139,46 @@ $(document).ready(function () {
     if ($form.length) {
         $form.on("submit", function (e) {
 
-            // 1. CHECK FIELDS: Are name/email/pass filled correctly?
-            if (!$(this).valid()) {
-                e.preventDefault(); 
+            // 1. CHECK TEXT FIELDS (Name, Email, Password)
+            var isTextFormValid = $(this).valid();
 
-                // Add shake effect to the input fields that have errors
-                $(".input-validation-error").addClass("shake-error");
+            // 2. CHECK RECAPTCHA
+            var isCaptchaValid = false;
+            if (typeof grecaptcha !== 'undefined') {
+                var captchaResponse = grecaptcha.getResponse();
+                isCaptchaValid = (captchaResponse.length > 0);
+            }
 
-                // Remove the shake class after 500ms so it can shake again later
-                setTimeout(() => $(".input-validation-error").removeClass("shake-error"), 500);
+            // 3. IF RECAPTCHA IS EMPTY -> SHAKE IT (Always)
+            if (!isCaptchaValid) {
+                var box = document.getElementById("recaptcha-container");
+                if (box) {
+                    // Reset animation
+                    box.classList.remove("shake-error");
+                    void box.offsetWidth; // Force Reflow (The magic fix)
 
-                // Show the toast message 
+                    // Start animation
+                    box.classList.add("shake-error");
+                }
+            }
+
+            // 4. FINAL DECISION
+            // If either text inputs are bad OR captcha is bad, stop form.
+            if (!isTextFormValid || !isCaptchaValid) {
+                e.preventDefault(); // Stop submit
+
                 if (window.showToast) {
-                    window.showToast("Please fill in all required information.", "error");
+                    // Determine which message to show
+                    if (!isTextFormValid && !isCaptchaValid) {
+                        window.showToast("Please fill in required fields and verify captcha.", "error");
+                    } else if (!isCaptchaValid) {
+                        window.showToast("Please verify you are not a robot.", "error");
+                    } else {
+                        window.showToast("Please fill in all required information.", "error");
+                    }
                 }
                 return false;
             }
-
-            // 2. CHECK RECAPTCHA: Is it ticked?
-            const captchaResponse = grecaptcha.getResponse();
-
-            if (captchaResponse.length === 0) {
-                e.preventDefault(); 
-
-                const container = document.getElementById("recaptcha-container");
-
-                container.classList.remove("shake-error");
-                void container.offsetWidth; 
-                container.classList.add("shake-error");
-
-                if (window.showToast) {
-                    window.showToast("Please complete the captcha verification.", "error");
-                }
-                return false;
-            }
-
         });
     }
 });

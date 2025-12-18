@@ -1,0 +1,120 @@
+﻿@model LibraryManagementSystem.Models.ProfileVM
+
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<link rel="stylesheet" href="~/css/profile.css" />
+
+<div class="profile-container">
+
+    <div class="profile-card">
+        <div class="profile-avatar-wrapper">
+            <img src="/images/profiles/@(Model.ProfilePhotoUrl ?? "default-profile.png")"
+                 class="profile-avatar"
+                 alt="Profile Photo">
+
+            <button class="profile-upload-btn" onclick="alert('Photo upload coming next!')" title="Change Photo">
+                <i class="fas fa-camera"></i>
+            </button>
+        </div>
+
+        <h2 class="profile-name">@Model.Username</h2>
+        <span class="profile-role-badge">@Model.Role</span>
+
+        <div class="profile-stats">
+            <div class="stat-item">
+                <span class="stat-value">@Model.CredibilityScore</span>
+                <span class="stat-label">Credibility</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value">0</span> <span class="stat-label">Wishlist</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="profile-details-card">
+        <h3 class="section-title">Edit Profile</h3>
+
+        <form id="profileForm">
+            @Html.AntiForgeryToken()
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label asp-for="FirstName" class="form-label"></label>
+                    <input asp-for="FirstName" class="form-input" placeholder="e.g. John" />
+                    <span asp-validation-for="FirstName" class="text-danger small"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="LastName" class="form-label"></label>
+                    <input asp-for="LastName" class="form-input" placeholder="e.g. Doe" />
+                    <span asp-validation-for="LastName" class="text-danger small"></span>
+                </div>
+
+                <div class="form-group full-width">
+                    <label asp-for="Email" class="form-label"></label>
+                    <input asp-for="Email" class="form-input" placeholder="name@example.com" />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+
+                <div class="form-group full-width">
+                    <label asp-for="ContactNo" class="form-label"></label>
+                    <input asp-for="ContactNo" class="form-input" placeholder="012-3456789" />
+                    <span asp-validation-for="ContactNo" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="toggle-switch">
+                <input asp-for="IsProfilePublic" type="checkbox" class="toggle-input">
+                <div class="d-flex flex-column">
+                    <label asp-for="IsProfilePublic" class="form-label mb-0" style="cursor:pointer">Public Profile</label>
+                    <small style="color:var(--color-gray-500); font-size: 0.8rem;">Allow other members to see your profile</small>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" id="saveBtn" class="btn btn-primary">
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // ... Your existing AJAX Script goes here ...
+        $(document).ready(function() {
+            $('#profileForm').on('submit', function(e) {
+                e.preventDefault();
+                if (!$(this).valid()) return;
+
+                var formData = $(this).serialize();
+                var btn = $('#saveBtn');
+
+                btn.prop('disabled', true).text('Saving...');
+
+                $.ajax({
+                    url: '@Url.Action("UpdateProfile", "Account")',
+                    type: 'POST',
+                    data: formData,
+                    success: function(response) {
+                        if (response.success) {
+                            toastr.success(response.message);
+                        } else {
+                            toastr.error(response.message);
+                        }
+                    },
+                    error: function() {
+                        toastr.error("Server error.");
+                    },
+                    complete: function() {
+                        btn.prop('disabled', false).text('Save Changes');
+                    }
+                });
+            });
+        });
+    </script>
+}

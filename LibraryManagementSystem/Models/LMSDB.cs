@@ -104,7 +104,7 @@ public class PasswordResetToken
     [MaxLength(255)]
     public string Token { get; set; } // The random secure string sent to email
 
-    public DateTime ExpiryDate { get; set; } // Token usually expires in 15-60 mins
+    public DateTime ExpiryDate { get; set; } 
 
     public bool IsUsed { get; set; } = false; // Prevents re-using the same link
 

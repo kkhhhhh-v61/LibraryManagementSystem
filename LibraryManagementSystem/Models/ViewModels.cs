@@ -1,4 +1,4 @@
-﻿﻿using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using static LibraryManagementSystem.Helper;
@@ -86,6 +86,70 @@ public class RegisterVM
     public IFormFile? ProfilePhoto { get; set; }
 }
 
+/* ------------------ PASSWORD RECOVERY VIEW MODELS ------------------ */
+
+public class ForgotPasswordVM
+{
+    [Required(ErrorMessage = "Please enter your email address.")]
+    [EmailAddress]
+    public required string Email { get; set; }
+}
+
+public class ResetPasswordVM
+{
+    [Required]
+    public string Token { get; set; }
+
+    [Required]
+    [EmailAddress]
+    public string Email { get; set; }
+
+    [Required]
+    [DataType(DataType.Password)]
+    [StringLength(100, MinimumLength = 6)]
+    public string Password { get; set; }
+
+    [DataType(DataType.Password)]
+    [Display(Name = "Confirm password")]
+    [Compare("Password", ErrorMessage = "Passwords do not match.")]
+    public string ConfirmPassword { get; set; }
+}
+
+/* ---------------------- PROFILE VIEW MODEL ---------------------- */
+
+public class ProfileVM
+{
+    public string Username { get; set; } // Read-only usually
+    public string Role { get; set; }     // Read-only
+
+    [Display(Name = "Credibility Score")]
+    public int CredibilityScore { get; set; } // Read-only
+
+    [Required(ErrorMessage = "First Name is required.")]
+    [MaxLength(50)]
+    [Display(Name = "First Name")]
+    public string FirstName { get; set; }
+
+    [Required(ErrorMessage = "Last Name is required.")]
+    [MaxLength(50)]
+    [Display(Name = "Last Name")]
+    public string LastName { get; set; }
+
+    [Required]
+    [EmailAddress]
+    public string Email { get; set; }
+
+    [Required]
+    [RegularExpression(@"^(\+?6?01)[02-46-9]-*[0-9]{7}$|^(\+?6?01)[1]-*[0-9]{8}$",
+        ErrorMessage = "Invalid Malaysian phone number format.")]
+    [Display(Name = "Phone Number")]
+    public string ContactNo { get; set; }
+
+    [Display(Name = "Public Profile")]
+    public bool IsProfilePublic { get; set; }
+
+    public string? ProfilePhotoUrl { get; set; }
+}
 
 
 /* ------------------------------ TAN KAI HAO ------------------------------ */
@@ -94,6 +158,58 @@ public class BookInsertVM
 {
     [DisplayName("Cover Image")]
     public IFormFile? Image { get; set; }
+
+    [Required(ErrorMessage = "{0} is required.")]
+    [StringLength(255, ErrorMessage = "{0} must be between 1 and 255 characters.")]
+    public string Title { get; set; }
+
+    [Required(ErrorMessage = "{0} is required.")]
+    [StringLength(2000, MinimumLength = 10, ErrorMessage = "{0} must be between 10 and 2000 characters")]
+    public string Description { get; set; }
+
+    [Required(ErrorMessage = "{0} is required.")]
+    [StringLength(17, MinimumLength = 10, ErrorMessage = "{0} must be between 10 and 17 characters.")]
+    [ISBNValidation]
+    public string ISBN { get; set; }
+
+    [DisplayName("Publication Year")]
+    [Required(ErrorMessage = "{0} is required.")]
+    [Range(1450, 2100, ErrorMessage = "{0} must be between 1450 and 2100.")]
+    public int PublicationYear { get; set; }
+
+    [Required(ErrorMessage = "{0} is required.")]
+    [Range(1, 100, ErrorMessage = "{0} must be between 1 and 100.")]
+    public int Edition { get; set; }
+
+    [DisplayName("Genre(s)")]
+    [MinLength(1, ErrorMessage = "At least one Genre is required.")]
+    public List<string> SelectedGenreIds { get; set; } = new();
+
+    public List<SelectListItem> GenreList { get; set; } = new();
+
+    [DisplayName("Author(s)")]
+    [MinLength(1, ErrorMessage = "At least one Author is required.")]
+    [MaxLength(10, ErrorMessage = "A book cannot have more than 10 authors.")]
+    public List<string> SelectedAuthorIds { get; set; } = new();
+
+    public List<SelectListItem> AuthorList { get; set; } = new();
+
+    [DisplayName("Featured")]
+    public bool IsFeatured { get; set; } = false;
+
+    [DisplayName("Archived")]
+    public bool IsArchived { get; set; } = false;
+}
+
+public class BookEditVM
+{
+    [DisplayName("Book ID")]
+    public string Id { get; set; }
+
+    [DisplayName("Cover Image")]
+    public IFormFile? Image { get; set; }
+
+    public string? ExistingImageURL { get; set; }
 
     [Required(ErrorMessage = "{0} is required.")]
     [StringLength(255, ErrorMessage = "{0} must be between 1 and 255 characters.")]

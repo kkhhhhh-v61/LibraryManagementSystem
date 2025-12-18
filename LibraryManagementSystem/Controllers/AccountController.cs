@@ -1,9 +1,11 @@
 using LibraryManagementSystem.Models;
+using LibraryManagementSystem.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using LMSUser = LibraryManagementSystem.Models.User;
@@ -14,11 +16,15 @@ namespace LibraryManagementSystem.Controllers
     {
         private readonly LMSDB _db;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IEmailSender _emailSender;
+        private readonly IMemoryCache _cache;
 
-        public AccountController(LMSDB db, IWebHostEnvironment webHostEnvironment)
+        public AccountController(LMSDB db, IWebHostEnvironment webHostEnvironment, IEmailSender emailSender, IMemoryCache cache)
         {
             _db = db;
             _webHostEnvironment = webHostEnvironment;
+            _emailSender = emailSender;
+            _cache = cache; 
         }
 
         [HttpGet]
@@ -45,10 +51,9 @@ namespace LibraryManagementSystem.Controllers
         {
             if (ModelState.IsValid)
             {
-                // 1. Find the user in the database
+                // Find the user in the database
                 var user = await _db.Users.FirstOrDefaultAsync(u => u.Username == model.Username);
 
-                // --- NEW LOGIC: If user not found, don't give a clue. Just fail. ---
                 if (user == null)
                 {
                     TempData["ToastMessage"] = "Invalid username or password.";
@@ -56,8 +61,6 @@ namespace LibraryManagementSystem.Controllers
                     return View(model);
                 }
 
-                // --- NEW LOGIC: Check Locking BEFORE Password ---
-                // If they are locked, stop them right here.
                 if (user.LockoutEnd != null && user.LockoutEnd > DateTime.Now)
                 {
                     var remainingMins = Math.Ceiling((user.LockoutEnd.Value - DateTime.Now).TotalMinutes);
@@ -67,7 +70,6 @@ namespace LibraryManagementSystem.Controllers
                     return View(model);
                 }
 
-                // --- NEW LOGIC: Check if Inactive (Deleted) ---
                 if (user.Status == LMSUser.UserStatus.INACTIVE)
                 {
                     TempData["ToastMessage"] = "Your account is inactive. Please contact support.";
@@ -75,12 +77,11 @@ namespace LibraryManagementSystem.Controllers
                     return View(model);
                 }
 
-                // 2. Verify Password
+                //Verify Password
                 if (BCrypt.Net.BCrypt.Verify(model.Password, user.PasswordHash))
                 {
                     // --- SUCCESS ---
 
-                    // RESET Logic: If they had failed attempts before, clear them now.
                     if (user.FailedLoginAttempts > 0 || user.LockoutEnd != null)
                     {
                         user.FailedLoginAttempts = 0;
@@ -154,7 +155,7 @@ namespace LibraryManagementSystem.Controllers
         [HttpPost]
         public async Task<IActionResult> Register(RegisterVM model)
         {
-            // --- 1. reCAPTCHA Verification ---
+            // --- reCAPTCHA Verification ---
             string recaptchaToken = Request.Form["g-recaptcha-response"];
             string secretKey = "6LcE1C4sAAAAAEoFEeRtXToUjbY8smzSWozqj-_N";
 
@@ -165,13 +166,12 @@ namespace LibraryManagementSystem.Controllers
                 return View(model);
             }
 
-            // --- 2. Standard Logic ---
             if (ModelState.IsValid)
             {
                 // ==================================================
                 // DUPLICATE DATA CHECKS
                 // ==================================================
-                bool hasDuplicate = false; // Flag to track if we found issues
+                bool hasDuplicate = false; 
 
                 // Check Username
                 if (await _db.Users.AnyAsync(u => u.Username == model.Username))
@@ -201,7 +201,6 @@ namespace LibraryManagementSystem.Controllers
                     TempData["ToastType"] = "error"; // Shows Red Toast
                     return View(model);
                 }
-                // ==================================================
 
                 // Generate User ID
                 string newUserId = "U00001";
@@ -263,9 +262,159 @@ namespace LibraryManagementSystem.Controllers
             TempData["ToastType"] = "warning";
             return View(model);
         }
+        // =======================================================
+        // PASSWORD RECOVERY SECTION (NEW)
+        // =======================================================
+
+        [HttpGet]
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordVM model)
+        {
+            if (ModelState.IsValid)
+            {
+                // =========================================================
+                // 1. RATE LIMIT CHECK (Max 3 attempts per 20 mins)
+                // =========================================================
+                string cacheKey = $"ResetLimit_{model.Email}";
+
+                if (_cache.TryGetValue(cacheKey, out int currentCount))
+                {
+                    if (currentCount >= 3)
+                    {
+                        TempData["ToastMessage"] = "Too many attempts. Please wait 60 minutes before trying again.";
+                        TempData["ToastType"] = "warning";
+                        return RedirectToAction("Login");
+                    }
+                }
+
+                // =========================================================
+                // 2. NORMAL PASSWORD RESET LOGIC
+                // =========================================================
+                var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
+
+                if (user != null && user.Status != LMSUser.UserStatus.INACTIVE)
+                {
+                    var oldTokens = _db.PasswordResetTokens.Where(t => t.UserId == user.Id);
+                    _db.PasswordResetTokens.RemoveRange(oldTokens);
+
+                    string tokenString = Guid.NewGuid().ToString();
+                    var resetToken = new PasswordResetToken
+                    {
+                        UserId = user.Id,
+                        Token = tokenString,
+                        ExpiryDate = DateTime.Now.AddMinutes(15),
+                        IsUsed = false
+                    };
+
+                    _db.PasswordResetTokens.Add(resetToken);
+                    await _db.SaveChangesAsync();
+
+                    // C. Send Email
+                    string resetLink = Url.Action("ResetPassword", "Account",
+                        new { token = tokenString, email = model.Email }, Request.Scheme) ?? "";
+
+                    string emailBody = $@"
+                <h3>Reset Your Password</h3>
+                <p>Hello {user.Username},</p>
+                <p>Click the link below to reset your password (Valid for 15 mins):</p>
+                <p><a href='{resetLink}' style='padding:10px; background-color:#007bff; color:white; text-decoration:none; border-radius:5px;'>Reset Password</a></p>";
+
+                    await _emailSender.SendEmailAsync(model.Email, "Reset Password Request", emailBody);
+                    var cacheOptions = new MemoryCacheEntryOptions()
+                        .SetSlidingExpiration(TimeSpan.FromMinutes(60));
+
+                    _cache.Set(cacheKey, currentCount + 1, cacheOptions);
+                }
+
+                TempData["ToastMessage"] = "If that email exists, a reset link has been sent!";
+                TempData["ToastType"] = "success";
+
+                return RedirectToAction("Login");
+            }
+
+            return View(model);
+        }
+
+        [HttpGet]
+        public IActionResult ForgotPasswordConfirmation()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult ResetPassword(string token, string email)
+        {
+            if (token == null || email == null)
+            {
+                TempData["ToastMessage"] = "Invalid password reset link.";
+                TempData["ToastType"] = "error";
+                return RedirectToAction("Login");
+            }
+
+            var model = new ResetPasswordVM { Token = token, Email = email };
+            return View(model);
+        }
+        // =======================================================
+        // RESET PASSWORD
+        // =======================================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(ResetPasswordVM model)
+        {
+            if (!ModelState.IsValid) return View(model);
+
+            var resetToken = await _db.PasswordResetTokens
+                .Include(t => t.User) 
+                .FirstOrDefaultAsync(t => t.Token == model.Token && t.User.Email == model.Email);
+
+            //Validate Token
+            if (resetToken == null)
+            {
+                TempData["ToastMessage"] = "Invalid token.";
+                return RedirectToAction("Login");
+            }
+            if (resetToken.IsUsed)
+            {
+                TempData["ToastMessage"] = "This link has already been used.";
+                return RedirectToAction("Login");
+            }
+            if (resetToken.ExpiryDate < DateTime.Now)
+            {
+                TempData["ToastMessage"] = "This link has expired.";
+                return RedirectToAction("Login");
+            }
+
+            //Update Password (Using BCrypt to match your Register logic)
+            resetToken.User.PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password);
+
+            resetToken.IsUsed = true;
+
+            //Clear any locks the user might have had
+            resetToken.User.FailedLoginAttempts = 0;
+            resetToken.User.LockoutEnd = null;
+            if (resetToken.User.Status == LMSUser.UserStatus.LOCKED)
+            {
+                resetToken.User.Status = LMSUser.UserStatus.ACTIVE;
+            }
+
+            _db.Update(resetToken.User);
+            _db.Update(resetToken);
+            await _db.SaveChangesAsync();
+
+            TempData["ToastMessage"] = "Password reset successful! Please login.";
+            TempData["ToastType"] = "success";
+
+            return RedirectToAction("Login");
+        }
 
         // =======================================================
-        // LOGOUT SECTION (UNCHANGED)
+        // LOGOUT 
         // =======================================================
         [HttpGet]
         [HttpPost]
@@ -273,7 +422,6 @@ namespace LibraryManagementSystem.Controllers
         {
             string username = User.Identity?.Name ?? "User";
 
-            // Clear the session cookie
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
             TempData["ToastMessage"] = "See you, " + username + "!";
@@ -295,8 +443,70 @@ namespace LibraryManagementSystem.Controllers
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
-            // This creates the actual "Session" cookie
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
+        }
+        [HttpGet]
+        [Authorize] // Ensures only logged-in users can see this
+        public async Task<IActionResult> Profile()
+        {
+            // Get current user ID
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null) return RedirectToAction("Login");
+
+            var user = await _db.Users.FindAsync(userId);
+            if (user == null) return NotFound();
+
+            var model = new ProfileVM
+            {
+                Username = user.Username,
+                Role = user.Role.ToString(),
+                CredibilityScore = user.CredibilityScore,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                ContactNo = user.ContactNo,
+                IsProfilePublic = user.IsProfilePublic,
+                ProfilePhotoUrl = user.ImageURL
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateProfile(ProfileVM model)
+        {
+            if (!ModelState.IsValid)
+            {
+                // Return JSON error list if validation fails
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+                return Json(new { success = false, message = "Validation failed.", errors = errors });
+            }
+
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var user = await _db.Users.FindAsync(userId);
+
+            if (user == null)
+            {
+                return Json(new { success = false, message = "User not found." });
+            }
+
+            // Update Fields
+            user.FirstName = model.FirstName;
+            user.LastName = model.LastName;
+            user.Email = model.Email;
+            user.ContactNo = model.ContactNo;
+            user.IsProfilePublic = model.IsProfilePublic;
+
+            // Check for unique email/phone conflicts (excluding current user)
+            bool emailExists = await _db.Users.AnyAsync(u => u.Email == model.Email && u.Id != userId);
+            if (emailExists) return Json(new { success = false, message = "Email already in use." });
+
+            _db.Users.Update(user);
+            await _db.SaveChangesAsync();
+
+            return Json(new { success = true, message = "Profile updated successfully!" });
         }
     }
 }
