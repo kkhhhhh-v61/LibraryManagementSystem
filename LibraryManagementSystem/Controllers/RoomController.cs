@@ -12,34 +12,52 @@ namespace LibraryManagementSystem.Controllers
     {
         // GET: Room/Index
         [Authorize(Roles = "MEMBER")]
-        public IActionResult Index(string search = "") // 1. 添加参数接收搜索词
+        public IActionResult Index(string search = "", string sortOrder = "")
         {
-            // 2. 基础查询
-            var query = db.RoomCategories
-                .Include(c => c.Rooms)
-                .AsQueryable();
+            ViewData["CurrentFilter"] = search;
+            ViewData["CurrentSort"] = sortOrder;
 
-            // 3. 搜索过滤逻辑
+            ViewData["IdSortParm"] = String.IsNullOrEmpty(sortOrder) ? "id_asc" : "";
+            ViewData["NameSortParm"] = sortOrder == "Name" ? "name_desc" : "Name";
+            ViewData["RateSortParm"] = sortOrder == "Rate" ? "rate_desc" : "Rate";
+
+            var query = db.RoomCategories.Include(c => c.Rooms).AsQueryable();
+
             if (!string.IsNullOrEmpty(search))
             {
-                search = search.Trim(); // 去除首尾空格
-                query = query.Where(c =>
-                    c.Name.Contains(search) ||
-                    c.Description.Contains(search)
-                );
+                search = search.Trim();
+                query = query.Where(c => c.Name.Contains(search) || c.Description.Contains(search));
             }
 
-            // 4. 获取数据
-            var categories = query.OrderByDescending(c => c.Id).ToList();
+            switch (sortOrder)
+            {
+                case "id_asc":
+                    query = query.OrderBy(c => c.Id);
+                    break;
+                case "Name":
+                    query = query.OrderBy(c => c.Name);
+                    break;
+                case "name_desc":
+                    query = query.OrderByDescending(c => c.Name);
+                    break;
+                case "Rate":
+                    query = query.OrderBy(c => c.HourlyRate);
+                    break;
+                case "rate_desc":
+                    query = query.OrderByDescending(c => c.HourlyRate);
+                    break;
+                default:
+                    query = query.OrderByDescending(c => c.Id);
+                    break;
+            }
 
-            // 5. ★ 关键修正：检测是否为 AJAX 请求 ★
+            var categories = query.ToList();
+
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
             {
-                // 如果是 AJAX，只返回表格部分的 Partial View
                 return PartialView("_CategoryTable", categories);
             }
 
-            // 6. 如果是普通访问，返回完整页面
             var vm = new RoomIndexVM
             {
                 Categories = categories
@@ -101,27 +119,13 @@ namespace LibraryManagementSystem.Controllers
                 db.RoomCategories.Add(newCategory);
                 db.SaveChanges();
 
-
-                return Json(new
-                {
-                    success = true,
-                    message = "Category created successfully!",
-                    data = new
-                    {
-                        id = newCategory.Id,
-                        name = newCategory.Name,
-                        rate = newCategory.HourlyRate.ToString("F2"),
-                        description = newCategory.Description
-                    }
-                });
+                ModelState.Clear();
+                var emptyVm = new RoomIndexVM();
+                ViewData["SuccessMessage"] = "Category created successfully!";
+                return PartialView("_CreateCategoryForm", emptyVm);
             }
 
-            var errors = ModelState.ToDictionary(
-                kvp => kvp.Key,
-                kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToArray() ?? Array.Empty<string>()
-            );
-
-            return Json(new { success = false, message = "Please fix the errors below.", errors = errors });
+            return PartialView("_CreateCategoryForm", vm);
         }
 
         // ==========================================================================================
@@ -143,6 +147,8 @@ namespace LibraryManagementSystem.Controllers
                 ModelState.AddModelError("RoomInput.Name", "Room Name already exists in this category.");
             }
 
+            ViewBag.CategoryList = new SelectList(db.RoomCategories, "Id", "Name", vm.RoomInput.RoomCategoryId);
+
             if (ModelState.IsValid)
             {
                 string newId = GenerateNextId("Room");
@@ -160,17 +166,19 @@ namespace LibraryManagementSystem.Controllers
                 db.Rooms.Add(newRoom);
                 db.SaveChanges();
 
-                return Json(new { success = true, message = "Room added successfully!" });
+                ModelState.Clear();
+                var emptyVm = new RoomIndexVM();
+
+                ViewBag.CategoryList = new SelectList(db.RoomCategories, "Id", "Name");
+                ViewData["SuccessMessage"] = "Room added successfully!";
+
+                return PartialView("_CreateRoomForm", emptyVm);
             }
 
-            var errors = ModelState.ToDictionary(
-                kvp => kvp.Key,
-                kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToArray() ?? Array.Empty<string>()
-            );
-
-            return Json(new { success = false, message = "Failed to add room.", errors = errors });
+            return PartialView("_CreateRoomForm", vm);
         }
 
+        // Id auto generate
         private string GenerateNextId(string type)
         {
             string prefix = type == "Room" ? "R" : "C";

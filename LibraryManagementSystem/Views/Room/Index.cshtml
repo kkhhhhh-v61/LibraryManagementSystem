@@ -30,7 +30,7 @@
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
 
                     <input type="text" name="search" class="search-input" placeholder="Search categories..." autocomplete="off" oninput="submitSearch()">
-
+                    <input type="hidden" name="sortOrder" value="@ViewData["CurrentSort"]" />
                     <div id="loader" class="loading-spinner"></div>
                 </div>
             </form>
@@ -46,76 +46,27 @@
         <div class="panel panel-auto">
             <div class="panel-header"><div class="panel-title">Add Category</div></div>
             <div class="panel-body">
-                <form id="formCreateCategory" onsubmit="submitCategory(event)" class="form-stack" enctype="multipart/form-data">
 
-                    <div class="form-group">
-                        <label class="form-label">Name</label>
-                        <input asp-for="CategoryInput.Name" class="form-input" placeholder="e.g. Gaming Room" data-trim autofocus />
-                        <span asp-validation-for="CategoryInput.Name" class="text-danger" style="font-size:0.8rem; color:var(--danger);"></span>
-                    </div>
+                <div id="createCategoryContainer">
+                    <partial name="_CreateCategoryForm" model="Model" />
+                </div>
 
-                    <div class="form-group">
-                        <label class="form-label">Rate (RM/Hr)</label>
-                        <input asp-for="CategoryInput.HourlyRate" class="form-input" placeholder="0.00" type="number" step="0.01" data-trim />
-                        <span asp-validation-for="CategoryInput.HourlyRate" class="text-danger" style="font-size:0.8rem; color:var(--danger);"></span>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Description</label>
-                        <textarea asp-for="CategoryInput.Description" class="form-input" rows="2" data-trim></textarea>
-                        <span asp-validation-for="CategoryInput.Description" class="text-danger" style="font-size:0.8rem; color:var(--danger);"></span>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Image</label>
-                        <input asp-for="CategoryInput.Image" class="form-input" type="file" accept="image/*" />
-                    </div>
-
-                    <button type="submit" class="btn-save">Create Category</button>
-                </form>
             </div>
         </div>
 
         <div class="panel panel-auto">
             <div class="panel-header"><div class="panel-title">Add Room</div></div>
             <div class="panel-body scrollable-panel-body">
-                <form id="formCreateRoom" onsubmit="submitRoom(event)" class="form-stack" enctype="multipart/form-data">
 
-                    <div class="form-group">
-                        <label class="form-label">Room Name</label>
-                        <input asp-for="RoomInput.Name" class="form-input" placeholder="e.g. Room A" data-trim />
-                        <span asp-validation-for="RoomInput.Name" class="text-danger" style="font-size:0.8rem; color:var(--danger);"></span>
-                    </div>
+                <div id="createRoomContainer">
+                    <partial name="_CreateRoomForm" model="Model" />
+                </div>
 
-                    <div class="form-group">
-                        <label class="form-label">Location</label>
-                        <input asp-for="RoomInput.Location" class="form-input" placeholder="Level 1" data-trim />
-                        <span asp-validation-for="RoomInput.Location" class="text-danger" style="font-size:0.8rem; color:var(--danger);"></span>
-                    </div>
-
-                    <div class="form-grid" style="grid-template-columns: 1fr 1fr; display:grid; gap:10px;">
-                        <div class="form-group">
-                            <label class="form-label">Capacity</label>
-                            <input asp-for="RoomInput.Capacity" class="form-input" />
-                            <span asp-validation-for="RoomInput.Capacity" class="text-danger" style="font-size:0.8rem; color:var(--danger);"></span>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Category</label>
-                            <select asp-for="RoomInput.RoomCategoryId" class="form-input" asp-items="ViewBag.CategoryList">
-                                <option value="">Select...</option>
-                            </select>
-                            <span asp-validation-for="RoomInput.RoomCategoryId" class="text-danger" style="font-size:0.8rem; color:var(--danger);"></span>
-                        </div>
-                    </div>
-
-                    <input type="hidden" asp-for="RoomInput.Status" value="AVAILABLE" />
-
-                    <button type="submit" class="btn-save" style="background-color:var(--success);">Create Room</button>
-                </form>
             </div>
         </div>
 
     </div>
+
 </div>
 
 @section foot {
@@ -132,10 +83,8 @@
     <script>
         let timeout = null;
 
-        // 这个函数绑定在输入框的 oninput 上
         function submitSearch() {
             clearTimeout(timeout);
-            // 延迟 500ms 提交，防止请求过于频繁
             timeout = setTimeout(function () {
                 $("#searchForm").submit();
             }, 500);

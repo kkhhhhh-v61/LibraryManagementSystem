@@ -13,9 +13,69 @@
         <table class="modern-table">
             <thead>
                 <tr>
-                    <th style="width:10%">ID</th>
-                    <th style="width:25%">Name</th>
-                    <th style="width:15%">Rate</th>
+                    <th style="width:10%">
+                        <a asp-action="Index"
+                           asp-route-sortOrder="@ViewData["IdSortParm"]"
+                           asp-route-search="@ViewData["CurrentFilter"]"
+                           data-ajax="true"
+                           data-ajax-update="#resultContainer"
+                           data-ajax-loading="#loader"
+                           style="color: inherit; text-decoration: none; cursor: pointer;">
+                            ID
+                            @if (ViewData["CurrentSort"]?.ToString() == "id_asc")
+                            {
+                                <span>▲</span>
+                            }
+                            else if (string.IsNullOrEmpty(ViewData["CurrentSort"]?.ToString()))
+                            {
+
+                                <span>▼</span>
+                            }
+                        </a>
+                    </th>
+
+                    <th style="width:25%">
+                        <a asp-action="Index"
+                           asp-route-sortOrder="@ViewData["NameSortParm"]"
+                           asp-route-search="@ViewData["CurrentFilter"]"
+                           data-ajax="true"
+                           data-ajax-update="#resultContainer"
+                           data-ajax-loading="#loader"
+                           style="color: inherit; text-decoration: none; cursor: pointer;">
+                            Name
+                            @if (ViewData["CurrentSort"]?.ToString() == "Name")
+                            {
+                                <span>▲</span>
+                            }
+                            else if (ViewData["CurrentSort"]?.ToString() == "name_desc")
+                            {
+
+                                <span>▼</span>
+                            }
+                        </a>
+                    </th>
+
+                    <th style="width:15%">
+                        <a asp-action="Index"
+                           asp-route-sortOrder="@ViewData["RateSortParm"]"
+                           asp-route-search="@ViewData["CurrentFilter"]"
+                           data-ajax="true"
+                           data-ajax-update="#resultContainer"
+                           data-ajax-loading="#loader"
+                           style="color: inherit; text-decoration: none; cursor: pointer;">
+                            Rate
+                            @if (ViewData["CurrentSort"]?.ToString() == "Rate")
+                            {
+                                <span>▲</span>
+                            }
+                            else if (ViewData["CurrentSort"]?.ToString() == "rate_desc")
+                            {
+
+                                <span>▼</span>
+                            }
+                        </a>
+                    </th>
+
                     <th style="width:35%">Description</th>
                     <th style="width:15%; text-align:right;">Action</th>
                 </tr>

@@ -592,7 +592,7 @@ textarea.form-input {
 }
 
 .loading-spinner {
-    display: none; /* 默认隐藏 */
+    display: none;
     width: 16px;
     height: 16px;
     border: 2px solid #f3f3f3;

@@ -1,0 +1,51 @@
+﻿@using LibraryManagementSystem.Models
+@model RoomIndexVM
+
+<form asp-action="CreateCategoryAjax" method="post"
+      data-ajax="true"
+      data-ajax-method="post"
+      data-ajax-update="#createCategoryContainer"
+      data-ajax-loading="#catLoader"
+      class="form-stack" enctype="multipart/form-data">
+
+    <div class="form-group">
+        <label class="form-label">Name</label>
+        <input asp-for="CategoryInput.Name" class="form-input" placeholder="e.g. Gaming Room" data-trim />
+        <span asp-validation-for="CategoryInput.Name" class="text-danger" style="font-size:0.8rem; color:var(--danger);"></span>
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Rate (RM/Hr)</label>
+        <input asp-for="CategoryInput.HourlyRate" class="form-input" placeholder="0.00" type="number" step="0.01" data-trim />
+        <span asp-validation-for="CategoryInput.HourlyRate" class="text-danger" style="font-size:0.8rem; color:var(--danger);"></span>
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea asp-for="CategoryInput.Description" class="form-input" rows="2" data-trim></textarea>
+        <span asp-validation-for="CategoryInput.Description" class="text-danger" style="font-size:0.8rem; color:var(--danger);"></span>
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Image</label>
+        <input asp-for="CategoryInput.Image" class="form-input" type="file" accept="image/*" />
+        <span asp-validation-for="CategoryInput.Image" class="text-danger" style="font-size:0.8rem; color:var(--danger);"></span>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <button type="submit" class="btn-save">Create Category</button>
+        <div id="catLoader" class="loading-spinner" style="display:none;"></div>
+    </div>
+</form>
+
+@if (ViewData["SuccessMessage"] != null)
+{
+    <script>
+        showToast('@ViewData["SuccessMessage"]', 'success');
+
+        if (typeof submitSearch === 'function') {
+            submitSearch();
+        }
+
+    </script>
+}

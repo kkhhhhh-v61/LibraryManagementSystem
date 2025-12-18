@@ -1,0 +1,54 @@
+﻿@using LibraryManagementSystem.Models
+@model RoomIndexVM
+
+<form asp-action="CreateRoomAjax" method="post"
+      data-ajax="true"
+      data-ajax-method="post"
+      data-ajax-update="#createRoomContainer"
+      data-ajax-loading="#roomLoader"
+      class="form-stack">
+
+    <div class="form-group">
+        <label class="form-label">Room Name</label>
+        <input asp-for="RoomInput.Name" class="form-input" placeholder="e.g. Room A" data-trim />
+        <span asp-validation-for="RoomInput.Name" class="text-danger" style="font-size:0.8rem; color:var(--danger);"></span>
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Location</label>
+        <input asp-for="RoomInput.Location" class="form-input" placeholder="Level 1" data-trim />
+        <span asp-validation-for="RoomInput.Location" class="text-danger" style="font-size:0.8rem; color:var(--danger);"></span>
+    </div>
+
+    <div class="form-grid" style="grid-template-columns: 1fr 1fr; display:grid; gap:10px;">
+        <div class="form-group">
+            <label class="form-label">Capacity</label>
+            <input asp-for="RoomInput.Capacity" class="form-input" />
+            <span asp-validation-for="RoomInput.Capacity" class="text-danger" style="font-size:0.8rem; color:var(--danger);"></span>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Category</label>
+            <select asp-for="RoomInput.RoomCategoryId" class="form-input" asp-items="ViewBag.CategoryList">
+                <option value="">Select...</option>
+            </select>
+            <span asp-validation-for="RoomInput.RoomCategoryId" class="text-danger" style="font-size:0.8rem; color:var(--danger);"></span>
+        </div>
+    </div>
+
+    <input type="hidden" asp-for="RoomInput.Status" value="AVAILABLE" />
+
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <button type="submit" class="btn-save" style="background-color:var(--success);">Create Room</button>
+        <div id="roomLoader" class="loading-spinner" style="display:none;"></div>
+    </div>
+</form>
+
+@if (ViewData["SuccessMessage"] != null)
+{
+    <script>
+        showToast('@ViewData["SuccessMessage"]', 'success');
+        if (typeof submitSearch === 'function') {
+            submitSearch();
+        }
+    </script>
+}
