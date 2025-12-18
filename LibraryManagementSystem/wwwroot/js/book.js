@@ -126,6 +126,8 @@ function setupImageUpload(wrapper) {
     const removeButton = wrapper.querySelector(".upload__remove");
     const form = wrapper.closest("form");
     const STORAGE_KEY = "temp_image_data";
+    const SUBMIT_KEY = "form_submitting";
+
     input.addEventListener("change", (e) => {
         const file = e.target.files[0];
         handleFileUpdate(file);
@@ -143,11 +145,26 @@ function setupImageUpload(wrapper) {
             .on("click", () => {
                 clearFile();
             });
+
+        form.addEventListener("submit", () => {
+            sessionStorage.setItem(SUBMIT_KEY, "true");
+        });
     }
+
+    if (!sessionStorage.getItem(SUBMIT_KEY)) {
+        sessionStorage.removeItem(STORAGE_KEY);
+    }
+    sessionStorage.removeItem(SUBMIT_KEY);
 
     const storedBase64 = sessionStorage.getItem(STORAGE_KEY);
     if (storedBase64) {
         restoreFileState(storedBase64);
+    } else {
+        const existingImage = wrapper.dataset.existingImage;
+        if (existingImage) {
+            preview.src = existingImage;
+            wrapper.classList.add("has-image");
+        }
     }
 
     function handleFileUpdate(file) {

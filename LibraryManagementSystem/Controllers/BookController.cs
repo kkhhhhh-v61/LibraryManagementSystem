@@ -117,7 +117,124 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         TempData["ToastType"] = "success";
         TempData["BookInsertSuccess"] = true;
 
-        return RedirectToAction("ManageBook"); // TODO: Redirect to Book Maintenance
+        return RedirectToAction("ManageBook");
+    }
+
+    public IActionResult EditBook(string id)
+    {
+        var book = db.Books
+            .Include(b => b.Genres)
+            .Include(b => b.Authors)
+            .FirstOrDefault(b => b.Id == id);
+
+        if (book == null)
+        {
+            TempData["ToastMessage"] = "Book not found.";
+            TempData["ToastType"] = "error";
+            return RedirectToAction("ManageBook");
+        }
+
+        var vm = new BookEditVM
+        {
+            Id = book.Id,
+            Title = book.Title,
+            Description = book.Description,
+            ExistingImageURL = book.ImageURL,
+            ISBN = book.ISBN,
+            PublicationYear = book.PublicationYear,
+            Edition = book.Edition,
+            IsFeatured = book.IsFeatured,
+            IsArchived = book.IsArchived,
+            SelectedGenreIds = book.Genres.Select(g => g.Id).ToList(),
+            SelectedAuthorIds = book.Authors.Select(a => a.Id).ToList()
+        };
+
+        PopulateDropdowns(vm);
+        return View(vm);
+    }
+
+    [HttpPost]
+    public IActionResult EditBook(BookEditVM vm)
+    {
+        // 1. ISBN Validation
+        string cleanISBN = vm.ISBN.Replace("-", "").Trim().Replace(" ", "").ToUpper();
+        if (db.Books.Any(b => b.ISBN == cleanISBN && b.Id != vm.Id))
+        {
+            ModelState.AddModelError("ISBN", "This ISBN is already assigned to another book.");
+        }
+
+        // 2. Image Validation
+        if (vm.Image != null)
+        {
+            var imageResult = Helper.ValidateImage(vm.Image);
+            if (imageResult != ValidationResult.Success)
+            {
+                ModelState.AddModelError("Image", imageResult.ErrorMessage!);
+            }
+        }
+
+        // 3. Early Exit
+        if (!ModelState.IsValid)
+        {
+            TempData["ToastMessage"] = "Failed to update Book. Please check errors.";
+            TempData["ToastType"] = "error";
+            var existingBook = db.Books.AsNoTracking().FirstOrDefault(b => b.Id == vm.Id);
+            if (existingBook != null) vm.ExistingImageURL = existingBook.ImageURL;
+            PopulateDropdowns(vm);
+            return View(vm);
+        }
+
+        var book = db.Books
+            .Include(b => b.Genres)
+            .Include(b => b.Authors)
+            .FirstOrDefault(b => b.Id == vm.Id);
+
+        if (book == null)
+        {
+            TempData["ToastMessage"] = "Book not found.";
+            TempData["ToastType"] = "error";
+            return RedirectToAction("ManageBook");
+        }
+
+        // 4. Save Image
+        if (vm.Image != null)
+        {
+            book.ImageURL = Helper.SaveImage(vm.Image, "books", en.WebRootPath);
+        }
+
+        // 5. Update Properties
+        book.Title = vm.Title.Trim();
+        book.Description = vm.Description.Trim();
+        book.ISBN = cleanISBN;
+        book.PublicationYear = vm.PublicationYear;
+        book.Edition = vm.Edition;
+        book.IsFeatured = vm.IsFeatured;
+        book.IsArchived = vm.IsArchived;
+
+        // 6. Update Relationships
+        book.Genres.Clear();
+        foreach (var genreId in vm.SelectedGenreIds)
+        {
+            var genre = db.Genres.Find(genreId);
+            if (genre != null) book.Genres.Add(genre);
+        }
+
+        book.Authors.Clear();
+        foreach (var authorId in vm.SelectedAuthorIds)
+        {
+            var author = db.Authors.Find(authorId);
+            if (author != null) book.Authors.Add(author);
+        }
+
+        // 7. Save Changes
+        db.SaveChanges();
+
+        // 8. Success Feedback
+        TempData["ToastMessage"] = $"Book '{vm.Title}' updated successfully.";
+        TempData["ToastType"] = "success";
+        TempData["BookInsertSuccess"] = true; // Clears session storage for image preview
+
+        return RedirectToAction("ManageBook");
     }
 
     [HttpPost]
@@ -435,6 +552,12 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
     }
 
     private void PopulateDropdowns(BookInsertVM vm)
+    {
+        vm.GenreList = db.Genres.OrderBy(g => g.Name).Select(g => new SelectListItem(g.Name, g.Id)).ToList();
+        vm.AuthorList = db.Authors.OrderBy(a => a.Name).Select(a => new SelectListItem(a.Name, a.Id)).ToList();
+    }
+
+    private void PopulateDropdowns(BookEditVM vm)
     {
         vm.GenreList = db.Genres.OrderBy(g => g.Name).Select(g => new SelectListItem(g.Name, g.Id)).ToList();
         vm.AuthorList = db.Authors.OrderBy(a => a.Name).Select(a => new SelectListItem(a.Name, a.Id)).ToList();

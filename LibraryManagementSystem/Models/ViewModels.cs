@@ -137,6 +137,58 @@ public class BookInsertVM
     public bool IsArchived { get; set; } = false;
 }
 
+public class BookEditVM
+{
+    [DisplayName("Book ID")]
+    public string Id { get; set; }
+
+    [DisplayName("Cover Image")]
+    public IFormFile? Image { get; set; }
+
+    public string? ExistingImageURL { get; set; }
+
+    [Required(ErrorMessage = "{0} is required.")]
+    [StringLength(255, ErrorMessage = "{0} must be between 1 and 255 characters.")]
+    public string Title { get; set; }
+
+    [Required(ErrorMessage = "{0} is required.")]
+    [StringLength(2000, MinimumLength = 10, ErrorMessage = "{0} must be between 10 and 2000 characters")]
+    public string Description { get; set; }
+
+    [Required(ErrorMessage = "{0} is required.")]
+    [StringLength(17, MinimumLength = 10, ErrorMessage = "{0} must be between 10 and 17 characters.")]
+    [ISBNValidation]
+    public string ISBN { get; set; }
+
+    [DisplayName("Publication Year")]
+    [Required(ErrorMessage = "{0} is required.")]
+    [Range(1450, 2100, ErrorMessage = "{0} must be between 1450 and 2100.")]
+    public int PublicationYear { get; set; }
+
+    [Required(ErrorMessage = "{0} is required.")]
+    [Range(1, 100, ErrorMessage = "{0} must be between 1 and 100.")]
+    public int Edition { get; set; }
+
+    [DisplayName("Genre(s)")]
+    [MinLength(1, ErrorMessage = "At least one Genre is required.")]
+    public List<string> SelectedGenreIds { get; set; } = new();
+
+    public List<SelectListItem> GenreList { get; set; } = new();
+
+    [DisplayName("Author(s)")]
+    [MinLength(1, ErrorMessage = "At least one Author is required.")]
+    [MaxLength(10, ErrorMessage = "A book cannot have more than 10 authors.")]
+    public List<string> SelectedAuthorIds { get; set; } = new();
+
+    public List<SelectListItem> AuthorList { get; set; } = new();
+
+    [DisplayName("Featured")]
+    public bool IsFeatured { get; set; } = false;
+
+    [DisplayName("Archived")]
+    public bool IsArchived { get; set; } = false;
+}
+
 public class GenreVM
 {
     public string? Id { get; set; }
