@@ -240,11 +240,8 @@ function initializeTableManagement() {
                 // AJAX Search
                 clearTimeout(debounceTimer);
                 debounceTimer = setTimeout(() => {
-                    performAjaxSearch(term);
+                    performAjaxSearch(term, 1);
                 }, 300);
-            } else {
-                // Client-side Search (Legacy for ManageBook)
-                performClientSideSearch(term);
             }
         });
 
@@ -274,12 +271,26 @@ function initializeTableManagement() {
 
     // Bind static modal events (Edit/Delete/Batch)
     bindStaticModalEvents();
+
+    // Bind Pagination Events (Delegation)
+    if (tableContainer) {
+        tableContainer.addEventListener("click", function (e) {
+            if (e.target.classList.contains("pagination__link")) {
+                e.preventDefault();
+                const page = e.target.dataset.page;
+                const term = searchInput ? searchInput.value : "";
+                performAjaxSearch(term, page);
+            }
+        });
+    }
 }
 
-function performAjaxSearch(term) {
+function performAjaxSearch(term, page) {
     const tableContainer = document.getElementById("tableContainer");
     const url = new URL(window.location.href);
-    url.searchParams.set("search", term);
+    if (term) url.searchParams.set("search", term);
+    else url.searchParams.delete("search");
+    url.searchParams.set("page", page);
 
     fetch(url, {
         headers: { "X-Requested-With": "XMLHttpRequest" },

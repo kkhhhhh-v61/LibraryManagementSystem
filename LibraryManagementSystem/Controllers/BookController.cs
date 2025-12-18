@@ -8,7 +8,7 @@ namespace LibraryManagementSystem.Controllers;
 
 public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
 {
-    public IActionResult ManageBook(string? search)
+    public IActionResult ManageBook(string? search, string? authorId, string? genreId, int page = 1)
     {
         var query = db.Books
             .Include(b => b.Authors)
@@ -21,9 +21,30 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
             query = query.Where(b => b.Title.Contains(search) || b.ISBN.Contains(search));
         }
 
+        if (!string.IsNullOrWhiteSpace(authorId))
+        {
+            query = query.Where(b => b.Authors.Any(a => a.Id == authorId));
+        }
+
+        if (!string.IsNullOrWhiteSpace(genreId))
+        {
+            query = query.Where(b => b.Genres.Any(g => g.Id == genreId));
+        }
+
+        int pageSize = 10;
+        int totalItems = query.Count();
+        int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+        if (page < 1) page = 1;
+        if (page > totalPages && totalPages > 0) page = totalPages;
+
+        var items = query.OrderByDescending(b => b.DateAdded).Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
         var vm = new BookManagementVM
         {
-            ExistingBooks = query.OrderByDescending(b => b.DateAdded).ToList()
+            ExistingBooks = items,
+            CurrentPage = page,
+            TotalPages = totalPages,
+            SearchTerm = search
         };
 
         if (Request.IsAjax())
@@ -311,7 +332,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         return Ok();
     }
 
-    public IActionResult ManageGenre(string? search)
+    public IActionResult ManageGenre(string? search, int page = 1)
     {
         var query = db.Genres.Include(g => g.Books).AsQueryable();
 
@@ -321,9 +342,20 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
             query = query.Where(g => g.Name.Contains(search));
         }
 
+        int pageSize = 10;
+        int totalItems = query.Count();
+        int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+        if (page < 1) page = 1;
+        if (page > totalPages && totalPages > 0) page = totalPages;
+
+        var items = query.OrderBy(g => g.Name).Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
         var vm = new GenreManagementVM
         {
-            ExistingGenres = query.OrderBy(g => g.Name).ToList(),
+            ExistingGenres = items,
+            CurrentPage = page,
+            TotalPages = totalPages,
+            SearchTerm = search
         };
 
         if (Request.IsAjax())
@@ -459,7 +491,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         return RedirectToAction("ManageGenre");
     }
 
-    public IActionResult ManageAuthor(string? search)
+    public IActionResult ManageAuthor(string? search, int page = 1)
     {
         var query = db.Authors.Include(a => a.Books).AsQueryable();
 
@@ -469,9 +501,20 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
             query = query.Where(a => a.Name.Contains(search));
         }
 
+        int pageSize = 10;
+        int totalItems = query.Count();
+        int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+        if (page < 1) page = 1;
+        if (page > totalPages && totalPages > 0) page = totalPages;
+
+        var items = query.OrderBy(a => a.Name).Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
         var vm = new AuthorManagementVM
         {
-            ExistingAuthors = query.OrderBy(a => a.Name).ToList(),
+            ExistingAuthors = items,
+            CurrentPage = page,
+            TotalPages = totalPages,
+            SearchTerm = search
         };
         
         if (Request.IsAjax())
