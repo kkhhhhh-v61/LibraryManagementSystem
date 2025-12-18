@@ -199,6 +199,7 @@ function initializeTableManagement() {
     const selectAll = document.getElementById("selectAll");
     const rowCheckboxes = document.querySelectorAll(".row-checkbox");
     const batchButton = document.getElementById("batchDeleteButton");
+    const deselectButton = document.getElementById("deselectAllButton");
     const batchForm = document.getElementById("batchForm");
     const selectionCountSpan = document.getElementById("selectionCount");
     if (selectAll && batchForm && batchButton) {
@@ -214,10 +215,12 @@ function initializeTableManagement() {
                 }
 
                 batchButton.classList.add("active");
+                if (deselectButton) deselectButton.classList.add("active");
             } else {
                 if (selectionCountSpan)
                     selectionCountSpan.classList.remove("active");
                 batchButton.classList.remove("active");
+                if (deselectButton) deselectButton.classList.remove("active");
             }
         };
 
@@ -261,6 +264,14 @@ function initializeTableManagement() {
                 batchForm.submit();
             }
         });
+
+        if (deselectButton) {
+            deselectButton.addEventListener("click", function () {
+                rowCheckboxes.forEach((cb) => (cb.checked = false));
+                if (selectAll) selectAll.checked = false;
+                updateBatchButton();
+            });
+        }
     }
 
     const editModal = document.getElementById("modal-edit");
@@ -350,15 +361,21 @@ function initializeTableManagement() {
     }
 
     const searchInput = document.getElementById("nameSearchInput");
+    const searchClear = document.getElementById("searchClearButton");
     const tableBody = document.querySelector(".table tbody");
     if (searchInput && tableBody) {
         searchInput.addEventListener("input", function (e) {
+            if (searchClear) {
+                if (this.value.length > 0) searchClear.classList.add("active");
+                else searchClear.classList.remove("active");
+            }
+
             const term = e.target.value.toLowerCase();
             const rows = tableBody.querySelectorAll(".table__row");
             let hasResults = false;
 
             rows.forEach((row) => {
-                const nameCell = row.querySelectorAll(".table__cell")[2];
+                const nameCell = row.querySelector(".table__cell--main");
 
                 if (nameCell) {
                     const text = nameCell.textContent.toLowerCase();
@@ -391,7 +408,30 @@ function initializeTableManagement() {
             } else {
                 if (noResultRow) noResultRow.remove();
             }
+
+            if (selectAll) {
+                const visibleCheckboxes = Array.from(rowCheckboxes).filter(
+                    (cb) => cb.closest(".table__row").style.display !== "none"
+                );
+
+                if (visibleCheckboxes.length > 0) {
+                    selectAll.checked = visibleCheckboxes.every(
+                        (cb) => cb.checked
+                    );
+                } else {
+                    selectAll.checked = false;
+                }
+            }
         });
+
+        if (searchClear) {
+            searchClear.addEventListener("click", () => {
+                searchInput.value = "";
+                searchClear.classList.remove("active");
+                searchInput.dispatchEvent(new Event("input"));
+                searchInput.focus();
+            });
+        }
     }
 }
 
