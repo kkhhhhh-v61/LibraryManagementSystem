@@ -109,36 +109,9 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         return RedirectToAction("Browse"); // TODO: Redirect to Book Maintenance
     }
 
-    public IActionResult ManageGenre(string sortOrder)
+    public IActionResult ManageGenre()
     {
-        ViewData["CurrentSort"] = sortOrder;
-        ViewData["NameSortParm"] = string.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
-        ViewData["IdSortParm"] = sortOrder == "id" ? "id_desc" : "id";
-        ViewData["CountSortParm"] = sortOrder == "count" ? "count_desc" : "count";
-
-        var genres = db.Genres.Include(g => g.Books).AsQueryable();
-
-        switch (sortOrder)
-        {
-            case "name_desc":
-                genres = genres.OrderByDescending(g => g.Name);
-                break;
-            case "id":
-                genres = genres.OrderBy(g => g.Id);
-                break;
-            case "id_desc":
-                genres = genres.OrderByDescending(g => g.Id);
-                break;
-            case "count":
-                genres = genres.OrderBy(g => g.Books.Count);
-                break;
-            case "count_desc":
-                genres = genres.OrderByDescending(g => g.Books.Count);
-                break;
-            default:
-                genres = genres.OrderBy(g => g.Name);
-                break;
-        }
+        var genres = db.Genres.Include(g => g.Books).OrderBy(g => g.Name);
 
         var vm = new GenreManagementVM
         {
@@ -273,36 +246,9 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         return RedirectToAction("ManageGenre");
     }
 
-    public IActionResult ManageAuthor(string sortOrder)
+    public IActionResult ManageAuthor()
     {
-        ViewData["CurrentSort"] = sortOrder;
-        ViewData["NameSortParm"] = string.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
-        ViewData["IdSortParm"] = sortOrder == "id" ? "id_desc" : "id";
-        ViewData["CountSortParm"] = sortOrder == "count" ? "count_desc" : "count";
-
-        var authors = db.Authors.Include(a => a.Books).AsQueryable();
-
-        switch (sortOrder)
-        {
-            case "name_desc":
-                authors = authors.OrderByDescending(a => a.Name);
-                break;
-            case "id":
-                authors = authors.OrderBy(a => a.Id);
-                break;
-            case "id_desc":
-                authors = authors.OrderByDescending(a => a.Id);
-                break;
-            case "count":
-                authors = authors.OrderBy(a => a.Books.Count);
-                break;
-            case "count_desc":
-                authors = authors.OrderByDescending(a => a.Books.Count);
-                break;
-            default:
-                authors = authors.OrderBy(a => a.Name);
-                break;
-        }
+        var authors = db.Authors.Include(a => a.Books).OrderBy(a => a.Name);
 
         var vm = new AuthorManagementVM
         {
@@ -439,8 +385,8 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
 
     private void PopulateDropdowns(BookInsertVM vm)
     {
-        vm.GenreList = db.Genres.Select(g => new SelectListItem(g.Name, g.Id)).ToList();
-        vm.AuthorList = db.Authors.Select(a => new SelectListItem(a.Name, a.Id)).ToList();
+        vm.GenreList = db.Genres.OrderBy(g => g.Name).Select(g => new SelectListItem(g.Name, g.Id)).ToList();
+        vm.AuthorList = db.Authors.OrderBy(a => a.Name).Select(a => new SelectListItem(a.Name, a.Id)).ToList();
     }
 
     private static string GenerateNewId(string? lastId, char prefixChar)
