@@ -617,14 +617,14 @@ textarea.form-input {
 }
 
     [data-tooltip]:hover::after {
-        content: attr(data-tooltip); /* 自动读取 data-tooltip 里的文字 */
+        content: attr(data-tooltip);
         position: absolute;
-        bottom: 40%; /* 显示在按钮上方 */
+        bottom: 40%;
         left: 50%;
         transform: translateX(-50%);
-        margin-bottom: 8px; /* 距离按钮的间距 */
+        margin-bottom: 8px;
 
-        background-color: #1e293b; /* 深色背景 */
+        background-color: #1e293b;
         color: white;
         padding: 5px 10px;
         border-radius: 4px;
@@ -638,7 +638,7 @@ textarea.form-input {
     }
 
     [data-tooltip]:hover::after {
-        opacity: 1; /* 鼠标悬停时显示 */
+        opacity: 1;
     }
 
 
