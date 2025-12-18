@@ -3,10 +3,6 @@
 @{
     ViewBag.Title = "Manage Author";
 
-    // Calculate Stats
-    var totalAuthors = Model.ExistingAuthors.Count;
-    var unusedAuthors = Model.ExistingAuthors.Count(a => a.Books.Count == 0);
-    var topAuthor = Model.ExistingAuthors.OrderByDescending(a => a.Books.Count).FirstOrDefault();
 }
 
 @section head {
@@ -15,25 +11,6 @@
 
 <form class="manage__content" asp-action="BatchDeleteAuthor" method="post" id="batchForm">
     
-    <!-- Stats Grid -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <span class="stat-card__title">Total Authors</span>
-            <span class="stat-card__value">@totalAuthors</span>
-            <span class="stat-card__desc">Registered authors</span>
-        </div>
-        <div class="stat-card">
-            <span class="stat-card__title">Unused Authors</span>
-            <span class="stat-card__value">@unusedAuthors</span>
-            <span class="stat-card__desc">No books assigned</span>
-        </div>
-        <div class="stat-card">
-            <span class="stat-card__title">Top Author</span>
-            <span class="stat-card__value">@(topAuthor?.Name ?? "-")</span>
-            <span class="stat-card__desc">@(topAuthor?.Books.Count ?? 0) books</span>
-        </div>
-    </div>
-
     <!-- Main Panel -->
     <div class="manage__panel">
         <div class="panel__header">

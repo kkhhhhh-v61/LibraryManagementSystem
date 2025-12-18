@@ -324,14 +324,16 @@ function initializeTableManagement() {
 
     const editModal = document.getElementById("modal-edit");
 
-    const modalTitle = editModal.querySelector(".modal__title");
-    const formIdInput = editModal.querySelector("input[name='Form.Id']");
-    const formNameInput = editModal.querySelector("input[name='Form.Name']");
-    const openButtons = document.querySelectorAll(".js-open-modal");
-    const closeButton = editModal.querySelector(".js-close-modal");
-    const cancelButton = editModal.querySelector(".js-cancel-modal");
-
     if (editModal) {
+        const modalTitle = editModal.querySelector(".modal__title");
+        const formIdInput = editModal.querySelector("input[name='Form.Id']");
+        const formNameInput = editModal.querySelector(
+            "input[name='Form.Name']"
+        );
+        const openButtons = document.querySelectorAll(".js-open-modal");
+        const closeButton = editModal.querySelector(".js-close-modal");
+        const cancelButton = editModal.querySelector(".js-cancel-modal");
+
         openButtons.forEach((button) => {
             button.addEventListener("click", () => {
                 const id = button.dataset.id;
@@ -357,6 +359,7 @@ function initializeTableManagement() {
                         );
                 }
                 editModal.classList.add("active");
+                setTimeout(() => formNameInput.focus(), 50);
             });
         });
 
@@ -370,7 +373,10 @@ function initializeTableManagement() {
         });
 
         const shouldOpen = document.getElementById("server-modal-trigger");
-        if (shouldOpen) editModal.classList.add("active");
+        if (shouldOpen) {
+            editModal.classList.add("active");
+            setTimeout(() => formNameInput.focus(), 50);
+        }
     }
 
     const deleteModal = document.getElementById("modal-delete");

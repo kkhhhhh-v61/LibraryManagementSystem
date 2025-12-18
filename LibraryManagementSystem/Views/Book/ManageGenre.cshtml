@@ -3,10 +3,6 @@
 @{
     ViewBag.Title = "Manage Genre";
 
-    // Calculate Stats
-    var totalGenres = Model.ExistingGenres.Count;
-    var unusedGenres = Model.ExistingGenres.Count(g => g.Books.Count == 0);
-    var topGenre = Model.ExistingGenres.OrderByDescending(g => g.Books.Count).FirstOrDefault();
 }
 
 @section head {
@@ -15,25 +11,6 @@
 
 <form class="manage__content" asp-action="BatchDeleteGenre" method="post" id="batchForm">
     
-    <!-- Stats Grid -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <span class="stat-card__title">Total Genres</span>
-            <span class="stat-card__value">@totalGenres</span>
-            <span class="stat-card__desc">Active categories</span>
-        </div>
-        <div class="stat-card">
-            <span class="stat-card__title">Unused Genres</span>
-            <span class="stat-card__value">@unusedGenres</span>
-            <span class="stat-card__desc">No books assigned</span>
-        </div>
-        <div class="stat-card">
-            <span class="stat-card__title">Top Genre</span>
-            <span class="stat-card__value">@(topGenre?.Name ?? "-")</span>
-            <span class="stat-card__desc">@(topGenre?.Books.Count ?? 0) books</span>
-        </div>
-    </div>
-
     <!-- Main Panel -->
     <div class="manage__panel">
         <div class="panel__header">

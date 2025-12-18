@@ -7,7 +7,7 @@ namespace LibraryManagementSystem.Controllers;
 
 public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
 {
-    public IActionResult Browse()
+    public IActionResult ManageBook()
     {
         return View();
     }
