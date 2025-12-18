@@ -1,15 +1,11 @@
-﻿/* =============================================================
-   1. 布局容器
-   ============================================================= */
-#calendar-wrapper {
+﻿#calendar-wrapper {
     position: relative;
     width: 100%;
-    /* 适配屏幕高度 */
     height: calc(100vh - 80px);
     display: flex;
     flex-direction: column;
     background-color: #f8fafc;
-    padding: 20px; /* 增加一点外边距 */
+    padding: 20px;
     box-sizing: border-box;
     overflow: hidden;
 }
@@ -30,9 +26,6 @@
         visibility: visible;
     }
 
-/* =============================================================
-   2. 主卡片 & 头部
-   ============================================================= */
 #calendar-card {
     flex: 1;
     background: #fff;
@@ -46,7 +39,6 @@
     z-index: 1;
 }
 
-/* --- 头部工具栏 (美化版) --- */
 .calendar-header {
     height: 64px;
     padding: 0 24px;
@@ -57,20 +49,17 @@
     background: #fff;
 }
 
-/* 左侧整体 */
 .header-left {
     display: flex;
     align-items: center;
-    /* 移除 gap，由内部元素控制 */
 }
 
-/* 1. 品牌标题 */
 .brand-wrapper {
     display: flex;
     align-items: center;
     gap: 10px;
     color: #0f172a;
-    padding-right: 20px; /* 右边留出空间给分割线 */
+    padding-right: 20px;
 }
 
 .brand-icon {
@@ -86,7 +75,6 @@
     letter-spacing: -0.01em;
 }
 
-/* 2. 分割线 */
 .header-separator {
     width: 1px;
     height: 24px;
@@ -94,23 +82,21 @@
     margin-right: 20px;
 }
 
-/* 3. ★ 整合后的导航栏 (Unified Nav) ★ */
 .custom-nav {
     display: flex;
     align-items: center;
     background: #ffffff;
     border: 1px solid #e2e8f0;
-    border-radius: 8px; /* 圆角 */
+    border-radius: 8px;
     padding: 3px;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05); /* 精致阴影 */
-    gap: 0; /* 紧凑排列 */
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    gap: 0;
 }
 
-/* 左右箭头按钮 */
 .nav-btn {
     border: none;
     background: transparent;
-    width: 32px; /* 固定宽度，正方形 */
+    width: 32px;
     height: 32px;
     border-radius: 6px;
     color: #64748b;
@@ -130,20 +116,18 @@
         transform: scale(0.95);
     }
 
-/* 中间的日期按钮 */
 .date-btn {
     border: none;
     background: transparent;
     height: 32px;
-    padding: 0 16px; /* 左右留宽一点 */
+    padding: 0 16px;
     border-radius: 6px;
-    /* 字体设置 */
     font-size: 0.95rem;
     font-weight: 700;
     color: #1e293b;
     cursor: pointer;
-    white-space: nowrap; /* 防止日期换行 */
-    min-width: 160px; /* ★ 关键：固定最小宽度，防止切换月份时按钮跳动 */
+    white-space: nowrap;
+    min-width: 160px;
     text-align: center;
     transition: all 0.2s;
 }
@@ -153,7 +137,6 @@
         color: #4f46e5;
     }
 
-/* 右侧工具栏 (保持原样) */
 .header-right {
     display: flex;
     align-items: center;
@@ -198,9 +181,6 @@
     border-radius: 2px;
 }
 
-/* =============================================================
-   3. FullCalendar 放大设计 (Enlarged Design)
-   ============================================================= */
 #calendar-wrapper .fc {
     font-family: 'Inter', sans-serif;
     background: #fff;
@@ -210,11 +190,10 @@
     display: none;
 }
 
-/* 表头高度 */
 #calendar-wrapper .fc-timeline-header-row {
     height: 48px;
 }
-/* 时间文字加大 */
+
 #calendar-wrapper .fc-timeline-slot-text {
     font-size: 0.85rem;
     color: #64748b;
@@ -227,7 +206,6 @@
     border: none;
 }
 
-/* 竖线：整点深色，半点浅色 */
 #calendar-wrapper .fc-timeline-slot {
     border-right: 1px dashed #f1f5f9 !important;
 }
@@ -240,7 +218,6 @@
     border-bottom: 1px solid #f1f5f9;
 }
 
-/* ★ 关键：行高加大到 60px (Enlarged) ★ */
 #calendar-wrapper .fc-timeline-lane,
 #calendar-wrapper .fc-datagrid-cell-frame {
     height: 60px !important;
@@ -248,7 +225,6 @@
     align-items: center;
 }
 
-/* 左侧文字加大 */
 #calendar-wrapper .fc-datagrid-cell-main {
     font-size: 0.95rem;
     font-weight: 600;
@@ -256,12 +232,10 @@
     padding-left: 20px;
 }
 
-/* --- 事件条加大 --- */
 #calendar-wrapper .fc-event {
     border: none;
     border-radius: 6px;
     padding: 0;
-    /* 计算: (60px行高 - 38px事件) / 2 = 11px 上边距 */
     height: 38px;
     margin-top: 11px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.08);
@@ -307,7 +281,6 @@
     background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.15) 0, rgba(255,255,255,0.15) 5px, transparent 5px, transparent 10px);
 }
 
-/* Maintenance (工程斜纹) */
 .row-maintenance {
     background-color: #f8fafc;
     background-image: repeating-linear-gradient(45deg, #f1f5f9, #f1f5f9 10px, #e2e8f0 10px, #e2e8f0 20px);
@@ -320,9 +293,6 @@
         text-decoration: line-through;
     }
 
-/* =============================================================
-   4. 右侧抽屉 (Sidebar)
-   ============================================================= */
 #details-drawer {
     position: absolute;
     top: 15px;
@@ -453,7 +423,7 @@
     resize: vertical;
     outline: none;
     transition: 0.2s;
-    box-sizing: border-box; /* 防止撑破容器 */
+    box-sizing: border-box;
     font-family: 'Inter', sans-serif;
 }
 
@@ -462,7 +432,6 @@
         background: #fff;
     }
 
-/* 保存按钮样式 */
 .btn-save {
     margin-top: 10px;
     width: 100%;

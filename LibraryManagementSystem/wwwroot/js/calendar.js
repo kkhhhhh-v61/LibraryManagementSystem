@@ -1,8 +1,4 @@
-﻿/* =============================================================
-   Calendar Logic
-   ============================================================= */
-
-var calendar;
+﻿var calendar;
 
 document.addEventListener('DOMContentLoaded', function () {
     var calendarEl = document.getElementById('calendar');
@@ -13,19 +9,22 @@ document.addEventListener('DOMContentLoaded', function () {
         initialView: 'resourceTimelineDay',
         headerToolbar: false,
 
-        // 布局核心
+        // Drag & Drop
+        editable: true,
+        eventStartEditable: false,
+        eventDurationEditable: false,
+        eventResourceEditable: true,
+
         height: '100%',
         resourceAreaWidth: '160px',
-        expandRows: false, // 关闭自动撑高，严格遵循 CSS 的 45px
+        expandRows: false, 
 
-        // 时间设置
         slotDuration: '00:30:00',
         slotLabelInterval: '01:00',
         slotMinTime: '09:00:00',
         slotMaxTime: '22:00:00',
         nowIndicator: true,
 
-        // 数据加载
         resources: function (info, success, failure) {
             var catId = categorySelect.value;
             fetch(calendarConfig.urls.getResources + '?categoryId=' + catId)
@@ -37,7 +36,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 .then(r => r.json()).then(d => success(d)).catch(e => failure(e));
         },
 
-        // 事件渲染
         eventContent: function (arg) {
             let statusClass = arg.event.extendedProps.status === 'PENDING' ? 'bg-pending' : 'bg-confirmed';
             let title = arg.event.title;
@@ -52,16 +50,50 @@ document.addEventListener('DOMContentLoaded', function () {
             `};
         },
 
-        // 维护行样式
+        eventDrop: function (info) {
+            var bookingId = info.event.id;
+            var newRoomId = info.event.getResources()[0].id;
+            var newRoomName = info.event.getResources()[0].title;
+
+
+            var formData = new FormData();
+            formData.append('id', bookingId);
+            formData.append('newRoomId', newRoomId);
+
+            fetch(calendarConfig.urls.moveBooking, {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        if (window.showToast) window.showToast(data.message, "success");
+
+                        if (data.action === 'swap') {
+                            calendar.refetchEvents();
+                        } else {
+                            info.event.setExtendedProp('roomName', newRoomName);
+                        }
+                    } else {
+                        if (window.showToast) window.showToast(data.message, "error");
+                        info.revert();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    if (window.showToast) window.showToast("System error, change reverted.", "error");
+                    info.revert();
+                });
+        },
+
         resourceLaneClassNames: function (arg) {
             return arg.resource.extendedProps.status === 'MAINTENANCE' ? ['row-maintenance'] : [];
         },
 
-        // 维护图标
         resourceLabelDidMount: function (info) {
             if (info.resource.extendedProps.status === 'MAINTENANCE') {
                 info.el.querySelector('.fc-datagrid-cell-main').innerHTML +=
-                    ' <span style="font-size:0.8em; margin-left:4px;">🔒</span>';
+                    ' <span style="font-size:0.8em; margin-left:4px;"><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#434343"><path d="M756-120 537-339l84-84 219 219-84 84Zm-552 0-84-84 276-276-68-68-28 28-51-51v82l-28 28-121-121 28-28h82l-50-50 142-142q20-20 43-29t47-9q24 0 47 9t43 29l-92 92 50 50-28 28 68 68 90-90q-4-11-6.5-23t-2.5-24q0-59 40.5-99.5T701-841q15 0 28.5 3t27.5 9l-99 99 72 72 99-99q7 14 9.5 27.5T841-701q0 59-40.5 99.5T701-561q-12 0-24-2t-23-7L204-120Z"/></svg></span>';
             }
         },
 
@@ -87,7 +119,7 @@ function openDrawer(event) {
     document.getElementById('dUser').innerText = p.userName;
     document.getElementById('dPrice').innerText = p.price.toFixed(2);
     document.getElementById('dBookingId').value = event.id;
-    document.getElementById('dDescription').value = p.description || ""; // 防止 null
+    document.getElementById('dDescription').value = p.description || "";
 
     document.getElementById('dStart').innerText = event.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     document.getElementById('dEnd').innerText = event.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -129,10 +161,8 @@ function saveDescription() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // 使用 app.js 的 toast
                 if (window.showToast) window.showToast("Note updated successfully!", "success");
 
-                // 更新日历内存
                 var event = calendar.getEventById(id);
                 if (event) {
                     event.setExtendedProp('description', desc);

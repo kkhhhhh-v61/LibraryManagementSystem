@@ -169,11 +169,9 @@ namespace LibraryManagementSystem.Controllers
         public IActionResult MasterCalendar()
         {
             ViewBag.Categories = db.RoomCategories.ToList();
-            // 页面入口
             return View();
         }
 
-        // 1. 获取左侧的“资源” (即房间列表)
         //[Authorize(Roles = "ADMIN")]
         [HttpGet]
         public IActionResult GetResources(string? categoryId)
@@ -182,7 +180,6 @@ namespace LibraryManagementSystem.Controllers
                 .Include(r => r.RoomCategory)
                 .AsQueryable();
 
-            // ★ 新增逻辑：如果传了 categoryId，就只查这个分类下的房间
             if (!string.IsNullOrEmpty(categoryId))
             {
                 query = query.Where(r => r.RoomCategoryId == categoryId);
@@ -195,7 +192,6 @@ namespace LibraryManagementSystem.Controllers
                 {
                     id = r.Id,
                     title = r.Name,
-                    // 扩展属性，用于前端变灰处理
                     extendedProps = new { status = r.Status.ToString() }
                 })
                 .ToList();
@@ -203,7 +199,6 @@ namespace LibraryManagementSystem.Controllers
             return Json(rooms);
         }
 
-        // 2. 获取预订数据 (必须包含 resourceId)
         //[Authorize(Roles = "ADMIN")]
         [HttpGet]
         public IActionResult GetCalendarData(string? categoryId)
@@ -211,7 +206,6 @@ namespace LibraryManagementSystem.Controllers
             var query = db.Bookings
                 .Include(b => b.Room)
                 .Include(b => b.User)
-                // 注意：BookingStatus 也是 Enum，所以这里用 != 是对的
                 .Where(b => b.Status != Booking.BookingStatus.CANCELLED)
                 .AsQueryable();
 
@@ -224,8 +218,6 @@ namespace LibraryManagementSystem.Controllers
 
             var events = bookings.Select(b => {
 
-                // ★ 核心修正：直接对比 Enum
-                // 不再需要 string.Equals，也不需要 Trim() 或 ToUpper()
                 bool isMaintenance = (b.Room.Status == Room.RoomStatus.MAINTENANCE);
 
                 return new
@@ -236,9 +228,8 @@ namespace LibraryManagementSystem.Controllers
                     start = b.StartTime.ToString("yyyy-MM-ddTHH:mm:ss"),
                     end = b.EndTime.ToString("yyyy-MM-ddTHH:mm:ss"),
 
-                    // 颜色逻辑
                     backgroundColor = isMaintenance
-                                      ? "#94a3b8" // 灰色
+                                      ? "#94a3b8" 
                                       : (b.Status == Booking.BookingStatus.PENDING ? "#f59e0b" : "#10b981"),
 
                     borderColor = isMaintenance
@@ -252,7 +243,6 @@ namespace LibraryManagementSystem.Controllers
                         roomName = b.Room.Name,
                         userName = b.User.Username,
                         price = b.TotalPrice,
-                        // 显示状态文本
                         status = isMaintenance ? "MAINTENANCE" : b.Status.ToString(),
                         description = b.Description ?? ""
                     }
@@ -263,7 +253,7 @@ namespace LibraryManagementSystem.Controllers
         }
 
         [HttpPost]
-        //[Authorize(Roles = "ADMIN, STAFF")] // 确保只有管理员/员工能修改
+        //[Authorize(Roles = "ADMIN, STAFF")]
         public IActionResult UpdateDescription(string id, string description)
         {
             var booking = db.Bookings.Find(id);
@@ -276,6 +266,89 @@ namespace LibraryManagementSystem.Controllers
             db.SaveChanges();
 
             return Json(new { success = true, message = "Description updated successfully" });
+        }
+
+        // POST: Move Booking (Drag & Drop)
+        [HttpPost]
+        // [Authorize(Roles = "ADMIN, STAFF")]
+        public IActionResult MoveBooking(string id, string newRoomId)
+        {
+            using var transaction = db.Database.BeginTransaction();
+
+            try
+            {
+                var sourceBooking = db.Bookings
+                    .Include(b => b.Room)
+                    .FirstOrDefault(b => b.Id == id);
+
+                if (sourceBooking == null) return Json(new { success = false, message = "Source booking not found." });
+
+                if (sourceBooking.Status == BookingStatus.COMPLETED || sourceBooking.Status == BookingStatus.CANCELLED)
+                {
+                    return Json(new { success = false, message = "Cannot move completed or cancelled bookings." });
+                }
+
+                var targetRoom = db.Rooms.Find(newRoomId);
+                if (targetRoom == null) return Json(new { success = false, message = "Target room not found." });
+
+                if (targetRoom.Status == RoomStatus.MAINTENANCE)
+                {
+                    return Json(new { success = false, message = "Target room is under maintenance." });
+                }
+
+                var conflictingBooking = db.Bookings
+                    .Include(b => b.Room)
+                    .FirstOrDefault(b =>
+                        b.RoomId == newRoomId &&
+                        b.Status != BookingStatus.CANCELLED &&
+                        sourceBooking.StartTime < b.EndTime &&
+                        sourceBooking.EndTime > b.StartTime
+                    );
+
+                if (conflictingBooking == null)
+                {
+                    sourceBooking.RoomId = newRoomId;
+                    db.SaveChanges();
+                    transaction.Commit();
+                    return Json(new { success = true, message = "Booking moved successfully!", action = "move" });
+                }
+
+                else
+                {
+                    if (sourceBooking.Room.RoomCategoryId != targetRoom.RoomCategoryId)
+                    {
+                        return Json(new { success = false, message = "Cannot swap: Different room categories." });
+                    }
+
+                    bool isSourceRoomBlocked = db.Bookings.Any(b =>
+                        b.RoomId == sourceBooking.RoomId &&
+                        b.Id != sourceBooking.Id &&
+                        b.Status != BookingStatus.CANCELLED &&
+                        conflictingBooking.StartTime < b.EndTime &&
+                        conflictingBooking.EndTime > b.StartTime
+                    );
+
+                    if (isSourceRoomBlocked)
+                    {
+                        return Json(new { success = false, message = "Cannot swap: Source room has overlap with other bookings." });
+                    }
+
+                    string sourceRoomId = sourceBooking.RoomId;
+
+                    sourceBooking.RoomId = newRoomId;
+                    conflictingBooking.RoomId = sourceRoomId;
+
+                    db.SaveChanges();
+                    transaction.Commit();
+
+                    return Json(new { success = true, message = "Bookings swapped successfully!", action = "swap" });
+                }
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                return Json(new { success = false, message = "System Error: " + ex.Message });
+            }
         }
     }
 }
