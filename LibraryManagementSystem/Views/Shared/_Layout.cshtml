@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sansation:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap">
     <link rel="stylesheet" href="/css/app.css" asp-append-version="true" />
-    <link rel="stylesheet" href="/css/auth.css" asp-append-version="true" />    
+    <link rel="stylesheet" href="/css/auth.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     @await RenderSectionAsync("head", false)
 </head>
@@ -99,7 +99,7 @@
                         </a>
                     </form>
                 }
-                </div>
+            </div>
         </div>
     </nav>
 
@@ -123,14 +123,14 @@
                             <small class="header-main__user-role">@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value</small>
                         </div>
                         <img src="@(string.IsNullOrEmpty(User.FindFirst("ProfilePicture")?.Value) ||
-                                             User.FindFirst("ProfilePicture")?.Value == "default-profile.png" ?
-                                             "/images/assets/default-profile.png" :
-                                             $"/images/profiles/{User.FindFirst("ProfilePicture")?.Value}")"
+                                                                          User.FindFirst("ProfilePicture")?.Value == "default-profile.png" ?
+                                                                          "/images/assets/default-profile.png" :
+                                                                          $"/images/profiles/{User.FindFirst("ProfilePicture")?.Value}")"
                          alt="@User.Identity.Name"
                          class="header-main__user-avatar"
                          style="object-fit: cover;" />
                 </a>
-                }
+                                }
                 else
                 {
                     <a asp-controller="Account" asp-action="Login" class="btn btn-secondary">Login</a>
@@ -154,18 +154,23 @@
     @await RenderSectionAsync("foot", false)
     @await RenderSectionAsync("Scripts", required: false)
 
-    @if (TempData["ToastMessage"] != null)
-    {
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                // Pass the data from Server (Razor) to Client (JS Function)
-                window.showToastOnLoad(
-                    @Json.Serialize(TempData["ToastMessage"]),
-                    @Json.Serialize(TempData["ToastType"])
-                );
-            });
-        </script>
-    }
-</body>
+    <script>
+        $(document).ready(function () {
+            // Use Json.Serialize to safely handle quotes/special characters
+            var message = @Json.Serialize(TempData["ToastMessage"]);
+            var type = @Json.Serialize(TempData["ToastType"]);
 
+            if (message) {
+                if (window.showToast)
+                {
+                    window.showToast(message, type || "info");
+                } 
+                else 
+                {
+                    console.error("showToast function not found in app.js!");
+                }
+            }
+        });
+    </script>
+</body>
 </html>
