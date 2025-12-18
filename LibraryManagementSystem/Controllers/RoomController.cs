@@ -12,14 +12,40 @@ namespace LibraryManagementSystem.Controllers
     {
         // GET: Room/Index
         [Authorize(Roles = "MEMBER")]
-        public IActionResult Index()
+        public IActionResult Index(string search = "") // 1. 添加参数接收搜索词
         {
+            // 2. 基础查询
+            var query = db.RoomCategories
+                .Include(c => c.Rooms)
+                .AsQueryable();
+
+            // 3. 搜索过滤逻辑
+            if (!string.IsNullOrEmpty(search))
+            {
+                search = search.Trim(); // 去除首尾空格
+                query = query.Where(c =>
+                    c.Name.Contains(search) ||
+                    c.Description.Contains(search)
+                );
+            }
+
+            // 4. 获取数据
+            var categories = query.OrderByDescending(c => c.Id).ToList();
+
+            // 5. ★ 关键修正：检测是否为 AJAX 请求 ★
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                // 如果是 AJAX，只返回表格部分的 Partial View
+                return PartialView("_CategoryTable", categories);
+            }
+
+            // 6. 如果是普通访问，返回完整页面
             var vm = new RoomIndexVM
             {
-                Categories = db.RoomCategories.Include(c => c.Rooms).OrderByDescending(c => c.Id).ToList()
+                Categories = categories
             };
 
-            ViewBag.CategoryList = new SelectList(vm.Categories, "Id", "Name");
+            ViewBag.CategoryList = new SelectList(db.RoomCategories, "Id", "Name");
 
             return View(vm);
         }
