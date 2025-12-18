@@ -274,6 +274,8 @@ public class GenreManagementVM
     public int CurrentPage { get; set; }
     public int TotalPages { get; set; }
     public string? SearchTerm { get; set; }
+    public string SortColumn { get; set; } = "Name";
+    public string SortOrder { get; set; } = "asc";
 }
 
 
@@ -298,6 +300,8 @@ public class AuthorManagementVM
     public int CurrentPage { get; set; }
     public int TotalPages { get; set; }
     public string? SearchTerm { get; set; }
+    public string SortColumn { get; set; } = "Name";
+    public string SortOrder { get; set; } = "asc";
 }
 
 public class BookManagementVM
@@ -307,6 +311,8 @@ public class BookManagementVM
     public int CurrentPage { get; set; }
     public int TotalPages { get; set; }
     public string? SearchTerm { get; set; }
+    public string SortColumn { get; set; } = "Title";
+    public string SortOrder { get; set; } = "asc";
 }
 
 

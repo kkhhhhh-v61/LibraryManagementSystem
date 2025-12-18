@@ -703,6 +703,21 @@
     font-size: var(--text-md);
 }
 
+.sortable-header {
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s ease;
+}
+
+.sortable-header:hover {
+    background-color: var(--color-gray-200);
+}
+
+.sort-icon {
+    font-size: 0.7em;
+    margin-left: 4px;
+}
+
 .table__row:hover {
     background-color: #f0f9ff;
 }
