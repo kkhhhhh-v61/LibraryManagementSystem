@@ -288,6 +288,20 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         return RedirectToAction("ManageBook");
     }
 
+    [HttpPost]
+    public IActionResult ToggleBookStatus(string id, string field, bool value)
+    {
+        var book = db.Books.Find(id);
+        if (book == null) return NotFound();
+
+        if (field == "IsFeatured") book.IsFeatured = value;
+        else if (field == "IsArchived") book.IsArchived = value;
+        else return BadRequest("Invalid field");
+
+        db.SaveChanges();
+        return Ok();
+    }
+
     public IActionResult ManageGenre(string? search)
     {
         var query = db.Genres.Include(g => g.Books).AsQueryable();
