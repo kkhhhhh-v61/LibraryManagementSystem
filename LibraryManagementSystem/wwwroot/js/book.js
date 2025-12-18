@@ -294,6 +294,9 @@ function initializeTableManagement() {
     // Initial binding of table content events
     bindTableContentEvents();
 
+    // Initialize Custom Filters (Dropdowns)
+    initializeCustomFilters();
+
     // Bind static modal events (Edit/Delete/Batch)
     bindStaticModalEvents();
 
@@ -331,6 +334,58 @@ function initializeTableManagement() {
             }
         });
     }
+}
+
+function initializeCustomFilters() {
+    const dropdowns = document.querySelectorAll(".filter-dropdown");
+    const searchInput = document.getElementById("nameSearchInput");
+
+    dropdowns.forEach((dropdown) => {
+        const trigger = dropdown.querySelector(".filter-dropdown__trigger");
+        const input = dropdown.querySelector('input[type="hidden"]');
+        const triggerText = dropdown.querySelector(".trigger__text");
+        const items = dropdown.querySelectorAll(".filter-dropdown__item");
+
+        // Toggle
+        trigger.addEventListener("click", (e) => {
+            e.stopPropagation();
+            // Close others
+            dropdowns.forEach((d) => {
+                if (d !== dropdown) d.classList.remove("active");
+            });
+            dropdown.classList.toggle("active");
+        });
+
+        // Selection
+        items.forEach((item) => {
+            item.addEventListener("click", (e) => {
+                e.stopPropagation();
+                const value = item.dataset.value;
+                const text = item.textContent;
+
+                // Update UI
+                triggerText.textContent = text;
+                items.forEach((i) => i.classList.remove("selected"));
+                item.classList.add("selected");
+                dropdown.classList.remove("active");
+
+                // Update Value and Trigger Search
+                if (input.value !== value) {
+                    input.value = value;
+                    triggerSearch(searchInput);
+                }
+            });
+        });
+    });
+
+    // Close on outside click
+    document.addEventListener("click", (e) => {
+        dropdowns.forEach((d) => {
+            if (!d.contains(e.target)) {
+                d.classList.remove("active");
+            }
+        });
+    });
 }
 
 function triggerSearch(searchInput) {

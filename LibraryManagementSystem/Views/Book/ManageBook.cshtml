@@ -14,12 +14,48 @@
             <div class="header__start">
                 <h2 class="panel__title">Book Maintenance</h2>
                 <div class="header__filters">
-                    <select id="filterAuthor" class="filter-select" asp-for="SelectedAuthorId" asp-items="Model.AuthorList">
-                        <option value="">All Authors</option>
-                    </select>
-                    <select id="filterGenre" class="filter-select" asp-for="SelectedGenreId" asp-items="Model.GenreList">
-                        <option value="">All Genres</option>
-                    </select>
+                    <div class="filter-dropdown" id="authorFilterWrapper">
+                        <input type="hidden" id="filterAuthor" value="@Model.SelectedAuthorId" />
+                        <button class="filter-dropdown__trigger" type="button">
+                            <span class="trigger__text">
+                                @{
+                                    var selectedAuthor = Model.AuthorList.FirstOrDefault(a => a.Value == Model.SelectedAuthorId);
+                                    @(selectedAuthor != null ? selectedAuthor.Text : "All Authors")
+                                }
+                            </span>
+                            <svg class="trigger__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
+                                <path d="M480-360 280-560h400L480-360Z"/>
+                            </svg>
+                        </button>
+                        <div class="filter-dropdown__menu">
+                            <div class="filter-dropdown__item @(string.IsNullOrEmpty(Model.SelectedAuthorId) ? "selected" : "")" data-value="">All Authors</div>
+                            @foreach (var item in Model.AuthorList)
+                            {
+                                <div class="filter-dropdown__item @(item.Value == Model.SelectedAuthorId ? "selected" : "")" data-value="@item.Value">@item.Text</div>
+                            }
+                        </div>
+                    </div>
+                    <div class="filter-dropdown" id="genreFilterWrapper">
+                        <input type="hidden" id="filterGenre" value="@Model.SelectedGenreId" />
+                        <button class="filter-dropdown__trigger" type="button">
+                            <span class="trigger__text">
+                                @{
+                                    var selectedGenre = Model.GenreList.FirstOrDefault(g => g.Value == Model.SelectedGenreId);
+                                    @(selectedGenre != null ? selectedGenre.Text : "All Genres")
+                                }
+                            </span>
+                            <svg class="trigger__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
+                                <path d="M480-360 280-560h400L480-360Z"/>
+                            </svg>
+                        </button>
+                        <div class="filter-dropdown__menu">
+                            <div class="filter-dropdown__item @(string.IsNullOrEmpty(Model.SelectedGenreId) ? "selected" : "")" data-value="">All Genres</div>
+                            @foreach (var item in Model.GenreList)
+                            {
+                                <div class="filter-dropdown__item @(item.Value == Model.SelectedGenreId ? "selected" : "")" data-value="@item.Value">@item.Text</div>
+                            }
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="search__wrapper">
@@ -30,11 +66,6 @@
                 <svg class="search__clear" id="searchClearButton" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
                     <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
                 </svg>
-            </div>
-            <div class="panel__actions">
-                <a asp-action="InsertBook" class="form__button form__button--submit" style="width: auto; padding: 0 var(--spacing-md); height: 40px; display: inline-flex; align-items: center; text-decoration: none;">
-                    + Add Book
-                </a>
             </div>
         </div>
 
@@ -52,6 +83,9 @@
                     Delete Selected
                 </button>
             </div>
+            <a asp-action="InsertBook" class="form__button form__button--submit" style="width: auto; padding: 0 var(--spacing-md); height: 40px; display: inline-flex; align-items: center; text-decoration: none;">
+                + Add Book
+            </a>
         </div>
     </div>
 </form>
