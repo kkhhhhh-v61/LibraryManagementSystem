@@ -109,41 +109,6 @@ window.showToastOnLoad = (message, type) => {
         window.showToast(message, type);
     }
 };
-// 2. reCAPTCHA Shake Logic
-document.addEventListener("DOMContentLoaded", function () {
-
-    // Find the form
-    var registerForm = document.getElementById("registerForm");
-
-    // Only run this code if the form actually exists on this page
-    if (registerForm) {
-
-        registerForm.addEventListener("submit", function (event) {
-
-            // Check if reCAPTCHA is ticked
-            // Note: grecaptcha is a global object provided by Google's script
-            var captchaResponse = grecaptcha.getResponse();
-
-            if (captchaResponse.length === 0) {
-                // STOP the form submission
-                event.preventDefault();
-
-                // Find the box
-                var container = document.getElementById("recaptcha-container");
-
-                // Add shake class
-                container.classList.add("shake-error");
-
-                // Remove shake class after 0.4s (so it can be triggered again)
-                setTimeout(function () {
-                    container.classList.remove("shake-error");
-                }, 400);
-            }
-        });
-    }
-});
-
-};
 
 /* ===========================================================================
    INITIALIZATION
@@ -152,4 +117,62 @@ document.addEventListener("DOMContentLoaded", function () {
 $(document).ready(function () {
     initializeFormHelpers();
     initializeSidebar();
+});
+
+/* ===========================================================================
+   INITIALIZATION
+   =========================================================================== */
+
+$(document).ready(function () {
+    if (typeof initializeFormHelpers === "function") initializeFormHelpers();
+    if (typeof initializeSidebar === "function") initializeSidebar();
+});
+
+/* ===========================================================================
+   REGISTER VALIDATION (FIELDS + RECAPTCHA)
+   =========================================================================== */
+
+$(document).ready(function () {
+    const $form = $("#registerForm");
+
+    if ($form.length) {
+        $form.on("submit", function (e) {
+
+            // 1. CHECK FIELDS: Are name/email/pass filled correctly?
+            if (!$(this).valid()) {
+                e.preventDefault(); 
+
+                // Add shake effect to the input fields that have errors
+                $(".input-validation-error").addClass("shake-error");
+
+                // Remove the shake class after 500ms so it can shake again later
+                setTimeout(() => $(".input-validation-error").removeClass("shake-error"), 500);
+
+                // Show the toast message 
+                if (window.showToast) {
+                    window.showToast("Please fill in all required information.", "error");
+                }
+                return false;
+            }
+
+            // 2. CHECK RECAPTCHA: Is it ticked?
+            const captchaResponse = grecaptcha.getResponse();
+
+            if (captchaResponse.length === 0) {
+                e.preventDefault(); 
+
+                const container = document.getElementById("recaptcha-container");
+
+                container.classList.remove("shake-error");
+                void container.offsetWidth; 
+                container.classList.add("shake-error");
+
+                if (window.showToast) {
+                    window.showToast("Please complete the captcha verification.", "error");
+                }
+                return false;
+            }
+
+        });
+    }
 });
