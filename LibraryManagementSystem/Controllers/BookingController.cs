@@ -230,11 +230,11 @@ namespace LibraryManagementSystem.Controllers
 
                     backgroundColor = isMaintenance
                                       ? "#94a3b8" 
-                                      : (b.Status == Booking.BookingStatus.PENDING ? "#f59e0b" : "#10b981"),
+                                      : (b.Status == Booking.BookingStatus.PENDING ? "#f59e0b" : "#3b82f6"),
 
                     borderColor = isMaintenance
                                   ? "#94a3b8"
-                                  : (b.Status == Booking.BookingStatus.PENDING ? "#f59e0b" : "#10b981"),
+                                  : (b.Status == Booking.BookingStatus.PENDING ? "#f59e0b" : "#3b82f6"),
 
                     textColor = "#ffffff",
 

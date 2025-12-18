@@ -122,6 +122,10 @@ namespace LibraryManagementSystem.Controllers
                 ModelState.Clear();
                 var emptyVm = new RoomIndexVM();
                 ViewData["SuccessMessage"] = "Category created successfully!";
+
+                ViewData["NewCategoryId"] = newCategory.Id;
+                ViewData["NewCategoryName"] = newCategory.Name;
+
                 return PartialView("_CreateCategoryForm", emptyVm);
             }
 
