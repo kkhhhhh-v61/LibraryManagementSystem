@@ -127,10 +127,11 @@
                             <span class="header-main__user-name">@User.Identity.Name</span>
                             <small class="header-main__user-role">@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value</small>
                         </div>
-                        <img src="@(string.IsNullOrEmpty(User.FindFirst("ProfilePicture")?.Value) ||
-                                                                          User.FindFirst("ProfilePicture")?.Value == "default-profile.png" ?
-                                                                          "/images/assets/default-profile.png" :
-                                                                          $"/images/profiles/{User.FindFirst("ProfilePicture")?.Value}")"
+                        <img id="headerAvatar"
+                             src="@(string.IsNullOrEmpty(User.FindFirst("ProfilePicture")?.Value) ||
+                                         User.FindFirst("ProfilePicture")?.Value == "default-profile.png" ?
+                                         "/images/assets/default-profile.png" :
+                                         $"/images/profiles/{User.FindFirst("ProfilePicture")?.Value}")"
                          alt="@User.Identity.Name"
                          class="header-main__user-avatar"
                          style="object-fit: cover;" />

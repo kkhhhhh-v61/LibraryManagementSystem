@@ -220,3 +220,99 @@ $(document).ready(function () {
         });
     }
 });
+//Photo Cropping
+$(document).ready(function () {
+    var cropper;
+    var $modal = $('#customCropModal');
+    var imageToCrop = document.getElementById('imageToCrop');
+    var $photoInput = $('#photoInput');
+
+    function closeCropModal() {
+        $modal.hide();
+        if (cropper) {
+            cropper.destroy();
+            cropper = null;
+        }
+        $photoInput.val('');
+    }
+
+    // --- EVENT: File Selected ---
+    $photoInput.change(function (e) {
+        var files = e.target.files;
+
+        // 1. DESTROY IMMEDIATELY
+        if (cropper) {
+            cropper.destroy();
+            cropper = null;
+        }
+
+        // Reset the image src to prevent ghosting while loading
+        imageToCrop.src = "";
+
+        if (files && files.length > 0) {
+            var file = files[0];
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                // 2. Set new source
+                imageToCrop.src = e.target.result;
+
+                // 3. Show modal
+                $modal.show();
+
+                // 4. Initialize new Cropper
+                cropper = new Cropper(imageToCrop, {
+                    aspectRatio: 1,
+                    viewMode: 1,
+                    autoCropArea: 1
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // --- EVENT: Click Crop & Save ---
+    $('#btnCrop').click(function () {
+        if (!cropper) return;
+        var uploadUrl = $(this).data('url');
+
+        var canvas = cropper.getCroppedCanvas({
+            width: 300,
+            height: 300
+        });
+
+        canvas.toBlob(function (blob) {
+            var formData = new FormData();
+            formData.append('file', blob, 'profile_cropped.jpg');
+
+            $.ajax({
+                url: uploadUrl,
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    if (response.success) {
+                        var fullPath = "/images/profiles/" + response.newUrl;
+
+                        $("#profileImageDisplay").attr("src", fullPath);
+                        $("#headerAvatar").attr("src", fullPath);
+
+                        if (window.showToast) window.showToast("Profile photo updated!", "success");
+
+                        closeCropModal();
+                    } else {
+                        alert("Upload failed: " + response.message);
+                    }
+                },
+                error: function () {
+                    alert("Error uploading image.");
+                }
+            });
+        });
+    });
+
+    $('#btnCloseIcon, #btnCancelCrop').click(function () {
+        closeCropModal();
+    });
+});

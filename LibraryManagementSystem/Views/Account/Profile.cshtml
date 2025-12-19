@@ -4,19 +4,24 @@
     ViewData["Title"] = "My Profile";
 }
 
-<link rel="stylesheet" href="~/css/profile.css" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+<link rel="stylesheet" href="~/css/profile.css" asp-append-version="true" />
 
 <div class="profile-container">
 
     <div class="profile-card">
         <div class="profile-avatar-wrapper">
-            <img src="/images/profiles/@(Model.ProfilePhotoUrl ?? "default-profile.png")"
+            <img id="profileImageDisplay"
+                 src="/images/profiles/@(Model.ProfilePhotoUrl ?? "default-profile.png")"
                  class="profile-avatar"
-                 alt="Profile Photo">
+                 alt="Profile Photo"
+                 onerror="this.src='/images/profiles/default-profile.png'">
 
-            <button class="profile-upload-btn" onclick="alert('Photo upload coming next!')" title="Change Photo">
+            <button type="button" class="profile-upload-btn" onclick="document.getElementById('photoInput').click()" title="Change Photo">
                 <i class="fas fa-camera"></i>
             </button>
+
+            <input type="file" id="photoInput" accept="image/*" style="display: none;">
         </div>
 
         <h2 class="profile-name">@Model.Username</h2>
@@ -66,15 +71,15 @@
             </div>
 
             <div class="toggle-switch">
-                <input asp-for="IsProfilePublic" type="checkbox" class="toggle-input">
+                <input asp-for="IsProfilePublic" type="checkbox" class="toggle-input" id="publicToggle">
                 <div class="d-flex flex-column">
-                    <label asp-for="IsProfilePublic" class="form-label mb-0" style="cursor:pointer">Public Profile</label>
+                    <label for="publicToggle" class="form-label mb-0" style="cursor:pointer">Public Profile</label>
                     <small style="color:var(--color-gray-500); font-size: 0.8rem;">Allow other members to see your profile</small>
                 </div>
             </div>
 
             <div class="form-actions">
-                <button type="submit" id="saveBtn" class="btn btn-primary">
+                <button type="submit" id="saveBtn" class="btn btn-primary" style="background-color: var(--color-primary-base); border:none;">
                     Save Changes
                 </button>
             </div>
@@ -82,39 +87,33 @@
     </div>
 </div>
 
+<div id="customCropModal" class="custom-modal-overlay" style="display: none;">
+    <div class="custom-modal-content">
+        <div class="custom-modal-header">
+            <h5>Crop Photo</h5>
+            <button type="button" id="btnCloseIcon" class="close-btn">&times;</button>
+        </div>
+
+        <div class="custom-modal-body">
+            <div class="img-container">
+                <img id="imageToCrop" src="" style="max-width: 100%;">
+            </div>
+        </div>
+
+        <div class="custom-modal-footer">
+            <button type="button" id="btnCancelCrop" class="btn btn-secondary">Cancel</button>
+
+            <button type="button" id="btnCrop" class="btn btn-primary"
+                    style="background-color: var(--color-primary-base);"
+                    data-url="@Url.Action("UpdateProfilePhoto", "Account")">
+                Crop & Save
+            </button>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    <script>
-        // ... Your existing AJAX Script goes here ...
-        $(document).ready(function() {
-            $('#profileForm').on('submit', function(e) {
-                e.preventDefault();
-                if (!$(this).valid()) return;
-
-                var formData = $(this).serialize();
-                var btn = $('#saveBtn');
-
-                btn.prop('disabled', true).text('Saving...');
-
-                $.ajax({
-                    url: '@Url.Action("UpdateProfile", "Account")',
-                    type: 'POST',
-                    data: formData,
-                    success: function(response) {
-                        if (response.success) {
-                            toastr.success(response.message);
-                        } else {
-                            toastr.error(response.message);
-                        }
-                    },
-                    error: function() {
-                        toastr.error("Server error.");
-                    },
-                    complete: function() {
-                        btn.prop('disabled', false).text('Save Changes');
-                    }
-                });
-            });
-        });
-    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <script src="~/js/app.js"></script>
 }

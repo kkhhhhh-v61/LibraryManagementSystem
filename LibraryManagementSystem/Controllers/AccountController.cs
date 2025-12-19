@@ -508,5 +508,44 @@ namespace LibraryManagementSystem.Controllers
 
             return Json(new { success = true, message = "Profile updated successfully!" });
         }
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> UpdateProfilePhoto(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return Json(new { success = false, message = "No file received." });
+            }
+            var imageValidation = Helper.ValidateImage(file);
+            if (imageValidation != ValidationResult.Success)
+            {
+                return Json(new { success = false, message = imageValidation.ErrorMessage });
+            }
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var user = await _db.Users.FindAsync(userId);
+            if (user == null) return Json(new { success = false, message = "User not found." });
+
+            try
+            {
+                if (!string.IsNullOrEmpty(user.ImageURL) && user.ImageURL != "default-profile.png")
+                {
+                    string oldPath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "profiles", user.ImageURL);
+                    if (System.IO.File.Exists(oldPath))
+                    {
+                        System.IO.File.Delete(oldPath);
+                    }
+                }
+                string newFileName = Helper.SaveImage(file, "profiles", _webHostEnvironment.WebRootPath);
+                user.ImageURL = newFileName;
+                _db.Users.Update(user);
+                await _db.SaveChangesAsync();
+                await SignInUser(user);
+                return Json(new { success = true, message = "Photo updated!", newUrl = newFileName });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error saving image: " + ex.Message });
+            }
+        }
     }
 }
