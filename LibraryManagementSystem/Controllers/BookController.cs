@@ -56,6 +56,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         bool isDesc = order == "desc";
         query = sort switch
         {
+            "Id" => isDesc ? query.OrderByDescending(b => b.Id) : query.OrderBy(b => b.Id),
             "Title" => isDesc ? query.OrderByDescending(b => b.Title) : query.OrderBy(b => b.Title),
             "DateAdded" => isDesc ? query.OrderByDescending(b => b.DateAdded) : query.OrderBy(b => b.DateAdded),
             _ => isDesc ? query.OrderByDescending(b => b.Title) : query.OrderBy(b => b.Title)

@@ -6,7 +6,13 @@
             <th class="table__cell table__cell--checkbox">
                 <input class="checkbox-styled" id="selectAll" type="checkbox" />
             </th>
-            <th class="table__cell" style="width: 60px;">Image</th>
+            <th class="table__cell sortable-header @(Model.SortColumn == "Id" ? "active" : "")" data-sort="Id" data-order="@(Model.SortColumn == "Id" ? Model.SortOrder : "asc")" style="width: 80px;">
+                ID
+                @if (Model.SortColumn == "Id")
+                {
+                    <span class="sort-icon">@(Model.SortOrder == "asc" ? "▲" : "▼")</span>
+                }
+            </th>
             <th class="table__cell sortable-header @(Model.SortColumn == "Title" ? "active" : "")" data-sort="Title" data-order="@(Model.SortColumn == "Title" ? Model.SortOrder : "asc")">
                 Title
                 @if (Model.SortColumn == "Title")
@@ -43,11 +49,7 @@
                     <td class="table__cell table__cell--checkbox">
                         <input class="row-checkbox checkbox-styled" type="checkbox" name="ids" value="@book.Id" data-name="@book.Title" />
                     </td>
-                    <td class="table__cell">
-                        <img src="@(string.IsNullOrEmpty(book.ImageURL) ? "/images/assets/default-book.png" : $"/images/books/{book.ImageURL}")" 
-                             alt="@book.Title" 
-                             class="book-thumbnail" />
-                    </td>
+                    <td class="table__cell table__cell--id">@book.Id</td>
                     <td class="table__cell table__cell--main">
                         <div class="book-info">
                             <span class="book-title">@book.Title</span>
