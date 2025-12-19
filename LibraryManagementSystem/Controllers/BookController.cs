@@ -48,6 +48,39 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         return View(books);
     }
 
+    public IActionResult BookDetails(string id)
+    {
+        var book = db.Books
+            .Include(b => b.Authors)
+            .Include(b => b.Genres)
+            .FirstOrDefault(b => b.Id == id);
+
+        if (book == null)
+        {
+            TempData["ToastMessage"] = "Book not found.";
+            TempData["ToastType"] = "error";
+            return RedirectToAction("Catalogue");
+        }
+
+        // Availability
+        var copies = db.Copies.Where(c => c.BookId == id).ToList();
+        ViewBag.TotalCopies = copies.Count;
+        ViewBag.AvailableCopies = copies.Count(c => c.Status == Copy.CopyStatus.AVAILABLE);
+
+        // Reviews
+        var reviews = db.Reviews
+            .Include(r => r.Loan)
+            .ThenInclude(l => l.User)
+            .Where(r => r.Loan.Copy.BookId == id)
+            .OrderByDescending(r => r.ReviewDate)
+            .ToList();
+
+        ViewBag.Reviews = reviews;
+        ViewBag.AverageRating = reviews.Any() ? reviews.Average(r => r.Rating) : 0.0;
+
+        return View("BookDetail", book);
+    }
+
     [Authorize(Roles = "ADMIN, STAFF")]
     public IActionResult ManageBook(string? search, string? authorId, string? genreId, bool? featured, bool? archived, DateOnly? dateFrom, DateOnly? dateTo, int page = 1, string sort = "Title", string order = "asc")
     {
