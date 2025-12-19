@@ -641,4 +641,18 @@ textarea.form-input {
         opacity: 1;
     }
 
+.img-container {
+    max-width: 100%;
+    max-height: 500px;
+    overflow: hidden;
+    background-color: #f8fafc;
+}
 
+    .img-container img {
+        width: 100%;
+        display: block;
+    }
+
+#cropperModal {
+    z-index: 99999 !important;
+}

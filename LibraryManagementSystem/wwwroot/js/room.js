@@ -101,3 +101,103 @@ function addCategoryToDropdown(data) {
         setTimeout(() => select.style.borderColor = "", 1000);
     }
 }
+
+// Image cropper
+let categoryCropper = null;
+const MAX_FILE_SIZE = 1024 * 1024;
+
+document.addEventListener('change', function (e) {
+    if (e.target && (e.target.id === 'categoryImgInput' || e.target.id === 'editCategoryImgInput')) {
+        const files = e.target.files;
+        if (files && files.length > 0) {
+            const file = files[0];
+            const image = document.getElementById('imageToCrop');
+            const modal = document.getElementById('cropperModal');
+
+            modal.setAttribute('data-target-input', e.target.id);
+
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                image.src = event.target.result;
+                modal.style.display = 'flex';
+
+                if (categoryCropper) {
+                    categoryCropper.destroy();
+                }
+
+                categoryCropper = new Cropper(image, {
+                    aspectRatio: 16 / 9,
+                    viewMode: 1,
+                    autoCropArea: 1,
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+        e.target.value = '';
+    }
+});
+
+document.addEventListener('click', function (e) {
+    if (e.target && e.target.id === 'btnCropConfirm') {
+        const modal = document.getElementById('cropperModal');
+        const targetInputId = modal.getAttribute('data-target-input');
+        const input = document.getElementById(targetInputId);
+
+        if (categoryCropper && input) {
+            e.target.innerText = "Compressing...";
+            e.target.disabled = true;
+
+            const canvas = categoryCropper.getCroppedCanvas({
+                maxWidth: 1920,
+                maxHeight: 1080,
+                imageSmoothingQuality: 'high'
+            });
+
+            compressImage(canvas, 1.0, function (blob) {
+
+                const newFile = new File([blob], "cropped-image.jpg", { type: "image/jpeg" });
+
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(newFile);
+                input.files = dataTransfer.files;
+
+                const previewImg = document.querySelector('.img-preview-box img');
+                if (previewImg) {
+                    previewImg.src = URL.createObjectURL(blob);
+                }
+
+                e.target.innerText = "Crop & Save";
+                e.target.disabled = false;
+                closeCropperModal();
+
+                console.log(`Final Image Size: ${(blob.size / 1024).toFixed(2)} KB`);
+            });
+        }
+    }
+});
+
+function compressImage(canvas, quality, callback) {
+    canvas.toBlob(function (blob) {
+
+        if (blob.size <= MAX_FILE_SIZE || quality <= 0.6) {
+            callback(blob);
+        }
+        else {
+            const newQuality = parseFloat((quality - 0.1).toFixed(1));
+            console.log(`Image size ${(blob.size / 1024).toFixed(2)}KB is too big. Retrying with quality: ${newQuality}`);
+            compressImage(canvas, newQuality, callback);
+        }
+
+    }, 'image/jpeg', quality);
+}
+
+function closeCropperModal() {
+    const modal = document.getElementById('cropperModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+    if (categoryCropper) {
+        categoryCropper.destroy();
+        categoryCropper = null;
+    }
+}
