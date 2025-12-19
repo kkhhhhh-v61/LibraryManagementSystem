@@ -67,6 +67,10 @@ namespace LibraryManagementSystem.Controllers
             {
                 ModelState.AddModelError("EndTime", "End time must be after start time.");
             }
+            else if ((reqEnd - reqStart).TotalMinutes < 30)
+            {
+                ModelState.AddModelError("EndTime", "Booking duration must be at least 30 minutes.");
+            }
 
             if (!ModelState.IsValid)
             {
