@@ -293,7 +293,8 @@ namespace LibraryManagementSystem.Migrations
                     Status = table.Column<int>(type: "int", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     CancellationReason = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
-                    CancelledAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    CancelledAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsReminderSent = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {

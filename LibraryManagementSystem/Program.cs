@@ -1,4 +1,5 @@
 global using LibraryManagementSystem.Models;
+using LibraryManagementSystem.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +20,10 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.LoginPath = "/Account/Login";
         options.AccessDeniedPath = "/Account/AccessDenied"; // Optional
     });
+
+builder.Services.AddTransient<IEmailService, EmailService>();
+
+builder.Services.AddHostedService<BookingReminderService>();
 
 builder.Services.AddAuthorization(options =>
 {

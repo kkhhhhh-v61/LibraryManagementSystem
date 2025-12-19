@@ -136,6 +136,9 @@ namespace LibraryManagementSystem.Migrations
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsReminderSent")
+                        .HasColumnType("bit");
+
                     b.Property<string>("RoomId")
                         .IsRequired()
                         .HasMaxLength(3)

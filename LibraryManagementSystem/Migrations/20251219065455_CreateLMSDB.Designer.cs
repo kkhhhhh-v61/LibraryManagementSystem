@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LibraryManagementSystem.Migrations
 {
     [DbContext(typeof(LMSDB))]
-    [Migration("20251219030916_CreateLMSDB")]
+    [Migration("20251219065455_CreateLMSDB")]
     partial class CreateLMSDB
     {
         /// <inheritdoc />
@@ -138,6 +138,9 @@ namespace LibraryManagementSystem.Migrations
 
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsReminderSent")
+                        .HasColumnType("bit");
 
                     b.Property<string>("RoomId")
                         .IsRequired()
