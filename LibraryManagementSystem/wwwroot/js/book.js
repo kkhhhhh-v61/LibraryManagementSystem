@@ -345,6 +345,12 @@ function initializeCustomFilters() {
         const input = dropdown.querySelector('input[type="hidden"]');
         const triggerText = dropdown.querySelector(".trigger__text");
         const items = dropdown.querySelectorAll(".filter-dropdown__item");
+        const clearBtn = dropdown.querySelector(".filter-clear");
+
+        // Initial State
+        if (input.value) {
+            dropdown.classList.add("has-value");
+        }
 
         // Toggle
         trigger.addEventListener("click", (e) => {
@@ -369,6 +375,12 @@ function initializeCustomFilters() {
                 item.classList.add("selected");
                 dropdown.classList.remove("active");
 
+                if (value) {
+                    dropdown.classList.add("has-value");
+                } else {
+                    dropdown.classList.remove("has-value");
+                }
+
                 // Update Value and Trigger Search
                 if (input.value !== value) {
                     input.value = value;
@@ -376,6 +388,28 @@ function initializeCustomFilters() {
                 }
             });
         });
+
+        // Clear Button
+        if (clearBtn) {
+            clearBtn.addEventListener("click", (e) => {
+                e.stopPropagation();
+
+                // Reset to default (empty)
+                input.value = "";
+                const defaultItem = dropdown.querySelector(
+                    '.filter-dropdown__item[data-value=""]'
+                );
+                if (defaultItem) {
+                    triggerText.textContent = defaultItem.textContent;
+                    items.forEach((i) => i.classList.remove("selected"));
+                    defaultItem.classList.add("selected");
+                }
+
+                dropdown.classList.remove("has-value");
+                dropdown.classList.remove("active");
+                triggerSearch(searchInput);
+            });
+        }
     });
 
     // Close on outside click

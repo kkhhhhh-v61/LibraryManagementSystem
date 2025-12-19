@@ -115,6 +115,35 @@
     transform: rotate(180deg);
 }
 
+.filter-clear {
+    position: absolute;
+    right: 36px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: none;
+    padding: 4px;
+    z-index: 20;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+}
+
+.filter-clear:hover {
+    background-color: var(--color-gray-200);
+}
+
+.filter-clear svg {
+    width: 18px;
+    height: 18px;
+    fill: var(--color-gray-500);
+}
+
+.filter-clear:hover svg {
+    fill: var(--color-gray-700);
+}
+
 .filter-dropdown__menu {
     position: absolute;
     top: calc(100% + 4px);
@@ -151,6 +180,14 @@
     background-color: var(--color-primary-light);
     color: var(--color-primary-dark);
     font-weight: var(--weight-medium);
+}
+
+.filter-dropdown.has-value .filter-clear {
+    display: block;
+}
+
+.filter-dropdown.has-value .trigger__text {
+    margin-right: 32px;
 }
 
 .panel__table-container {
