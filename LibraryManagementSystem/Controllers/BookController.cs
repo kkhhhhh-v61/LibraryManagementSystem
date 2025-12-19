@@ -10,7 +10,7 @@ namespace LibraryManagementSystem.Controllers;
 public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
 {
     [Authorize(Roles = "ADMIN, STAFF")]
-    public IActionResult ManageBook(string? search, string? authorId, string? genreId, bool? featured, bool? archived, int page = 1, string sort = "Title", string order = "asc")
+    public IActionResult ManageBook(string? search, string? authorId, string? genreId, bool? featured, bool? archived, DateOnly? dateFrom, DateOnly? dateTo, int page = 1, string sort = "Title", string order = "asc")
     {
         var query = db.Books
             .Include(b => b.Authors)
@@ -43,16 +43,28 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
             query = query.Where(b => b.IsArchived);
         }
 
+        if (dateFrom.HasValue)
+        {
+            query = query.Where(b => b.DateAdded >= dateFrom.Value);
+        }
+
+        if (dateTo.HasValue)
+        {
+            query = query.Where(b => b.DateAdded <= dateTo.Value);
+        }
+
         bool isDesc = order == "desc";
         query = sort switch
         {
             "Title" => isDesc ? query.OrderByDescending(b => b.Title) : query.OrderBy(b => b.Title),
+            "DateAdded" => isDesc ? query.OrderByDescending(b => b.DateAdded) : query.OrderBy(b => b.DateAdded),
             _ => isDesc ? query.OrderByDescending(b => b.Title) : query.OrderBy(b => b.Title)
         };
 
         int pageSize = 10;
         int totalItems = query.Count();
         int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+        ViewBag.TotalItems = db.Books.Count();
         if (page < 1) page = 1;
         if (page > totalPages && totalPages > 0) page = totalPages;
 
@@ -73,6 +85,12 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
             AuthorList = db.Authors.OrderBy(a => a.Name).Select(a => new SelectListItem(a.Name, a.Id)).ToList(),
             GenreList = db.Genres.OrderBy(g => g.Name).Select(g => new SelectListItem(g.Name, g.Id)).ToList()
         };
+
+        var allDates = db.Books.Select(b => b.DateAdded);
+        ViewBag.MinDate = allDates.Any() ? allDates.Min().ToString("yyyy-MM-dd") : null;
+        ViewBag.MaxDate = allDates.Any() ? allDates.Max().ToString("yyyy-MM-dd") : null;
+        ViewBag.DateFrom = dateFrom?.ToString("yyyy-MM-dd");
+        ViewBag.DateTo = dateTo?.ToString("yyyy-MM-dd");
 
         if (Request.IsAjax())
         {
@@ -400,7 +418,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
     }
 
     [Authorize(Roles = "ADMIN, STAFF")]
-    public IActionResult ManageBookDetail(string id, string? search, int page = 1, string sort = "Id", string order = "asc")
+    public IActionResult ManageBookDetail(string id, string? search, string? status, int page = 1, string sort = "Id", string order = "asc")
     {
         var book = db.Books
             .Include(b => b.Authors)
@@ -422,6 +440,11 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
             query = query.Where(c => c.Id.Contains(search) || c.Barcode.Contains(search));
         }
 
+        if (!string.IsNullOrWhiteSpace(status) && Enum.TryParse<Copy.CopyStatus>(status, true, out var statusEnum))
+        {
+            query = query.Where(c => c.Status == statusEnum);
+        }
+
         bool isDesc = order == "desc";
         query = sort switch
         {
@@ -434,6 +457,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         int pageSize = 10;
         int totalItems = query.Count();
         int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+        ViewBag.TotalItems = db.Copies.Count(c => c.BookId == id);
         if (page < 1) page = 1;
         if (page > totalPages && totalPages > 0) page = totalPages;
 
@@ -449,6 +473,8 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
             SortColumn = sort,
             SortOrder = order
         };
+
+        ViewBag.FilterStatus = status;
 
         if (Request.IsAjax())
         {
@@ -537,6 +563,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         int pageSize = 10;
         int totalItems = query.Count();
         int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+        ViewBag.TotalItems = db.Genres.Count();
         if (page < 1) page = 1;
         if (page > totalPages && totalPages > 0) page = totalPages;
 
@@ -711,6 +738,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         int pageSize = 10;
         int totalItems = query.Count();
         int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+        ViewBag.TotalItems = db.Authors.Count();
         if (page < 1) page = 1;
         if (page > totalPages && totalPages > 0) page = totalPages;
 

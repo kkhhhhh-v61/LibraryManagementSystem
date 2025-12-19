@@ -6,11 +6,17 @@
             <th class="table__cell table__cell--checkbox">
                 <input class="checkbox-styled" id="selectAll" type="checkbox" />
             </th>
-            <th class="table__cell table__cell--toggle"></th>
             <th class="table__cell" style="width: 60px;">Image</th>
             <th class="table__cell sortable-header @(Model.SortColumn == "Title" ? "active" : "")" data-sort="Title" data-order="@(Model.SortColumn == "Title" ? Model.SortOrder : "asc")">
                 Title
                 @if (Model.SortColumn == "Title")
+                {
+                    <span class="sort-icon">@(Model.SortOrder == "asc" ? "▲" : "▼")</span>
+                }
+            </th>
+            <th class="table__cell sortable-header @(Model.SortColumn == "DateAdded" ? "active" : "")" data-sort="DateAdded" data-order="@(Model.SortColumn == "DateAdded" ? Model.SortOrder : "asc")" style="width: 180px; text-align: center;">
+                Date Added
+                @if (Model.SortColumn == "DateAdded")
                 {
                     <span class="sort-icon">@(Model.SortOrder == "asc" ? "▲" : "▼")</span>
                 }
@@ -33,16 +39,9 @@
         {
             @foreach (var book in Model.ExistingBooks)
             {
-                <tr class="table__row table__row--master">
+                <tr class="table__row">
                     <td class="table__cell table__cell--checkbox">
                         <input class="row-checkbox checkbox-styled" type="checkbox" name="ids" value="@book.Id" data-name="@book.Title" />
-                    </td>
-                    <td class="table__cell table__cell--toggle">
-                        <button class="toggle-button js-toggle-detail" type="button" title="View Details">
-                            <svg class="toggle-icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#666">
-                                <path d="M480-345 240-585l56-56 184 184 184-184 56 56-240 240Z"/>
-                            </svg>
-                        </button>
                     </td>
                     <td class="table__cell">
                         <img src="@(string.IsNullOrEmpty(book.ImageURL) ? "/images/assets/default-book.png" : $"/images/books/{book.ImageURL}")" 
@@ -55,6 +54,7 @@
                             <span class="book-isbn">ISBN: @book.ISBN</span>
                         </div>
                     </td>
+                    <td class="table__cell" style="text-align: center;">@book.DateAdded.ToString("yyyy-MM-dd")</td>
                     <td class="table__cell" style="text-align: center;">
                         <div class="switch-box__toggle" style="justify-content: center;">
                             <input class="toggle__input js-toggle-status" 
@@ -103,54 +103,6 @@
                                     <path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/>
                                 </svg>
                             </button>
-                        </div>
-                    </td>
-                </tr>
-                <tr class="table__row table__row--detail">
-                    <td colspan="7" class="detail-cell">
-                        <div class="detail-wrapper">
-                            <div class="detail-content">
-                                <div class="detail-container">
-                                    <div class="detail-header">
-                                        <div class="detail-meta-group">
-                                            <div class="meta-badge">
-                                                <span class="meta-label">ID</span>
-                                                <span class="meta-value">@book.Id</span>
-                                            </div>
-                                            <div class="meta-badge">
-                                                <span class="meta-label">Year</span>
-                                                <span class="meta-value">@book.PublicationYear</span>
-                                            </div>
-                                            <div class="meta-badge">
-                                                <span class="meta-label">Edition</span>
-                                                <span class="meta-value">@book.Edition</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="detail-body">
-                                        <div class="detail-column">
-                                            <div class="detail-section">
-                                                <span class="detail-label">Authors</span>
-                                                <div class="detail-tags">
-                                                    @if (book.Authors.Any()) { @foreach(var author in book.Authors) { <span class="tag">@author.Name</span> } } else { <span class="text-muted">-</span> }
-                                                </div>
-                                            </div>
-                                            <div class="detail-section" style="margin-top: 1rem;">
-                                                <span class="detail-label">Genres</span>
-                                                <div class="detail-tags">
-                                                    @if (book.Genres.Any()) { @foreach(var genre in book.Genres) { <span class="tag">@genre.Name</span> } } else { <span class="text-muted">-</span> }
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="detail-column">
-                                            <div class="detail-section">
-                                                <span class="detail-label">Description</span>
-                                                <p class="detail-text">@book.Description</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </td>
                 </tr>
