@@ -1,0 +1,45 @@
+@model List<Book>
+
+<div class="catalogue-grid @(Model == null || !Model.Any() ? "catalogue-grid--empty" : "")">
+    @if (Model == null || !Model.Any())
+    {
+        <div class="empty-state">
+            <div class="empty-state__icon">
+                <svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 -960 960 960" width="48" fill="var(--color-gray-400)"><path d="M320-240h320v-80H320v80Zm0-160h320v-80H320v80ZM240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h320l240 240v480q0 33-23.5 56.5T720-80H240Zm280-520v-200H240v640h480v-440H520ZM240-800v200-200 640-640Z"/></svg>
+            </div>
+            <p class="empty-state__text">No books found.</p>
+        </div>
+    }
+    else
+    {
+        @foreach (var book in Model)
+        {
+            <div class="book-card">
+                <div class="book-card__cover">
+                    <img src="@(string.IsNullOrEmpty(book.ImageURL) ? "/images/assets/no-cover.jpg" : $"/images/books/{book.ImageURL}")" alt="@book.Title" loading="lazy" />
+                    <div class="book-card__overlay">
+                        <h3 class="book-card__title">@book.Title</h3>
+                        <p class="book-card__author">@string.Join(", ", book.Authors.Select(a => a.Name))</p>
+                        <div class="book-card__meta">
+                            <span>@book.PublicationYear</span>
+                            <span>•</span>
+                            <span>@(book.Edition)@(GetOrdinal(book.Edition)) Ed</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@functions {
+    string GetOrdinal(int number)
+    {
+        if (number <= 0) return "";
+        switch (number % 100)
+        {
+            case 11: case 12: case 13: return "th";
+        }
+        return (number % 10) switch { 1 => "st", 2 => "nd", 3 => "rd", _ => "th" };
+    }
+}

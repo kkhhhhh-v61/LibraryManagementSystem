@@ -441,7 +441,8 @@ function initializeCustomFilters() {
                 // Update Value and Trigger Search
                 if (input.value !== value) {
                     input.value = value;
-                    triggerSearch(searchInput);
+                    input.dispatchEvent(new Event("change"));
+                    if (searchInput) triggerSearch(searchInput);
                 }
             });
         });
@@ -464,7 +465,8 @@ function initializeCustomFilters() {
 
                 dropdown.classList.remove("has-value");
                 dropdown.classList.remove("active");
-                triggerSearch(searchInput);
+                input.dispatchEvent(new Event("change"));
+                if (searchInput) triggerSearch(searchInput);
             });
         }
     });
@@ -1051,6 +1053,84 @@ function executePendingToggle() {
 }
 
 /* ===========================================================================
+   CATALOGUE PAGE LOGIC
+   =========================================================================== */
+
+function initializeCatalogue() {
+    const filterMenu = document.getElementById("catalogueFilterMenu");
+    const filterTrigger = document.getElementById("catalogueFilterTrigger");
+    const clearBtn = document.getElementById("catalogueClearFilters");
+    const searchInput = document.getElementById("catalogueSearchInput");
+    const gridWrapper = document.getElementById("catalogueGrid");
+    const filterGenre = document.getElementById("filterGenre");
+    const filterAuthor = document.getElementById("filterAuthor");
+
+    if (filterMenu && filterTrigger) {
+        filterTrigger.addEventListener("click", (e) => {
+            e.stopPropagation();
+            filterMenu.classList.toggle("active");
+        });
+
+        document.addEventListener("click", (e) => {
+            if (!filterMenu.contains(e.target)) {
+                filterMenu.classList.remove("active");
+            }
+        });
+    }
+
+    let debounceTimer;
+    const performSearch = () => {
+        const term = searchInput ? searchInput.value : "";
+        const genreId = filterGenre ? filterGenre.value : "";
+        const authorId = filterAuthor ? filterAuthor.value : "";
+
+        const params = new URLSearchParams();
+        if (term) params.set("search", term);
+        if (genreId) params.set("genreId", genreId);
+        if (authorId) params.set("authorId", authorId);
+
+        fetch(`/Book/Catalogue?${params.toString()}`, {
+            headers: { "X-Requested-With": "XMLHttpRequest" },
+        })
+            .then((response) => response.text())
+            .then((html) => {
+                if (gridWrapper) gridWrapper.innerHTML = html;
+            })
+            .catch((err) => console.error("Catalogue search failed", err));
+    };
+
+    const debouncedSearch = () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(performSearch, 300);
+    };
+
+    if (searchInput) {
+        searchInput.addEventListener("input", debouncedSearch);
+    }
+
+    if (filterGenre) {
+        filterGenre.addEventListener("change", debouncedSearch);
+    }
+
+    if (filterAuthor) {
+        filterAuthor.addEventListener("change", debouncedSearch);
+    }
+
+    if (clearBtn) {
+        clearBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            // Clear custom dropdowns
+            const dropdowns = filterMenu.querySelectorAll(".filter-dropdown");
+            dropdowns.forEach((d) => {
+                const clear = d.querySelector(".filter-clear");
+                if (clear) clear.click();
+            });
+            filterMenu.classList.remove("active");
+        });
+    }
+}
+
+/* ===========================================================================
    INITIALIZATION
    =========================================================================== */
 
@@ -1073,4 +1153,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Initialize features for management tables (Genre/Author)
     initializeTableManagement();
+
+    // Initialize Catalogue Page
+    initializeCatalogue();
 });

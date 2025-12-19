@@ -9,6 +9,45 @@ namespace LibraryManagementSystem.Controllers;
 
 public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
 {
+    public IActionResult Catalogue(string? search, string? genreId, string? authorId)
+    {
+        var genres = db.Genres.OrderBy(g => g.Name).Select(g => new SelectListItem(g.Name, g.Id)).ToList();
+        var authors = db.Authors.OrderBy(a => a.Name).Select(a => new SelectListItem(a.Name, a.Id)).ToList();
+
+        ViewBag.Genres = genres;
+        ViewBag.Authors = authors;
+
+        var query = db.Books
+            .Include(b => b.Authors)
+            .Include(b => b.Genres)
+            .Where(b => !b.IsArchived);
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            search = search.Trim();
+            query = query.Where(b => b.Title.Contains(search) || b.ISBN.Contains(search) || b.Authors.Any(a => a.Name.Contains(search)));
+        }
+
+        if (!string.IsNullOrWhiteSpace(genreId))
+        {
+            query = query.Where(b => b.Genres.Any(g => g.Id == genreId));
+        }
+
+        if (!string.IsNullOrWhiteSpace(authorId))
+        {
+            query = query.Where(b => b.Authors.Any(a => a.Id == authorId));
+        }
+
+        var books = query.OrderByDescending(b => b.DateAdded).ToList();
+
+        if (Request.IsAjax())
+        {
+            return PartialView("_GridCatalogue", books);
+        }
+
+        return View(books);
+    }
+
     [Authorize(Roles = "ADMIN, STAFF")]
     public IActionResult ManageBook(string? search, string? authorId, string? genreId, bool? featured, bool? archived, DateOnly? dateFrom, DateOnly? dateTo, int page = 1, string sort = "Title", string order = "asc")
     {
