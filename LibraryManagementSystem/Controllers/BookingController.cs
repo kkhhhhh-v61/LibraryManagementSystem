@@ -67,6 +67,10 @@ namespace LibraryManagementSystem.Controllers
             {
                 ModelState.AddModelError("EndTime", "End time must be after start time.");
             }
+            else if ((reqEnd - reqStart).TotalMinutes < 30)
+            {
+                ModelState.AddModelError("EndTime", "Booking duration must be at least 30 minutes.");
+            }
 
             if (!ModelState.IsValid)
             {
@@ -153,11 +157,39 @@ namespace LibraryManagementSystem.Controllers
             }).ToList();
         }
 
-        public IActionResult BookingHistory()
+        public IActionResult BookingHistory(string search = "", string date = "")
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var list = db.Bookings.Include(b => b.Room).ThenInclude(r => r.RoomCategory)
-                         .Where(b => b.UserId == userId).OrderByDescending(b => b.BookingDate).ToList();
+
+            var query = db.Bookings
+                .Include(b => b.Room).ThenInclude(r => r.RoomCategory)
+                .Where(b => b.UserId == userId);
+
+            if (!string.IsNullOrEmpty(date) && DateTime.TryParse(date, out DateTime selectedDate))
+            {
+                query = query.Where(b => b.StartTime.Date == selectedDate.Date);
+            }
+
+            var list = query.OrderByDescending(b => b.StartTime).ToList();
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                search = search.Trim().ToLower();
+
+                list = list.Where(b =>
+                    b.Room.Name.ToLower().Contains(search) ||
+                    b.Room.RoomCategory.Name.ToLower().Contains(search) ||
+                    b.TotalPrice.ToString("F2").Contains(search) ||
+                    b.StartTime.ToString("hh:mm tt").ToLower().Contains(search) ||
+                    b.EndTime.ToString("hh:mm tt").ToLower().Contains(search)
+                ).ToList();
+            }
+
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return PartialView("_BookingList", list);
+            }
+
             return View(list);
         }
 
