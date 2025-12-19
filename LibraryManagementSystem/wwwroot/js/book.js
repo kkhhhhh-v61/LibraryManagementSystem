@@ -227,6 +227,8 @@ function initializeTableManagement() {
     const clearFiltersBtn = document.getElementById("clearFilters");
     const filterFeatured = document.getElementById("filterFeatured");
     const filterArchived = document.getElementById("filterArchived");
+    const filterDateFrom = document.getElementById("filterDateFrom");
+    const filterDateTo = document.getElementById("filterDateTo");
 
     // Determine if we are using AJAX search (Genre/Author) or Client-side (Book)
     const isAjax = tableContainer !== null;
@@ -298,12 +300,34 @@ function initializeTableManagement() {
             );
         }
 
+        if (filterDateFrom) {
+            filterDateFrom.addEventListener("change", () =>
+                triggerSearch(searchInput)
+            );
+        }
+
+        if (filterDateTo) {
+            filterDateTo.addEventListener("change", () =>
+                triggerSearch(searchInput)
+            );
+        }
+
         if (clearFiltersBtn) {
             clearFiltersBtn.addEventListener("click", () => {
-                document.getElementById("filterAuthor").value = "";
-                document.getElementById("filterGenre").value = "";
-                document.getElementById("filterFeatured").checked = false;
-                document.getElementById("filterArchived").checked = false;
+                const filterAuthor = document.getElementById("filterAuthor");
+                if (filterAuthor) filterAuthor.value = "";
+                const filterGenre = document.getElementById("filterGenre");
+                if (filterGenre) filterGenre.value = "";
+                const filterStatus = document.getElementById("filterStatus");
+                if (filterStatus) filterStatus.value = "";
+                const filterFeatured =
+                    document.getElementById("filterFeatured");
+                if (filterFeatured) filterFeatured.checked = false;
+                const filterArchived =
+                    document.getElementById("filterArchived");
+                if (filterArchived) filterArchived.checked = false;
+                if (filterDateFrom) filterDateFrom.value = "";
+                if (filterDateTo) filterDateTo.value = "";
                 filterMenu.classList.remove("active");
                 triggerSearch(searchInput);
             });
@@ -475,6 +499,9 @@ function performAjaxSearch(term, page, sort, order) {
     const filterGenre = document.getElementById("filterGenre");
     const filterFeatured = document.getElementById("filterFeatured");
     const filterArchived = document.getElementById("filterArchived");
+    const filterStatus = document.getElementById("filterStatus");
+    const filterDateFrom = document.getElementById("filterDateFrom");
+    const filterDateTo = document.getElementById("filterDateTo");
 
     const url = new URL(window.location.href);
 
@@ -494,6 +521,10 @@ function performAjaxSearch(term, page, sort, order) {
         url.searchParams.set("genreId", filterGenre.value);
     else url.searchParams.delete("genreId");
 
+    if (filterStatus && filterStatus.value)
+        url.searchParams.set("status", filterStatus.value);
+    else url.searchParams.delete("status");
+
     if (filterFeatured && filterFeatured.checked)
         url.searchParams.set("featured", "true");
     else url.searchParams.delete("featured");
@@ -501,6 +532,14 @@ function performAjaxSearch(term, page, sort, order) {
     if (filterArchived && filterArchived.checked)
         url.searchParams.set("archived", "true");
     else url.searchParams.delete("archived");
+
+    if (filterDateFrom && filterDateFrom.value)
+        url.searchParams.set("dateFrom", filterDateFrom.value);
+    else url.searchParams.delete("dateFrom");
+
+    if (filterDateTo && filterDateTo.value)
+        url.searchParams.set("dateTo", filterDateTo.value);
+    else url.searchParams.delete("dateTo");
 
     fetch(url, {
         headers: { "X-Requested-With": "XMLHttpRequest" },
@@ -659,43 +698,6 @@ function bindTableContentEvents() {
 
     // Bind Edit/Delete buttons inside the table
     bindDynamicModalTriggers();
-
-    // Bind Accordion Toggles
-    const toggleButtons = document.querySelectorAll(".js-toggle-detail");
-    toggleButtons.forEach((btn) => {
-        btn.addEventListener("click", function () {
-            const masterRow = this.closest(".table__row--master");
-            const detailRow = masterRow.nextElementSibling;
-            const wrapper = detailRow.querySelector(".detail-wrapper");
-
-            if (
-                detailRow &&
-                detailRow.classList.contains("table__row--detail")
-            ) {
-                this.classList.toggle("active");
-
-                if (this.classList.contains("active")) {
-                    // Open
-                    detailRow.style.display = "table-row";
-                    // Force reflow
-                    void detailRow.offsetWidth;
-                    wrapper.classList.add("open");
-                } else {
-                    // Close
-                    wrapper.classList.remove("open");
-                    wrapper.addEventListener(
-                        "transitionend",
-                        function () {
-                            if (!wrapper.classList.contains("open")) {
-                                detailRow.style.display = "none";
-                            }
-                        },
-                        { once: true }
-                    );
-                }
-            }
-        });
-    });
 
     // Bind Status Toggles (Featured/Archived)
     bindStatusToggles();
