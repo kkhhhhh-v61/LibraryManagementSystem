@@ -30,7 +30,7 @@
             <div class="detail-info">
                 <!-- Image -->
                 <div class="detail-info__image-wrapper">
-                    <img src="@(string.IsNullOrEmpty(Model.Book.ImageURL) ? "/images/assets/default-book.png" : $"/images/books/{Model.Book.ImageURL}")" 
+                    <img src="@(string.IsNullOrEmpty(Model.Book.ImageURL) ? "/images/assets/no-cover.jpg" : $"/images/books/{Model.Book.ImageURL}")" 
                          alt="@Model.Book.Title" 
                          class="detail-info__image" />
                 </div>
@@ -63,7 +63,7 @@
                         <div class="detail-tags">
                             @if (Model.Book.IsFeatured) { <span class="tag tag--featured">Featured</span> }
                             @if (Model.Book.IsArchived) { <span class="tag tag--archived">Archived</span> }
-                            @if (!Model.Book.IsFeatured && !Model.Book.IsArchived) { <span class="text-muted">Standard</span> }
+                            @if (!Model.Book.IsFeatured && !Model.Book.IsArchived) { <span class="tag">Standard</span> }
                         </div>
                     </div>
 
