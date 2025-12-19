@@ -146,6 +146,49 @@
     </div>
 </div>
 
+<div class="modal" id="modal-add-copy">
+    <div class="modal__container">
+        <div class="modal__header">
+            <h2 class="modal__title">Add Copies</h2>
+            <button class="modal__close js-close-modal" type="button">
+                <svg class="close__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
+            </button>
+        </div>
+        <form class="modal__form" asp-action="AddCopy" method="post">
+            <div class="modal__content">
+                <input type="hidden" name="bookId" id="addCopyBookId" />
+                <p class="modal__text" style="margin-bottom: 1rem;">
+                    Adding copies for: <span class="text--highlight" id="addCopyBookTitle"></span>
+                </p>
+                <div class="form__field">
+                    <label class="field__label field__label--required">Quantity</label>
+                    <input class="field__input input--number" name="quantity" type="number" min="1" max="100" value="1" required />
+                </div>
+            </div>
+            <div class="modal__footer">
+                <button class="form__button form__button--reset js-cancel-modal" type="button">Cancel</button>
+                <button class="form__button form__button--submit" type="submit">Add Copies</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal" id="modal-copy-summary">
+    <div class="modal__container">
+        <div class="modal__header">
+            <h2 class="modal__title">Copies Added</h2>
+            <button class="modal__close js-close-modal" type="button"><svg class="close__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg></button>
+        </div>
+        <div class="modal__content">
+            <p class="modal__text">The following copies have been successfully generated:</p>
+            <div class="delete-list" id="copySummaryList"></div>
+        </div>
+        <div class="modal__footer">
+            <button class="form__button form__button--submit js-close-modal" type="button">Close</button>
+        </div>
+    </div>
+</div>
+
 <div class="modal" id="modal-toggle-confirm">
     <div class="modal__container">
         <div class="modal__header">
@@ -180,6 +223,27 @@
         <script>
             sessionStorage.removeItem("temp_image_data");
             sessionStorage.removeItem("form_submitting");
+        </script>
+    }
+
+    @if (TempData["AddedCopies"] != null)
+    {
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const addedCopies = @Html.Raw(TempData["AddedCopies"]);
+                const summaryModal = document.getElementById("modal-copy-summary");
+                const listContainer = document.getElementById("copySummaryList");
+                
+                if (summaryModal && listContainer && addedCopies.length > 0) {
+                    listContainer.innerHTML = addedCopies.map(copy => `
+                        <div class="delete-item">
+                            <div class="delete-item__info"><span class="delete-item__name">ID: ${copy.Id}</span><span class="delete-item__status" style="color: var(--color-gray-600);">Barcode: ${copy.Barcode}</span></div>
+                            <svg class="delete-item__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="#22c55e"><path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z"/></svg>
+                        </div>
+                    `).join("");
+                    summaryModal.classList.add("active");
+                }
+            });
         </script>
     }
 }

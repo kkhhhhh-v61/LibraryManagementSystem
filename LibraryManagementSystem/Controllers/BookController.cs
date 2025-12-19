@@ -341,6 +341,48 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
 
     [HttpPost]
     [Authorize(Roles = "ADMIN, STAFF")]
+    public IActionResult AddCopy(string bookId, int quantity)
+    {
+        if (quantity < 1)
+        {
+            TempData["ToastMessage"] = "Quantity must be at least 1.";
+            TempData["ToastType"] = "error";
+            return RedirectToAction("ManageBook");
+        }
+
+        var book = db.Books.Find(bookId);
+        if (book == null)
+        {
+            TempData["ToastMessage"] = "Book not found.";
+            TempData["ToastType"] = "error";
+            return RedirectToAction("ManageBook");
+        }
+
+        var addedCopies = new List<object>();
+        var lastCopy = db.Copies.OrderByDescending(c => c.Id).FirstOrDefault();
+        string? lastId = lastCopy?.Id;
+
+        for (int i = 0; i < quantity; i++)
+        {
+            string newId = GenerateNewId(lastId, 'C');
+            lastId = newId;
+
+            var copy = new Copy { Id = newId, BookId = bookId, Status = Copy.CopyStatus.AVAILABLE, Barcode = $"{bookId}-{newId}" };
+            db.Copies.Add(copy);
+            addedCopies.Add(new { copy.Id, copy.Barcode });
+        }
+
+        db.SaveChanges();
+
+        TempData["ToastMessage"] = $"{quantity} copies added successfully.";
+        TempData["ToastType"] = "success";
+        TempData["AddedCopies"] = System.Text.Json.JsonSerializer.Serialize(addedCopies);
+
+        return RedirectToAction("ManageBook");
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "ADMIN, STAFF")]
     public IActionResult ToggleBookStatus(string id, string field, bool value)
     {
         var book = db.Books.Find(id);

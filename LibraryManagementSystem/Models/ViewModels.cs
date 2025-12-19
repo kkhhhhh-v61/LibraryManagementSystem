@@ -86,8 +86,6 @@ public class RegisterVM
     public IFormFile? ProfilePhoto { get; set; }
 }
 
-/* ------------------ PASSWORD RECOVERY VIEW MODELS ------------------ */
-
 public class ForgotPasswordVM
 {
     [Required(ErrorMessage = "Please enter your email address.")]
@@ -114,8 +112,6 @@ public class ResetPasswordVM
     [Compare("Password", ErrorMessage = "Passwords do not match.")]
     public string ConfirmPassword { get; set; }
 }
-
-/* ---------------------- PROFILE VIEW MODEL ---------------------- */
 
 public class ProfileVM
 {
@@ -159,14 +155,21 @@ public class BookManagementVM
     public List<Book> ExistingBooks { get; set; } = new();
 
     public int CurrentPage { get; set; }
+
     public int TotalPages { get; set; }
+
     public string? SearchTerm { get; set; }
+
     public string SortColumn { get; set; } = "Title";
+
     public string SortOrder { get; set; } = "asc";
 
     public string? SelectedAuthorId { get; set; }
+
     public string? SelectedGenreId { get; set; }
+
     public List<SelectListItem> AuthorList { get; set; } = new();
+
     public List<SelectListItem> GenreList { get; set; } = new();
 }
 
@@ -269,6 +272,23 @@ public class BookEditVM
     public bool IsArchived { get; set; } = false;
 }
 
+public class GenreManagementVM
+{
+    public List<Genre> ExistingGenres { get; set; } = new();
+
+    public GenreVM Form { get; set; } = new();
+
+    public int CurrentPage { get; set; }
+
+    public int TotalPages { get; set; }
+
+    public string? SearchTerm { get; set; }
+
+    public string SortColumn { get; set; } = "Name";
+
+    public string SortOrder { get; set; } = "asc";
+}
+
 public class GenreVM
 {
     public string? Id { get; set; }
@@ -281,16 +301,20 @@ public class GenreVM
     public string Name { get; set; }
 }
 
-public class GenreManagementVM
+public class AuthorManagementVM
 {
-    public List<Genre> ExistingGenres { get; set; } = new();
+    public List<Author> ExistingAuthors { get; set; } = new();
 
-    public GenreVM Form { get; set; } = new();
+    public AuthorVM Form { get; set; } = new();
 
     public int CurrentPage { get; set; }
+
     public int TotalPages { get; set; }
+
     public string? SearchTerm { get; set; }
+
     public string SortColumn { get; set; } = "Name";
+    
     public string SortOrder { get; set; } = "asc";
 }
 
@@ -305,19 +329,6 @@ public class AuthorVM
     [RegularExpression(@"^[a-zA-Z]+(?:(?:[\s\-\']|\. ?)[a-zA-Z]+)*\.?$",
     ErrorMessage = "{0} must start with a letter, and symbols (', -, .) must be between letters.")]
     public string Name { get; set; }
-}
-
-public class AuthorManagementVM
-{
-    public List<Author> ExistingAuthors { get; set; } = new();
-
-    public AuthorVM Form { get; set; } = new();
-
-    public int CurrentPage { get; set; }
-    public int TotalPages { get; set; }
-    public string? SearchTerm { get; set; }
-    public string SortColumn { get; set; } = "Name";
-    public string SortOrder { get; set; } = "asc";
 }
 
 

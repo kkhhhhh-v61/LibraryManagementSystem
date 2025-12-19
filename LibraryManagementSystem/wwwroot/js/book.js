@@ -300,6 +300,9 @@ function initializeTableManagement() {
     // Bind static modal events (Edit/Delete/Batch)
     bindStaticModalEvents();
 
+    // Bind static Add Copy modal events
+    bindAddCopyStaticEvents();
+
     // Bind Pagination Events (Delegation)
     if (tableContainer) {
         tableContainer.addEventListener("click", function (e) {
@@ -656,6 +659,9 @@ function bindTableContentEvents() {
 
     // Bind Status Toggles (Featured/Archived)
     bindStatusToggles();
+
+    // Bind Add Copy Triggers
+    bindAddCopyTriggers();
 }
 
 function bindStaticModalEvents() {
@@ -794,6 +800,38 @@ function bindStaticModalEvents() {
     }
 }
 
+function bindAddCopyStaticEvents() {
+    const modal = document.getElementById("modal-add-copy");
+    const summaryModal = document.getElementById("modal-copy-summary");
+
+    if (modal) {
+        const closeButtons = modal.querySelectorAll(
+            ".js-close-modal, .js-cancel-modal"
+        );
+        closeButtons.forEach((btn) =>
+            btn.addEventListener("click", () =>
+                modal.classList.remove("active")
+            )
+        );
+        modal.addEventListener("click", (e) => {
+            if (e.target === modal) modal.classList.remove("active");
+        });
+    }
+
+    if (summaryModal) {
+        const closeButtons = summaryModal.querySelectorAll(".js-close-modal");
+        closeButtons.forEach((btn) =>
+            btn.addEventListener("click", () =>
+                summaryModal.classList.remove("active")
+            )
+        );
+        summaryModal.addEventListener("click", (e) => {
+            if (e.target === summaryModal)
+                summaryModal.classList.remove("active");
+        });
+    }
+}
+
 function bindDynamicModalTriggers() {
     const editModal = document.getElementById("modal-edit");
     if (editModal) {
@@ -859,6 +897,23 @@ function bindDynamicModalTriggers() {
             });
         });
     }
+}
+
+function bindAddCopyTriggers() {
+    const modal = document.getElementById("modal-add-copy");
+    if (!modal) return;
+
+    const bookIdInput = document.getElementById("addCopyBookId");
+    const bookTitleSpan = document.getElementById("addCopyBookTitle");
+    const triggers = document.querySelectorAll(".js-add-copy");
+
+    triggers.forEach((btn) =>
+        btn.addEventListener("click", () => {
+            bookIdInput.value = btn.dataset.id;
+            bookTitleSpan.textContent = btn.dataset.title;
+            modal.classList.add("active");
+        })
+    );
 }
 
 function bindStatusToggles() {
