@@ -1,0 +1,138 @@
+﻿@model Book
+@{
+    ViewBag.Title = Model.Title;
+    var reviews = ViewBag.Reviews as List<Review> ?? new List<Review>();
+    var avgRating = (double)ViewBag.AverageRating;
+    var available = (int)ViewBag.AvailableCopies;
+    var total = (int)ViewBag.TotalCopies;
+}
+
+@section head {
+    <link rel="stylesheet" href="/css/book.css" asp-append-version="true" />
+}
+
+<div class="public-detail-container">
+    <div class="public-detail-card">
+        <div class="public-detail-header">
+            <a asp-action="Catalogue" class="action__button button--back" title="Back to Catalogue">
+                <svg class="button__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000"><path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z"/></svg>
+            </a>
+        </div>
+
+        <div class="public-detail-grid">
+            <!-- Left: Image -->
+            <div class="public-detail-image">
+                <img src="@(string.IsNullOrEmpty(Model.ImageURL) ? "/images/assets/no-cover.jpg" : $"/images/books/{Model.ImageURL}")" alt="@Model.Title" />
+            </div>
+
+            <!-- Right: Info -->
+            <div class="public-detail-info">
+                <h1 class="public-detail-title">@Model.Title</h1>
+                
+                <div class="public-detail-meta-row">
+                    <span class="meta-label">ISBN:</span>
+                    <span class="meta-value" style="font-family: monospace;">@Model.ISBN</span>
+                </div>
+
+                <div class="public-detail-meta-grid">
+                    <span class="meta-label">Authors</span>
+                    <div class="meta-tags">
+                        @foreach(var author in Model.Authors) { <span class="meta-tag">@author.Name</span> }
+                    </div>
+
+                    <span class="meta-label">Genres</span>
+                    <div class="meta-tags">
+                        @foreach(var genre in Model.Genres) { <span class="meta-tag">@genre.Name</span> }
+                    </div>
+
+                    <span class="meta-label">Publication</span>
+                    <div class="meta-value">
+                        @Model.PublicationYear • Edition @Model.Edition
+                    </div>
+                </div>
+
+                <div class="public-detail-rating">
+                    <div class="stars">
+                        @for(int i=1; i<=5; i++) {
+                            <i class="fa-solid fa-star @(i <= Math.Round(avgRating) ? "star-filled" : "star-empty")"></i>
+                        }
+                    </div>
+                    <span class="rating-text">@avgRating.ToString("0.0") (@reviews.Count reviews)</span>
+                </div>
+
+                <div class="public-detail-availability">
+                    @if(available > 0)
+                    {
+                        <span class="status-badge status-available">
+                            <i class="fa-solid fa-check-circle"></i> @available / @total Copies Available
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="status-badge status-unavailable">
+                            <i class="fa-solid fa-times-circle"></i> Out of Stock
+                        </span>
+                    }
+                </div>
+
+                <div class="public-detail-actions">
+                    <button class="form__button form__button--submit" @(available > 0 ? "" : "disabled")>
+                        <i class="fa-solid fa-book-open"></i> Loan
+                    </button>
+                    <button class="form__button form__button--reset">
+                        <i class="fa-solid fa-bookmark"></i> Reserve
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="public-detail-separator"></div>
+
+        <div class="public-detail-description">
+            <h3>Description</h3>
+            <p>@Model.Description</p>
+        </div>
+
+        <div class="public-detail-separator"></div>
+
+        <div class="public-reviews-container">
+        <h2 class="section-title">Reviews & Ratings</h2>
+        
+        @if(reviews.Count > 0)
+        {
+            <div class="reviews-list">
+                @foreach(var review in reviews)
+                {
+                    <div class="review-card">
+                        <div class="review-header">
+                            <img src="@(string.IsNullOrEmpty(review.Loan.User.ImageURL) ? "/images/assets/default-profile.png" : $"/images/profiles/{review.Loan.User.ImageURL}")" class="review-avatar" />
+                            <div class="review-user-info">
+                                <span class="review-username">@review.Loan.User.Username</span>
+                                <span class="review-date">@review.ReviewDate.ToString("MMM dd, yyyy")</span>
+                            </div>
+                            <div class="review-stars">
+                                @for(int i=1; i<=5; i++) {
+                                    <i class="fa-solid fa-star @(i <= review.Rating ? "star-filled" : "star-empty")"></i>
+                                }
+                            </div>
+                        </div>
+                        <div class="review-body">
+                            <p>@review.Comment</p>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="no-reviews">
+                <p>No reviews yet. Be the first to review this book!</p>
+            </div>
+        }
+        </div>
+    </div>
+</div>
+
+@section foot {
+    <script src="/js/book.js" asp-append-version="true"></script>
+}

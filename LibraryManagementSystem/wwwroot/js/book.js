@@ -1064,6 +1064,7 @@ function initializeCatalogue() {
     const gridWrapper = document.getElementById("catalogueGrid");
     const filterGenre = document.getElementById("filterGenre");
     const filterAuthor = document.getElementById("filterAuthor");
+    const searchClear = document.getElementById("catalogueSearchClear");
 
     if (filterMenu && filterTrigger) {
         filterTrigger.addEventListener("click", (e) => {
@@ -1105,7 +1106,24 @@ function initializeCatalogue() {
     };
 
     if (searchInput) {
-        searchInput.addEventListener("input", debouncedSearch);
+        searchInput.addEventListener("input", (e) => {
+            debouncedSearch();
+            if (searchClear) {
+                if (e.target.value.length > 0)
+                    searchClear.classList.add("active");
+                else searchClear.classList.remove("active");
+            }
+        });
+    }
+
+    if (searchClear) {
+        searchClear.addEventListener("click", () => {
+            searchInput.value = "";
+            searchClear.classList.remove("active");
+            // Trigger input event to update search results
+            searchInput.dispatchEvent(new Event("input"));
+            searchInput.focus();
+        });
     }
 
     if (filterGenre) {

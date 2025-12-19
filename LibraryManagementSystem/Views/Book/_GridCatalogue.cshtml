@@ -14,7 +14,7 @@
     {
         @foreach (var book in Model)
         {
-            <div class="book-card">
+            <a href="@Url.Action("BookDetails", "Book", new { id = book.Id })" class="book-card">
                 <div class="book-card__cover">
                     <img src="@(string.IsNullOrEmpty(book.ImageURL) ? "/images/assets/no-cover.jpg" : $"/images/books/{book.ImageURL}")" alt="@book.Title" loading="lazy" />
                     <div class="book-card__overlay">
@@ -27,7 +27,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </a>
         }
     }
 </div>
