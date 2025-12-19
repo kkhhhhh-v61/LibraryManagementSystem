@@ -22,130 +22,159 @@ public class LoginVM
     public string Password { get; set; }
 }
 
-public class RegisterVM
-{
-    [DisplayName("Username")]
-    // Prevents empty submissions
-    [Required(ErrorMessage = "{0} is required.")]
-    // Enforces length constraints for database consistency
-    [StringLength(20, MinimumLength = 3, ErrorMessage = "{0} must be between 3 and 20 characters.")]
-    // Allow only: Letters (a-z), Numbers (0-9), and Underscores (_)
-    [RegularExpression(@"^[a-zA-Z0-9_]+$", ErrorMessage = "{0} can only contain letters, numbers, and underscores.")]
-    public string Username { get; set; }
+    public class RegisterVM
+    {
+        [DisplayName("Username")]
+        // Prevents empty submissions
+        [Required(ErrorMessage = "{0} is required.")]
+        // Enforces length constraints for database consistency
+        [StringLength(20, MinimumLength = 3, ErrorMessage = "{0} must be between 3 and 20 characters.")]
+        // Allow only: Letters (a-z), Numbers (0-9), and Underscores (_)
+        [RegularExpression(@"^[a-zA-Z0-9_]+$", ErrorMessage = "{0} can only contain letters, numbers, and underscores.")]
+        public string Username { get; set; }
 
-    [DisplayName("Password")]
-    [Required(ErrorMessage = "{0} is required.")]
-    // Minimum 8 characters for security
-    [StringLength(100, MinimumLength = 8, ErrorMessage = "{0} must be at least 8 characters long.")]
-    // Strong Password Policy: Must contain 1 Upper, 1 Lower, 1 Digit, 1 Special Char
-    [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$",
-        ErrorMessage = "{0} must have 1 Uppercase, 1 Lowercase, 1 Number, and 1 Special Character.")]
-    // Hides the characters in the input field
-    [DataType(DataType.Password)]
-    public string Password { get; set; }
+        [DisplayName("Password")]
+        [Required(ErrorMessage = "{0} is required.")]
+        // Minimum 8 characters for security
+        [StringLength(100, MinimumLength = 8, ErrorMessage = "{0} must be at least 8 characters long.")]
+        // Strong Password Policy: Must contain 1 Upper, 1 Lower, 1 Digit, 1 Special Char
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$",
+            ErrorMessage = "{0} must have 1 Uppercase, 1 Lowercase, 1 Number, and 1 Special Character.")]
+        // Hides the characters in the input field
+        [DataType(DataType.Password)]
+        public string Password { get; set; }
 
-    [DisplayName("Confirm Password")]
-    [Required(ErrorMessage = "{0} is required.")]
-    [DataType(DataType.Password)]
-    // Ensures this field matches the 'Password' field exactly
-    [Compare("Password", ErrorMessage = "Password and confirmation password do not match.")]
-    public string ConfirmPassword { get; set; }
+        [DisplayName("Confirm Password")]
+        [Required(ErrorMessage = "{0} is required.")]
+        [DataType(DataType.Password)]
+        // Ensures this field matches the 'Password' field exactly
+        [Compare("Password", ErrorMessage = "Password and confirmation password do not match.")]
+        public string ConfirmPassword { get; set; }
 
-    [DisplayName("First Name")]
-    [Required(ErrorMessage = "{0} is required.")]
-    [StringLength(50, MinimumLength = 1, ErrorMessage = "{0} must be between 1 and 50 characters.")]
-    // Allow only: Letters, Spaces, and Hyphens (e.g. "Mary-Anne")
-    [RegularExpression(@"^[a-zA-Z\s\-]+$", ErrorMessage = "{0} can only contain letters.")]
-    public string FirstName { get; set; }
+        [DisplayName("First Name")]
+        [Required(ErrorMessage = "{0} is required.")]
+        [StringLength(50, MinimumLength = 1, ErrorMessage = "{0} must be between 1 and 50 characters.")]
+        // Allow only: Letters, Spaces, and Hyphens (e.g. "Mary-Anne")
+        [RegularExpression(@"^[a-zA-Z\s\-]+$", ErrorMessage = "{0} can only contain letters.")]
+        public string FirstName { get; set; }
 
-    [DisplayName("Last Name")]
-    [Required(ErrorMessage = "{0} is required.")]
-    [StringLength(50, MinimumLength = 1, ErrorMessage = "{0} must be between 1 and 50 characters.")]
-    // Allow only: Letters, Spaces, and Hyphens
-    [RegularExpression(@"^[a-zA-Z\s\-]+$", ErrorMessage = "{0} can only contain letters.")]
-    public string LastName { get; set; }
+        [DisplayName("Last Name")]
+        [Required(ErrorMessage = "{0} is required.")]
+        [StringLength(50, MinimumLength = 1, ErrorMessage = "{0} must be between 1 and 50 characters.")]
+        // Allow only: Letters, Spaces, and Hyphens
+        [RegularExpression(@"^[a-zA-Z\s\-]+$", ErrorMessage = "{0} can only contain letters.")]
+        public string LastName { get; set; }
 
-    [DisplayName("Email")]
-    [Required(ErrorMessage = "{0} is required.")]
-    // Built-in check for basic format
-    [EmailAddress(ErrorMessage = "Invalid Email Address.")]
-    // STRICT check: Requires @ symbol, domain name, and extension (like .com)
-    [RegularExpression(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", ErrorMessage = "Email must contain a valid domain (e.g., user@example.com).")]
-    public string Email { get; set; }
+        [DisplayName("Email")]
+        [Required(ErrorMessage = "{0} is required.")]
+        // Built-in check for basic format
+        [EmailAddress(ErrorMessage = "Invalid Email Address.")]
+        // STRICT check: Requires @ symbol, domain name, and extension (like .com)
+        [RegularExpression(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", ErrorMessage = "Email must contain a valid domain (e.g., user@example.com).")]
+        public string Email { get; set; }
 
-    [DisplayName("Contact No.")]
-    [Required(ErrorMessage = "{0} is required.")]
-    // Flexible Phone Format: Supports optional country code (+), brackets (), and dashes (-)
-    [RegularExpression(@"^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$",
-        ErrorMessage = "Please enter a valid phone number (e.g., 012-3456789).")]
-    public string ContactNo { get; set; }
+        [DisplayName("Contact No.")]
+        [Required(ErrorMessage = "{0} is required.")]
+        // Flexible Phone Format: Supports optional country code (+), brackets (), and dashes (-)
+        [RegularExpression(@"^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$",
+            ErrorMessage = "Please enter a valid phone number (e.g., 012-3456789).")]
+        public string ContactNo { get; set; }
 
-    [DisplayName("Profile Photo")]
-    // Custom validation logic for file type/size is handled in the Controller/Helper
-    public IFormFile? ProfilePhoto { get; set; }
-}
+        [DisplayName("Profile Photo")]
+        // Custom validation logic for file type/size is handled in the Controller/Helper
+        public IFormFile? ProfilePhoto { get; set; }
+    }
 
-public class ForgotPasswordVM
-{
-    [Required(ErrorMessage = "Please enter your email address.")]
-    [EmailAddress]
-    public required string Email { get; set; }
-}
+    public class ForgotPasswordVM
+    {
+        [Required(ErrorMessage = "Please enter your email address.")]
+        [EmailAddress]
+        public required string Email { get; set; }
+    }
 
-public class ResetPasswordVM
-{
-    [Required]
-    public string Token { get; set; }
+    public class ResetPasswordVM
+    {
+        [Required]
+        public string Token { get; set; }
 
-    [Required]
-    [EmailAddress]
-    public string Email { get; set; }
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; }
 
-    [Required]
-    [DataType(DataType.Password)]
-    [StringLength(100, MinimumLength = 6)]
-    public string Password { get; set; }
+        [Required]
+        [DataType(DataType.Password)]
+        [StringLength(100, MinimumLength = 6)]
+        public string Password { get; set; }
 
-    [DataType(DataType.Password)]
-    [Display(Name = "Confirm password")]
-    [Compare("Password", ErrorMessage = "Passwords do not match.")]
-    public string ConfirmPassword { get; set; }
-}
+        [DataType(DataType.Password)]
+        [Display(Name = "Confirm password")]
+        [Compare("Password", ErrorMessage = "Passwords do not match.")]
+        public string ConfirmPassword { get; set; }
+    }
 
-public class ProfileVM
-{
-    public string Username { get; set; } // Read-only usually
-    public string Role { get; set; }     // Read-only
+    public class ProfileVM
+    {
+        public string Username { get; set; }
+        public string Role { get; set; }
 
-    [Display(Name = "Credibility Score")]
-    public int CredibilityScore { get; set; } // Read-only
+        [Display(Name = "Credibility Score")]
+        public int CredibilityScore { get; set; }
 
-    [Required(ErrorMessage = "First Name is required.")]
-    [MaxLength(50)]
-    [Display(Name = "First Name")]
-    public string FirstName { get; set; }
+        // --- Validation Rules Synced with RegisterVM ---
 
-    [Required(ErrorMessage = "Last Name is required.")]
-    [MaxLength(50)]
-    [Display(Name = "Last Name")]
-    public string LastName { get; set; }
+        [Display(Name = "First Name")]
+        [Required(ErrorMessage = "{0} is required.")]
+        [StringLength(50, MinimumLength = 1, ErrorMessage = "{0} must be between 1 and 50 characters.")]
+        [RegularExpression(@"^[a-zA-Z\s\-]+$", ErrorMessage = "{0} can only contain letters.")]
+        public string FirstName { get; set; }
 
-    [Required]
-    [EmailAddress]
-    public string Email { get; set; }
+        [Display(Name = "Last Name")]
+        [Required(ErrorMessage = "{0} is required.")]
+        [StringLength(50, MinimumLength = 1, ErrorMessage = "{0} must be between 1 and 50 characters.")]
+        [RegularExpression(@"^[a-zA-Z\s\-]+$", ErrorMessage = "{0} can only contain letters.")]
+        public string LastName { get; set; }
 
-    [Required]
-    [RegularExpression(@"^(\+?6?01)[02-46-9]-*[0-9]{7}$|^(\+?6?01)[1]-*[0-9]{8}$",
-        ErrorMessage = "Invalid Malaysian phone number format.")]
-    [Display(Name = "Phone Number")]
-    public string ContactNo { get; set; }
+        [Display(Name = "Email")]
+        [Required(ErrorMessage = "{0} is required.")]
+        [EmailAddress(ErrorMessage = "Invalid Email Address.")]
+        [RegularExpression(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", ErrorMessage = "Email must contain a valid domain (e.g., user@example.com).")]
+        public string Email { get; set; }
 
-    [Display(Name = "Public Profile")]
-    public bool IsProfilePublic { get; set; }
+        [Display(Name = "Contact No.")]
+        [Required(ErrorMessage = "{0} is required.")]
+        // CHANGED: Replaced specific Malaysian regex with the Flexible one from RegisterVM
+        [RegularExpression(@"^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$",
+            ErrorMessage = "Please enter a valid phone number.")]
+        public string ContactNo { get; set; }
 
-    public string? ProfilePhotoUrl { get; set; }
-}
+        [Display(Name = "Public Profile")]
+        public bool IsProfilePublic { get; set; }
 
+        public string? ProfilePhotoUrl { get; set; }
+    }
+
+    // 6. CHANGE PASSWORD (Updated to match Register Password Policy)
+    public class ChangePasswordVM
+    {
+        [Required]
+        [DataType(DataType.Password)]
+        public string CurrentPassword { get; set; }
+
+        [Required]
+        [DataType(DataType.Password)]
+        [Display(Name = "New Password")]
+        [StringLength(100, MinimumLength = 8, ErrorMessage = "{0} must be at least 8 characters long.")]
+        // Strong Password Policy: Must contain 1 Upper, 1 Lower, 1 Digit, 1 Special Char
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$",
+            ErrorMessage = "{0} must have 1 Uppercase, 1 Lowercase, 1 Number, and 1 Special Character.")]
+        public string NewPassword { get; set; }
+
+        [Required]
+        [DataType(DataType.Password)]
+        [Display(Name = "Confirm New Password")]
+        [Compare("NewPassword", ErrorMessage = "Passwords do not match")]
+        public string ConfirmNewPassword { get; set; }
+    }
 
 /* ------------------------------ TAN KAI HAO ------------------------------ */
 

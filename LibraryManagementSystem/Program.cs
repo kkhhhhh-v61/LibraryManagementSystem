@@ -8,10 +8,15 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddTransient<LibraryManagementSystem.Services.IEmailSender, LibraryManagementSystem.Services.IEmailSender>();
 builder.Services.AddControllersWithViews();
 builder.Services.AddMemoryCache();
-builder.Services.AddSqlServer<LMSDB>($@"
-    Data Source=(LocalDB)\MSSQLLocalDB;
-    AttachDbFilename={builder.Environment.ContentRootPath}\LMSDB.mdf;
-");
+var connectionString = $@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename={builder.Environment.ContentRootPath}\LMSDB.mdf;";
+
+builder.Services.AddSqlServer<LMSDB>(
+    connectionString,
+    sqlOptions => sqlOptions.EnableRetryOnFailure(
+        maxRetryCount: 5,
+        maxRetryDelay: TimeSpan.FromSeconds(10),
+        errorNumbersToAdd: null
+    ));
 
 // Configure cookie authentication
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

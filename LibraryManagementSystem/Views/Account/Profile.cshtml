@@ -5,6 +5,7 @@
 }
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
 <link rel="stylesheet" href="~/css/profile.css" asp-append-version="true" />
 
 <div class="profile-container">
@@ -39,53 +40,128 @@
     </div>
 
     <div class="profile-details-card">
-        <h3 class="section-title">Edit Profile</h3>
 
-        <form id="profileForm">
-            @Html.AntiForgeryToken()
+        <div class="profile-tabs">
+            <button class="tab-btn active" onclick="switchTab('profile')">Personal Details</button>
+            <button class="tab-btn" onclick="switchTab('security')">Security</button>
+        </div>
 
-            <div class="form-grid">
-                <div class="form-group">
-                    <label asp-for="FirstName" class="form-label"></label>
-                    <input asp-for="FirstName" class="form-input" placeholder="e.g. John" />
-                    <span asp-validation-for="FirstName" class="text-danger small"></span>
+        <div id="tab-profile" class="tab-content active">
+            <h3 class="section-title">Edit Profile</h3>
+            <form id="profileForm">
+                @Html.AntiForgeryToken()
+
+                <input type="hidden" asp-for="Username" />
+                <input type="hidden" asp-for="Role" />
+                <input type="hidden" asp-for="CredibilityScore" />
+                <input type="hidden" asp-for="ProfilePhotoUrl" />
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label asp-for="FirstName" class="form-label"></label>
+                        <input asp-for="FirstName" class="form-input" placeholder="e.g. John" />
+                        <span asp-validation-for="FirstName" class="text-danger small"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="LastName" class="form-label"></label>
+                        <input asp-for="LastName" class="form-input" placeholder="e.g. Doe" />
+                        <span asp-validation-for="LastName" class="text-danger small"></span>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" class="form-input" placeholder="name@example.com" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label asp-for="ContactNo" class="form-label"></label>
+                        <input asp-for="ContactNo" class="form-input" placeholder="012-3456789" />
+                        <span asp-validation-for="ContactNo" class="text-danger small"></span>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label asp-for="LastName" class="form-label"></label>
-                    <input asp-for="LastName" class="form-input" placeholder="e.g. Doe" />
-                    <span asp-validation-for="LastName" class="text-danger small"></span>
+                <div class="toggle-switch">
+                    <input asp-for="IsProfilePublic" type="checkbox" class="toggle-input" id="publicToggle">
+                    <div class="d-flex flex-column">
+                        <label for="publicToggle" class="form-label mb-0" style="cursor:pointer">Public Profile</label>
+                        <small style="color:var(--color-gray-500); font-size: 0.8rem;">Allow other members to see your profile</small>
+                    </div>
                 </div>
 
-                <div class="form-group full-width">
-                    <label asp-for="Email" class="form-label"></label>
-                    <input asp-for="Email" class="form-input" placeholder="name@example.com" />
-                    <span asp-validation-for="Email" class="text-danger small"></span>
+                <div class="form-actions">
+                    <button type="submit" id="saveBtn" class="btn btn-primary" style="background-color: var(--color-primary-base); border:none;">
+                        Save Changes
+                    </button>
                 </div>
+            </form>
+        </div>
 
-                <div class="form-group full-width">
-                    <label asp-for="ContactNo" class="form-label"></label>
-                    <input asp-for="ContactNo" class="form-input" placeholder="012-3456789" />
-                    <span asp-validation-for="ContactNo" class="text-danger small"></span>
-                </div>
+        <div id="tab-security" class="tab-content" style="display: none;">
+            <div class="profile-details-card">
+                <h3 class="section-title">Change Password</h3>
+
+                <form id="passwordForm">
+                    @Html.AntiForgeryToken()    
+                    <div class="form-grid">
+
+                        <div class="form-group full-width">
+                            <label for="currentPassword" class="form-label">Current Password</label>
+
+                            <div class="password-wrapper">
+                                <input type="password"
+                                       id="currentPassword"
+                                       name="CurrentPassword"
+                                       class="form-input"
+                                       placeholder="Enter current password"
+                                       required>
+                                <i class="fa-solid fa-eye toggle-icon" onclick="togglePassword('currentPassword', this)"></i>
+                            </div>
+                            <span class="text-danger field-validation-valid" data-valmsg-for="CurrentPassword" data-valmsg-replace="true" style="color: #dc2626; font-size: 0.875rem; margin-top: 4px; display: block;"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="newPassword" class="form-label">New Password</label>
+
+                            <div class="password-wrapper">
+                                <input type="password"
+                                       id="newPassword"
+                                       name="NewPassword"
+                                       class="form-input"
+                                       placeholder="Enter new password"
+                                       required>
+                                <i class="fa-solid fa-eye toggle-icon" onclick="togglePassword('newPassword', this)"></i>
+                            </div>
+                            <span class="text-danger field-validation-valid" data-valmsg-for="NewPassword" data-valmsg-replace="true" style="color: #dc2626; font-size: 0.875rem; margin-top: 4px; display: block;"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="confirmPassword" class="form-label">Confirm Password</label>
+
+                            <div class="password-wrapper">
+                                <input type="password"
+                                       id="confirmPassword"
+                                       name="ConfirmNewPassword"
+                                       class="form-input"
+                                       placeholder="Confirm new password"
+                                       required>
+                                <i class="fa-solid fa-eye toggle-icon" onclick="togglePassword('confirmPassword', this)"></i>
+                            </div>
+                            <span class="text-danger field-validation-valid" data-valmsg-for="ConfirmNewPassword" data-valmsg-replace="true" style="color: #dc2626; font-size: 0.875rem; margin-top: 4px; display: block;"></span>
+                        </div>
+
+                    </div>
+
+                    <div id="passwordAlert" class="alert" style="display:none; margin-bottom: 20px;"></div>
+
+                    <div class="form-actions">
+                        <button type="submit" id="savePasswordBtn" class="btn btn-primary" style="background-color: var(--color-primary-base); color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">
+                            Update Password
+                        </button>
+                    </div>
+                </form>
             </div>
-
-            <div class="toggle-switch">
-                <input asp-for="IsProfilePublic" type="checkbox" class="toggle-input" id="publicToggle">
-                <div class="d-flex flex-column">
-                    <label for="publicToggle" class="form-label mb-0" style="cursor:pointer">Public Profile</label>
-                    <small style="color:var(--color-gray-500); font-size: 0.8rem;">Allow other members to see your profile</small>
-                </div>
-            </div>
-
-            <div class="form-actions">
-                <button type="submit" id="saveBtn" class="btn btn-primary" style="background-color: var(--color-primary-base); border:none;">
-                    Save Changes
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
+        </div>
 
 <div id="customCropModal" class="custom-modal-overlay" style="display: none;">
     <div class="custom-modal-content">
@@ -93,16 +169,13 @@
             <h5>Crop Photo</h5>
             <button type="button" id="btnCloseIcon" class="close-btn">&times;</button>
         </div>
-
         <div class="custom-modal-body">
             <div class="img-container">
                 <img id="imageToCrop" src="" style="max-width: 100%;">
             </div>
         </div>
-
         <div class="custom-modal-footer">
             <button type="button" id="btnCancelCrop" class="btn btn-secondary">Cancel</button>
-
             <button type="button" id="btnCrop" class="btn btn-primary"
                     style="background-color: var(--color-primary-base);"
                     data-url="@Url.Action("UpdateProfilePhoto", "Account")">

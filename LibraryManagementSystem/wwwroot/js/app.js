@@ -316,3 +316,155 @@ $(document).ready(function () {
         closeCropModal();
     });
 });
+// ==========================================
+// 1. TAB SWITCHING LOGIC (Global Function)
+// ==========================================
+function switchTab(tabName) {
+    // 1. Hide all content
+    document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+
+    // 2. Deactivate all buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+    // 3. Show selected content
+    document.getElementById('tab-' + tabName).style.display = 'block';
+
+    // 4. Activate clicked button
+    const buttons = document.querySelectorAll('.tab-btn');
+    // Assuming buttons are in order: Profile [0], Security [1]
+    if (tabName === 'profile' && buttons[0]) buttons[0].classList.add('active');
+    else if (buttons[1]) buttons[1].classList.add('active');
+}
+
+// ==========================================
+// 2. ACCOUNT MANAGEMENT (Password & Profile)
+// ==========================================
+$(document).ready(function () {
+    $('#profileForm').off('submit').on('submit', function (e) {
+        e.preventDefault();
+
+        // Optional: Check validation
+        if ($(this).valid && !$(this).valid()) return;
+
+        var $form = $(this);
+        var $btn = $('#saveBtn');
+        var originalText = $btn.text();
+
+        $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Saving...');
+
+        $.ajax({
+            url: '/Account/UpdateProfile',
+            type: 'POST',
+            data: $form.serialize(),
+            success: function (response) {
+                if (response.success) {
+                    if (window.showToast) showToast(response.message, "success");
+
+                    // Update the name on the left card immediately
+                    var first = $('#FirstName').val();
+                    var last = $('#LastName').val();
+                    if (first || last) {
+                        $('.profile-name').text(first + " " + last);
+                    }
+                } else {
+                    if (window.showToast) showToast(response.message, "error");
+                }
+            },
+            error: function (xhr, status, error) {
+                if (window.showToast) showToast("Server error. Please try again later.", "error");
+            },
+            complete: function () {
+                $btn.prop('disabled', false).text(originalText);
+            }
+        });
+    });
+
+});
+/* ===========================================================================
+   3. PASSWORD CHANGE HANDLING (Vanilla JS)
+   =========================================================================== */
+document.addEventListener("DOMContentLoaded", function () {
+
+    const passwordForm = document.getElementById('passwordForm');
+    const alertBox = document.getElementById('passwordAlert');
+
+    if (passwordForm) {
+
+        // --- SAFETY LOCK START ---
+        // Check if we have already attached the listener. If so, stop.
+        if (passwordForm.dataset.listenerAttached === "true") {
+            return;
+        }
+        // Mark the form as "listening" so this code doesn't run again
+        passwordForm.dataset.listenerAttached = "true";
+        // --- SAFETY LOCK END ---
+
+        passwordForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            // 1. Clear previous errors UI
+            if (alertBox) alertBox.style.display = 'none';
+            document.querySelectorAll('.text-danger').forEach(el => el.textContent = '');
+
+            // 2. Prepare Data
+            const formData = new FormData(this);
+
+            // 3. Send AJAX Request
+            fetch('/Account/ChangePassword', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'RequestVerificationToken':
+                        passwordForm.querySelector('input[name="__RequestVerificationToken"]')?.value ||
+                        document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // --- SUCCESS ---
+                        if (window.showToast) {
+                            window.showToast(data.message, "success");
+                        } else {
+                            alert(data.message);
+                        }
+
+                        passwordForm.reset();
+
+                        // Reset icons and inputs
+                        document.querySelectorAll('.toggle-icon').forEach(icon => {
+                            icon.classList.remove('fa-eye-slash');
+                            icon.classList.add('fa-eye');
+                        });
+                        document.querySelectorAll('#passwordForm input[type="text"]').forEach(input => {
+                            input.type = "password";
+                        });
+
+                    } else {
+                        // --- ERROR ---
+                        if (alertBox) {
+                            alertBox.style.display = 'block';
+                            alertBox.className = 'alert alert-danger';
+                            alertBox.style.backgroundColor = '#f8d7da';
+                            alertBox.style.color = '#721c24';
+                            alertBox.style.border = '1px solid #f5c6cb';
+                            alertBox.style.padding = '10px';
+                            alertBox.style.borderRadius = '4px';
+
+                            if (data.errors && data.errors.length > 0) {
+                                alertBox.innerHTML = "<strong>Please fix:</strong><br/>" + data.errors.join('<br/>');
+                            } else {
+                                alertBox.textContent = data.message;
+                            }
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    if (window.showToast) {
+                        window.showToast("An unexpected error occurred.", "error");
+                    }
+                });
+        });
+    }
+});

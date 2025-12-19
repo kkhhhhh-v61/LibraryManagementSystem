@@ -3,6 +3,7 @@ using LibraryManagementSystem.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
@@ -24,7 +25,7 @@ namespace LibraryManagementSystem.Controllers
             _db = db;
             _webHostEnvironment = webHostEnvironment;
             _emailSender = emailSender;
-            _cache = cache; 
+            _cache = cache;
         }
 
         [HttpGet]
@@ -171,7 +172,7 @@ namespace LibraryManagementSystem.Controllers
                 // ==================================================
                 // DUPLICATE DATA CHECKS
                 // ==================================================
-                bool hasDuplicate = false; 
+                bool hasDuplicate = false;
 
                 // Check Username
                 if (await _db.Users.AnyAsync(u => u.Username == model.Username))
@@ -370,7 +371,7 @@ namespace LibraryManagementSystem.Controllers
             if (!ModelState.IsValid) return View(model);
 
             var resetToken = await _db.PasswordResetTokens
-                .Include(t => t.User) 
+                .Include(t => t.User)
                 .FirstOrDefaultAsync(t => t.Token == model.Token && t.User.Email == model.Email);
 
             //Validate Token
@@ -431,7 +432,7 @@ namespace LibraryManagementSystem.Controllers
         }
 
         private async Task SignInUser(LMSUser user)
-        {   
+        {
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
@@ -471,7 +472,9 @@ namespace LibraryManagementSystem.Controllers
 
             return View(model);
         }
-
+        // =======================================================
+        // 1. UPDATE PROFILE (Fixed for Custom Auth / LMSDB)
+        // =======================================================
         [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]
@@ -479,34 +482,75 @@ namespace LibraryManagementSystem.Controllers
         {
             if (!ModelState.IsValid)
             {
-                // Return JSON error list if validation fails
                 var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
                 return Json(new { success = false, message = "Validation failed.", errors = errors });
             }
 
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            var user = await _db.Users.FindAsync(userId);
+            // 1. Get the current user ID from Claims
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId)) return Json(new { success = false, message = "User not logged in." });
 
-            if (user == null)
+            // 2. Fetch User from DB
+            var user = await _db.Users.FindAsync(userId);
+            if (user == null) return Json(new { success = false, message = "User not found." });
+
+            // ==========================================
+            // CHECK FOR DUPLICATES (Only if changed)
+            // ==========================================
+
+            // 3. Check Email (Only if the user changed it)
+            if (model.Email.ToLower() != user.Email.ToLower())
             {
-                return Json(new { success = false, message = "User not found." });
+                bool emailExists = await _db.Users.AnyAsync(u => u.Email == model.Email && u.Id != user.Id);
+                if (emailExists)
+                {
+                    return Json(new { success = false, message = "Email already in use by another account." });
+                }
             }
 
-            // Update Fields
+            // 4. Check Phone (Only if the user changed it)
+            if (model.ContactNo != user.ContactNo)
+            {
+                bool phoneExists = await _db.Users.AnyAsync(u => u.ContactNo == model.ContactNo && u.Id != user.Id);
+                if (phoneExists)
+                {
+                    return Json(new { success = false, message = "Phone number already in use by another account." });
+                }
+            }
+
+            // ==========================================
+            // UPDATE FIELDS
+            // ==========================================
             user.FirstName = model.FirstName;
             user.LastName = model.LastName;
-            user.Email = model.Email;
             user.ContactNo = model.ContactNo;
             user.IsProfilePublic = model.IsProfilePublic;
 
-            // Check for unique email/phone conflicts (excluding current user)
-            bool emailExists = await _db.Users.AnyAsync(u => u.Email == model.Email && u.Id != userId);
-            if (emailExists) return Json(new { success = false, message = "Email already in use." });
+            // Handle Email Update specifically
+            if (model.Email != user.Email)
+            {
+                user.Email = model.Email;
+                // If you use Email as Username, update it here too:
+                // user.Username = model.Email; 
+            }
 
-            _db.Users.Update(user);
-            await _db.SaveChangesAsync();
+            // ==========================================
+            // SAVE CHANGES
+            // ==========================================
+            try
+            {
+                _db.Users.Update(user);
+                await _db.SaveChangesAsync();
 
-            return Json(new { success = true, message = "Profile updated successfully!" });
+                // OPTIONAL: Refresh the cookie claims if specific details (like Name/Role) changed
+                // await SignInUser(user); 
+
+                return Json(new { success = true, message = "Profile updated successfully!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Database error: " + ex.Message });
+            }
         }
         [HttpPost]
         [Authorize]
@@ -546,6 +590,52 @@ namespace LibraryManagementSystem.Controllers
             {
                 return Json(new { success = false, message = "Error saving image: " + ex.Message });
             }
+        }
+        // =======================================================
+        // CHANGE PASSWORD (LOGGED IN USER)
+        // =======================================================
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(ChangePasswordVM model)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+                return Json(new { success = false, message = "Validation failed.", errors = errors });
+            }
+
+            // 1. Get Current User
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var user = await _db.Users.FindAsync(userId);
+
+            if (user == null)
+            {
+                return Json(new { success = false, message = "User session invalid. Please re-login." });
+            }
+
+            // 2. Verify Old Password
+            bool isOldPasswordCorrect = BCrypt.Net.BCrypt.Verify(model.CurrentPassword, user.PasswordHash);
+            if (!isOldPasswordCorrect)
+            {
+                return Json(new { success = false, message = "The current password you entered is incorrect." });
+            }
+
+            // =========================================================================
+            // NEW CHECK: Prevent New Password from being the same as Current Password
+            // =========================================================================
+            if (model.CurrentPassword == model.NewPassword)
+            {
+                return Json(new { success = false, message = "New password cannot be the same as your current password." });
+            }
+
+            // 3. Update to New Password
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.NewPassword);
+
+            _db.Users.Update(user);
+            await _db.SaveChangesAsync();
+
+            return Json(new { success = true, message = "Password changed successfully!" });
         }
     }
 }

@@ -122,21 +122,24 @@
             <div class="header-main__actions">
                 @if (User.Identity.IsAuthenticated)
                 {
+                    // Logic to determine the image path
+                    var profileClaim = User.FindFirst("ProfilePicture")?.Value;
+                    var profilePath = string.IsNullOrEmpty(profileClaim) || profileClaim == "default-profile.png"
+                    ? "/images/assets/default-profile.png"
+                    : $"/images/profiles/{profileClaim}";
+
                     <a asp-controller="Account" asp-action="Profile" class="header-main__user-profile" style="text-decoration: none; color: inherit;">
                         <div class="header-main__user-info">
                             <span class="header-main__user-name">@User.Identity.Name</span>
                             <small class="header-main__user-role">@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value</small>
                         </div>
                         <img id="headerAvatar"
-                             src="@(string.IsNullOrEmpty(User.FindFirst("ProfilePicture")?.Value) ||
-                                         User.FindFirst("ProfilePicture")?.Value == "default-profile.png" ?
-                                         "/images/assets/default-profile.png" :
-                                         $"/images/profiles/{User.FindFirst("ProfilePicture")?.Value}")"
-                         alt="@User.Identity.Name"
-                         class="header-main__user-avatar"
-                         style="object-fit: cover;" />
-                </a>
-                                }
+                             src="@profilePath"
+                             alt="@User.Identity.Name"
+                             class="header-main__user-avatar"
+                             style="object-fit: cover;" />
+                    </a>
+                }
                 else
                 {
                     <a asp-controller="Account" asp-action="Login" class="btn btn-secondary">Login</a>
@@ -150,7 +153,7 @@
         </main>
     </div>
 
-    <div id="toast-container"></div>
+    <div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
 
     <script src="/js/jquery.min.js" asp-append-version="true"></script>
     <script src="/js/jquery.unobtrusive-ajax.min.js" asp-append-version="true"></script>

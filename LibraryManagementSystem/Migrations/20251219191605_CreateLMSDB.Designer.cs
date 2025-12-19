@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LibraryManagementSystem.Migrations
 {
     [DbContext(typeof(LMSDB))]
-    [Migration("20251219131008_CreateLMSDB")]
+    [Migration("20251219191605_CreateLMSDB")]
     partial class CreateLMSDB
     {
         /// <inheritdoc />
