@@ -89,7 +89,29 @@ namespace LibraryManagementSystem.Controllers
             if (availableRoom == null)
             {
 
-                TempData["Error"] = "No rooms available for this specific time slot.";
+                var nextFreeSlot = db.Bookings
+        .Include(b => b.Room)
+        .Where(b => b.Room.RoomCategoryId == vm.RoomCategoryId)
+        .Where(b => b.Status != BookingStatus.CANCELLED)
+        .Where(b => b.Status != BookingStatus.COMPLETED)
+        .Where(b => b.EndTime > reqStart)
+        .OrderBy(b => b.EndTime)
+        .Select(b => b.EndTime)
+        .FirstOrDefault();
+
+                string errorMsg = "No rooms available for this specific time slot.";
+
+                if (nextFreeSlot != DateTime.MinValue)
+                {
+                    string timeStr = nextFreeSlot.ToString("h:mm tt");
+                    errorMsg += $" All rooms are currently occupied. The next room becomes available after {timeStr}.";
+                }
+                else
+                {
+                    errorMsg += " Rooms might be under maintenance.";
+                }
+
+                TempData["Error"] = errorMsg;
                 ReloadViewData(vm);
                 return View("Index", vm);
             }
@@ -203,10 +225,23 @@ namespace LibraryManagementSystem.Controllers
         [HttpGet]
         public IActionResult GetCalendarData(string? categoryId)
         {
+            var expiredBookings = db.Bookings
+                .Where(b => b.Status == BookingStatus.CONFIRMED && b.EndTime <= DateTime.Now)
+                .ToList();
+
+            if (expiredBookings.Any())
+            {
+                foreach (var b in expiredBookings)
+                {
+                    b.Status = BookingStatus.COMPLETED;
+                }
+                db.SaveChanges();
+            }
+
             var query = db.Bookings
                 .Include(b => b.Room)
                 .Include(b => b.User)
-                .Where(b => b.Status != Booking.BookingStatus.CANCELLED)
+                .Where(b => b.Status != BookingStatus.CANCELLED && b.Status != BookingStatus.COMPLETED)
                 .AsQueryable();
 
             if (!string.IsNullOrEmpty(categoryId))
@@ -218,7 +253,11 @@ namespace LibraryManagementSystem.Controllers
 
             var events = bookings.Select(b => {
 
-                bool isMaintenance = (b.Room.Status == Room.RoomStatus.MAINTENANCE);
+                bool isMaintenance = (b.Room.Status == RoomStatus.MAINTENANCE);
+
+                string colorCode = isMaintenance
+                                   ? "#94a3b8"
+                                   : (b.Status == BookingStatus.PENDING ? "#f59e0b" : "#3b82f6");
 
                 return new
                 {
@@ -228,14 +267,8 @@ namespace LibraryManagementSystem.Controllers
                     start = b.StartTime.ToString("yyyy-MM-ddTHH:mm:ss"),
                     end = b.EndTime.ToString("yyyy-MM-ddTHH:mm:ss"),
 
-                    backgroundColor = isMaintenance
-                                      ? "#94a3b8" 
-                                      : (b.Status == Booking.BookingStatus.PENDING ? "#f59e0b" : "#3b82f6"),
-
-                    borderColor = isMaintenance
-                                  ? "#94a3b8"
-                                  : (b.Status == Booking.BookingStatus.PENDING ? "#f59e0b" : "#3b82f6"),
-
+                    backgroundColor = colorCode,
+                    borderColor = colorCode,
                     textColor = "#ffffff",
 
                     extendedProps = new

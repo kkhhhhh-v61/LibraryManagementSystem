@@ -475,4 +475,6 @@ public class Booking
     public string? CancellationReason { get; set; }
 
     public DateTime? CancelledAt { get; set; }
+
+    public bool IsReminderSent { get; set; } = false;
 }

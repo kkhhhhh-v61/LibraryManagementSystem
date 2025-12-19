@@ -57,7 +57,6 @@
                     <div class="legend-item"><span class="dot" style="background:#cbd5e1;"></span> Maint.</div>
                 </div>
                 <select id="categoryFilter" class="modern-select">
-                    <option value="">All Rooms</option>
                     @foreach (var cat in ViewBag.Categories)
                     {
                         <option value="@cat.Id">@cat.Name</option>
