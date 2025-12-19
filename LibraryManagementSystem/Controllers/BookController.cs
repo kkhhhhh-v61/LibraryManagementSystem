@@ -3,11 +3,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using LibraryManagementSystem.Extensions;
+using Microsoft.AspNetCore.Authorization;
 
 namespace LibraryManagementSystem.Controllers;
 
 public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
 {
+    [Authorize(Roles = "ADMIN, STAFF")]
     public IActionResult ManageBook(string? search, string? authorId, string? genreId, int page = 1, string sort = "Title", string order = "asc")
     {
         var query = db.Books
@@ -68,6 +70,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         return View(vm);
     }
 
+    [Authorize(Roles = "ADMIN, STAFF")]
     public IActionResult InsertBook()
     {
         var vm = new BookInsertVM
@@ -83,6 +86,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
     }
 
     [HttpPost]
+    [Authorize(Roles = "ADMIN, STAFF")]
     public IActionResult InsertBook(BookInsertVM vm)
     {
         // 1. ISBN Validation
@@ -165,6 +169,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         return RedirectToAction("ManageBook");
     }
 
+    [Authorize(Roles = "ADMIN, STAFF")]
     public IActionResult EditBook(string id)
     {
         var book = db.Books
@@ -199,6 +204,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
     }
 
     [HttpPost]
+    [Authorize(Roles = "ADMIN, STAFF")]
     public IActionResult EditBook(BookEditVM vm)
     {
         // 1. ISBN Validation
@@ -284,6 +290,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
     }
 
     [HttpPost]
+    [Authorize(Roles = "ADMIN, STAFF")]
     public IActionResult DeleteBook(string id)
     {
         var book = db.Books.Find(id);
@@ -306,6 +313,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
     }
 
     [HttpPost]
+    [Authorize(Roles = "ADMIN, STAFF")]
     public IActionResult BatchDeleteBook(List<string> ids)
     {
         if (ids == null || ids.Count == 0)
@@ -332,6 +340,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
     }
 
     [HttpPost]
+    [Authorize(Roles = "ADMIN, STAFF")]
     public IActionResult ToggleBookStatus(string id, string field, bool value)
     {
         var book = db.Books.Find(id);
@@ -345,6 +354,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         return Ok();
     }
 
+    [Authorize(Roles = "ADMIN, STAFF")]
     public IActionResult ManageGenre(string? search, int page = 1, string sort = "Name", string order = "asc")
     {
         var query = db.Genres.Include(g => g.Books).AsQueryable();
@@ -391,6 +401,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
     }
 
     [HttpPost]
+    [Authorize(Roles = "ADMIN, STAFF")]
     public IActionResult SaveGenre(GenreManagementVM vm)
     {
         // 1. Normalize Input
@@ -440,6 +451,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
     }
 
     [HttpPost]
+    [Authorize(Roles = "ADMIN, STAFF")]
     public IActionResult DeleteGenre(string id)
     {
         // 1. Fetch Genres with all their Books
@@ -474,6 +486,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
     }
 
     [HttpPost]
+    [Authorize(Roles = "ADMIN, STAFF")]
     public IActionResult BatchDeleteGenre(List<string> ids)
     {
         if (ids == null || ids.Count == 0)
@@ -515,6 +528,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         return RedirectToAction("ManageGenre");
     }
 
+    [Authorize(Roles = "ADMIN, STAFF")]
     public IActionResult ManageAuthor(string? search, int page = 1, string sort = "Name", string order = "asc")
     {
         var query = db.Authors.Include(a => a.Books).AsQueryable();
@@ -551,7 +565,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
             SortColumn = sort,
             SortOrder = order
         };
-        
+
         if (Request.IsAjax())
         {
             return PartialView("_TableAuthor", vm);
@@ -561,6 +575,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
     }
 
     [HttpPost]
+    [Authorize(Roles = "ADMIN, STAFF")]
     public IActionResult SaveAuthor(AuthorManagementVM vm)
     {
         // 1. Normalize Input
@@ -610,6 +625,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
     }
 
     [HttpPost]
+    [Authorize(Roles = "ADMIN, STAFF")]
     public IActionResult DeleteAuthor(string id)
     {
         // 1. Fetch Authors with all their Books
@@ -644,6 +660,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
     }
 
     [HttpPost]
+    [Authorize(Roles = "ADMIN, STAFF")]
     public IActionResult BatchDeleteAuthor(List<string> ids)
     {
         if (ids == null || ids.Count == 0)
