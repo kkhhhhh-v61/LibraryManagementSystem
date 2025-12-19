@@ -8,10 +8,10 @@ using System;
 
 namespace LibraryManagementSystem.Controllers
 {
+    [Authorize(Roles = "ADMIN, STAFF")]
     public class RoomController(LMSDB db, IWebHostEnvironment en) : Controller
     {
         // GET: Room/Index
-        [Authorize(Roles = "MEMBER")]
         public IActionResult Index(string search = "", string sortOrder = "")
         {
             ViewData["CurrentFilter"] = search;
@@ -72,7 +72,6 @@ namespace LibraryManagementSystem.Controllers
         // 1. CREATE CATEGORY
         // =======================================================================================
         [HttpPost]
-        //[Authorize(Roles = "MEMBER")]
         public IActionResult CreateCategoryAjax(RoomIndexVM vm)
         {
             ModelState.Remove("RoomInput.Name");
@@ -136,7 +135,6 @@ namespace LibraryManagementSystem.Controllers
         // 2. CREATE ROOM
         // ==========================================================================================
         [HttpPost]
-        //[Authorize(Roles = "STAFF")]
         public IActionResult CreateRoomAjax(RoomIndexVM vm)
         {
             ModelState.Remove("CategoryInput.Name");

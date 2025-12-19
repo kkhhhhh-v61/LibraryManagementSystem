@@ -9,10 +9,11 @@ using static LibraryManagementSystem.Models.Room;
 
 namespace LibraryManagementSystem.Controllers
 {
-    [Authorize(Roles = "MEMBER")]
+    [Authorize]
     public class BookingController(LMSDB db) : Controller
     {
         // GET: Booking Page
+        [Authorize(Roles = "MEMBER")]
         public IActionResult Index(string? roomCategoryId, string? date)
         {
             DateTime targetDate = string.IsNullOrEmpty(date) ? DateTime.Today : DateTime.Parse(date);
@@ -146,6 +147,7 @@ namespace LibraryManagementSystem.Controllers
             return RedirectToAction("Index");
         }
 
+        [Authorize(Roles = "MEMBER")]
         private void ReloadViewData(BookingCreateVM vm)
         {
             var allCategories = db.RoomCategories.OrderBy(c => c.Id).ToList();
@@ -157,6 +159,7 @@ namespace LibraryManagementSystem.Controllers
             }).ToList();
         }
 
+        [Authorize(Roles = "MEMBER")]
         public IActionResult BookingHistory(string search = "", string date = "")
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -194,6 +197,7 @@ namespace LibraryManagementSystem.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "MEMBER")]
         public IActionResult Cancel(string id)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -219,14 +223,13 @@ namespace LibraryManagementSystem.Controllers
 
 
         // Calender
-        //[Authorize(Roles = "ADMIN")]
+        [Authorize(Roles = "ADMIN, STAFF")]
         public IActionResult MasterCalendar()
         {
             ViewBag.Categories = db.RoomCategories.ToList();
             return View();
         }
 
-        //[Authorize(Roles = "ADMIN")]
         [HttpGet]
         public IActionResult GetResources(string? categoryId)
         {
@@ -253,7 +256,6 @@ namespace LibraryManagementSystem.Controllers
             return Json(rooms);
         }
 
-        //[Authorize(Roles = "ADMIN")]
         [HttpGet]
         public IActionResult GetCalendarData(string? categoryId)
         {
@@ -318,7 +320,7 @@ namespace LibraryManagementSystem.Controllers
         }
 
         [HttpPost]
-        //[Authorize(Roles = "ADMIN, STAFF")]
+        [Authorize(Roles = "ADMIN, STAFF")]
         public IActionResult UpdateDescription(string id, string description)
         {
             var booking = db.Bookings.Find(id);
@@ -335,7 +337,7 @@ namespace LibraryManagementSystem.Controllers
 
         // POST: Move Booking (Drag & Drop)
         [HttpPost]
-        // [Authorize(Roles = "ADMIN, STAFF")]
+        [Authorize(Roles = "ADMIN, STAFF")]
         public IActionResult MoveBooking(string id, string newRoomId)
         {
             using var transaction = db.Database.BeginTransaction();
