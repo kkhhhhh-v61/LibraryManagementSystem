@@ -10,7 +10,7 @@ namespace LibraryManagementSystem.Controllers;
 public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
 {
     [Authorize(Roles = "ADMIN, STAFF")]
-    public IActionResult ManageBook(string? search, string? authorId, string? genreId, int page = 1, string sort = "Title", string order = "asc")
+    public IActionResult ManageBook(string? search, string? authorId, string? genreId, bool? featured, bool? archived, int page = 1, string sort = "Title", string order = "asc")
     {
         var query = db.Books
             .Include(b => b.Authors)
@@ -31,6 +31,16 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         if (!string.IsNullOrWhiteSpace(genreId))
         {
             query = query.Where(b => b.Genres.Any(g => g.Id == genreId));
+        }
+
+        if (featured.HasValue && featured.Value)
+        {
+            query = query.Where(b => b.IsFeatured);
+        }
+
+        if (archived.HasValue && archived.Value)
+        {
+            query = query.Where(b => b.IsArchived);
         }
 
         bool isDesc = order == "desc";
@@ -58,6 +68,8 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
             SortOrder = order,
             SelectedAuthorId = authorId,
             SelectedGenreId = genreId,
+            FilterFeatured = featured,
+            FilterArchived = archived,
             AuthorList = db.Authors.OrderBy(a => a.Name).Select(a => new SelectListItem(a.Name, a.Id)).ToList(),
             GenreList = db.Genres.OrderBy(g => g.Name).Select(g => new SelectListItem(g.Name, g.Id)).ToList()
         };

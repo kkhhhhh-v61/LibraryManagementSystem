@@ -16,52 +16,85 @@
             </div>
             <div class="header__controls">
                 <div class="header__filters">
-                    <div class="filter-dropdown" id="authorFilterWrapper">
-                        <input type="hidden" id="filterAuthor" value="@Model.SelectedAuthorId" />
-                        <button class="filter-dropdown__trigger" type="button">
-                            <span class="trigger__text">
-                                @{
-                                    var selectedAuthor = Model.AuthorList.FirstOrDefault(a => a.Value == Model.SelectedAuthorId);
-                                    @(selectedAuthor != null ? selectedAuthor.Text : "All Authors")
-                                }
-                            </span>
-                            <svg class="trigger__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
-                                <path d="M480-360 280-560h400L480-360Z"/>
+                    <div class="filter-menu" id="filterMenu">
+                        <button class="filter-menu__trigger" type="button" id="filterMenuTrigger">
+                            <svg class="trigger__icon" xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#666">
+                                <path d="M440-160q-17 0-28.5-11.5T400-200v-240L168-736q-15-20-4.5-42t36.5-22h560q26 0 36.5 22t-4.5 42L560-440v240q0 17-11.5 28.5T520-160h-80Zm40-308 198-252H282l198 252Zm0 0Z"/>
                             </svg>
+                            <span class="trigger__text">Filters</span>
                         </button>
-                        <button class="filter-clear" type="button" title="Clear Filter">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
-                        </button>
-                        <div class="filter-dropdown__menu">
-                            <div class="filter-dropdown__item @(string.IsNullOrEmpty(Model.SelectedAuthorId) ? "selected" : "")" data-value="">All Authors</div>
-                            @foreach (var item in Model.AuthorList)
-                            {
-                                <div class="filter-dropdown__item @(item.Value == Model.SelectedAuthorId ? "selected" : "")" data-value="@item.Value">@item.Text</div>
-                            }
-                        </div>
-                    </div>
-                    <div class="filter-dropdown" id="genreFilterWrapper">
-                        <input type="hidden" id="filterGenre" value="@Model.SelectedGenreId" />
-                        <button class="filter-dropdown__trigger" type="button">
-                            <span class="trigger__text">
-                                @{
-                                    var selectedGenre = Model.GenreList.FirstOrDefault(g => g.Value == Model.SelectedGenreId);
-                                    @(selectedGenre != null ? selectedGenre.Text : "All Genres")
-                                }
-                            </span>
-                            <svg class="trigger__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
-                                <path d="M480-360 280-560h400L480-360Z"/>
-                            </svg>
-                        </button>
-                        <button class="filter-clear" type="button" title="Clear Filter">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
-                        </button>
-                        <div class="filter-dropdown__menu">
-                            <div class="filter-dropdown__item @(string.IsNullOrEmpty(Model.SelectedGenreId) ? "selected" : "")" data-value="">All Genres</div>
-                            @foreach (var item in Model.GenreList)
-                            {
-                                <div class="filter-dropdown__item @(item.Value == Model.SelectedGenreId ? "selected" : "")" data-value="@item.Value">@item.Text</div>
-                            }
+                        <div class="filter-menu__dropdown">
+                            <div class="filter-group">
+                                <label class="filter-label">Author</label>
+                                <div class="filter-dropdown" id="authorFilterWrapper" style="width: 100%;">
+                                    <input type="hidden" id="filterAuthor" value="@Model.SelectedAuthorId" />
+                                    <button class="filter-dropdown__trigger" type="button">
+                                        <span class="trigger__text">
+                                            @{
+                                                var selectedAuthor = Model.AuthorList.FirstOrDefault(a => a.Value == Model.SelectedAuthorId);
+                                                @(selectedAuthor != null ? selectedAuthor.Text : "All Authors")
+                                            }
+                                        </span>
+                                        <svg class="trigger__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="M480-360 280-560h400L480-360Z"/></svg>
+                                    </button>
+                                    <button class="filter-clear" type="button" title="Clear Filter"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg></button>
+                                    <div class="filter-dropdown__menu">
+                                        <div class="filter-dropdown__item @(string.IsNullOrEmpty(Model.SelectedAuthorId) ? "selected" : "")" data-value="">All Authors</div>
+                                        @foreach (var item in Model.AuthorList)
+                                        {
+                                            <div class="filter-dropdown__item @(item.Value == Model.SelectedAuthorId ? "selected" : "")" data-value="@item.Value">@item.Text</div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="filter-group">
+                                <label class="filter-label">Genre</label>
+                                <div class="filter-dropdown" id="genreFilterWrapper" style="width: 100%;">
+                                    <input type="hidden" id="filterGenre" value="@Model.SelectedGenreId" />
+                                    <button class="filter-dropdown__trigger" type="button">
+                                        <span class="trigger__text">
+                                            @{
+                                                var selectedGenre = Model.GenreList.FirstOrDefault(g => g.Value == Model.SelectedGenreId);
+                                                @(selectedGenre != null ? selectedGenre.Text : "All Genres")
+                                            }
+                                        </span>
+                                        <svg class="trigger__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="M480-360 280-560h400L480-360Z"/></svg>
+                                    </button>
+                                    <button class="filter-clear" type="button" title="Clear Filter"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg></button>
+                                    <div class="filter-dropdown__menu">
+                                        <div class="filter-dropdown__item @(string.IsNullOrEmpty(Model.SelectedGenreId) ? "selected" : "")" data-value="">All Genres</div>
+                                        @foreach (var item in Model.GenreList)
+                                        {
+                                            <div class="filter-dropdown__item @(item.Value == Model.SelectedGenreId ? "selected" : "")" data-value="@item.Value">@item.Text</div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="filter-group">
+                                <label class="filter-label">Status</label>
+                                <div class="filter-toggles">
+                                    <div class="toggle-option">
+                                        <span class="toggle-label">Featured</span>
+                                        <div class="switch-box__toggle">
+                                            <input type="checkbox" id="filterFeatured" class="toggle__input" @(Model.FilterFeatured == true ? "checked" : "") />
+                                            <span class="toggle__slider"></span>
+                                        </div>
+                                    </div>
+                                    <div class="toggle-option">
+                                        <span class="toggle-label">Archived</span>
+                                        <div class="switch-box__toggle">
+                                            <input type="checkbox" id="filterArchived" class="toggle__input" @(Model.FilterArchived == true ? "checked" : "") />
+                                            <span class="toggle__slider"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="filter-actions">
+                                <button type="button" id="clearFilters" class="filter-action-clear">
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="currentColor"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg>
+                                    Clear All Filters
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

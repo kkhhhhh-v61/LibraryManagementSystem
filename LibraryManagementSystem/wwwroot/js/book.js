@@ -220,8 +220,13 @@ function initializeTableManagement() {
     const searchClear = document.getElementById("searchClearButton");
     const tableContainer = document.getElementById("tableContainer");
     const deselectButton = document.getElementById("deselectAllButton");
-    const filterAuthor = document.getElementById("filterAuthor");
-    const filterGenre = document.getElementById("filterGenre");
+
+    // Filter Menu Elements
+    const filterMenu = document.getElementById("filterMenu");
+    const filterTrigger = document.getElementById("filterMenuTrigger");
+    const clearFiltersBtn = document.getElementById("clearFilters");
+    const filterFeatured = document.getElementById("filterFeatured");
+    const filterArchived = document.getElementById("filterArchived");
 
     // Determine if we are using AJAX search (Genre/Author) or Client-side (Book)
     const isAjax = tableContainer !== null;
@@ -268,16 +273,41 @@ function initializeTableManagement() {
         }
     }
 
-    if (filterAuthor) {
-        filterAuthor.addEventListener("change", () =>
-            triggerSearch(searchInput)
-        );
-    }
+    // Filter Menu Logic
+    if (filterMenu && filterTrigger) {
+        filterTrigger.addEventListener("click", (e) => {
+            e.stopPropagation();
+            filterMenu.classList.toggle("active");
+        });
 
-    if (filterGenre) {
-        filterGenre.addEventListener("change", () =>
-            triggerSearch(searchInput)
-        );
+        document.addEventListener("click", (e) => {
+            if (!filterMenu.contains(e.target)) {
+                filterMenu.classList.remove("active");
+            }
+        });
+
+        if (filterFeatured) {
+            filterFeatured.addEventListener("change", () =>
+                triggerSearch(searchInput)
+            );
+        }
+
+        if (filterArchived) {
+            filterArchived.addEventListener("change", () =>
+                triggerSearch(searchInput)
+            );
+        }
+
+        if (clearFiltersBtn) {
+            clearFiltersBtn.addEventListener("click", () => {
+                document.getElementById("filterAuthor").value = "";
+                document.getElementById("filterGenre").value = "";
+                document.getElementById("filterFeatured").checked = false;
+                document.getElementById("filterArchived").checked = false;
+                filterMenu.classList.remove("active");
+                triggerSearch(searchInput);
+            });
+        }
     }
 
     if (deselectButton) {
@@ -443,6 +473,8 @@ function performAjaxSearch(term, page, sort, order) {
     const tableContainer = document.getElementById("tableContainer");
     const filterAuthor = document.getElementById("filterAuthor");
     const filterGenre = document.getElementById("filterGenre");
+    const filterFeatured = document.getElementById("filterFeatured");
+    const filterArchived = document.getElementById("filterArchived");
 
     const url = new URL(window.location.href);
 
@@ -461,6 +493,14 @@ function performAjaxSearch(term, page, sort, order) {
     if (filterGenre && filterGenre.value)
         url.searchParams.set("genreId", filterGenre.value);
     else url.searchParams.delete("genreId");
+
+    if (filterFeatured && filterFeatured.checked)
+        url.searchParams.set("featured", "true");
+    else url.searchParams.delete("featured");
+
+    if (filterArchived && filterArchived.checked)
+        url.searchParams.set("archived", "true");
+    else url.searchParams.delete("archived");
 
     fetch(url, {
         headers: { "X-Requested-With": "XMLHttpRequest" },

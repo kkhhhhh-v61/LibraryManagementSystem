@@ -168,6 +168,10 @@ public class BookManagementVM
 
     public string? SelectedGenreId { get; set; }
 
+    public bool? FilterFeatured { get; set; }
+
+    public bool? FilterArchived { get; set; }
+
     public List<SelectListItem> AuthorList { get; set; } = new();
 
     public List<SelectListItem> GenreList { get; set; } = new();
