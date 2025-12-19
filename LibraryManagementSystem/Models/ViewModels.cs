@@ -276,6 +276,18 @@ public class BookEditVM
     public bool IsArchived { get; set; } = false;
 }
 
+public class BookDetailVM
+{
+    public Book Book { get; set; }
+    public List<Copy> Copies { get; set; } = new();
+
+    public int CurrentPage { get; set; }
+    public int TotalPages { get; set; }
+    public string? SearchTerm { get; set; }
+    public string SortColumn { get; set; } = "Id";
+    public string SortOrder { get; set; } = "asc";
+}
+
 public class GenreManagementVM
 {
     public List<Genre> ExistingGenres { get; set; } = new();

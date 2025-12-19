@@ -182,7 +182,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
     }
 
     [Authorize(Roles = "ADMIN, STAFF")]
-    public IActionResult EditBook(string id)
+    public IActionResult EditBook(string id, string? returnUrl)
     {
         var book = db.Books
             .Include(b => b.Genres)
@@ -211,6 +211,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
             SelectedAuthorIds = book.Authors.Select(a => a.Id).ToList()
         };
 
+        ViewBag.ReturnUrl = returnUrl;
         PopulateDropdowns(vm);
         return View(vm);
     }
@@ -353,13 +354,13 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
 
     [HttpPost]
     [Authorize(Roles = "ADMIN, STAFF")]
-    public IActionResult AddCopy(string bookId, int quantity)
+    public IActionResult AddCopy(string bookId, int quantity, string? returnUrl)
     {
         if (quantity < 1)
         {
             TempData["ToastMessage"] = "Quantity must be at least 1.";
             TempData["ToastType"] = "error";
-            return RedirectToAction("ManageBook");
+            return !string.IsNullOrEmpty(returnUrl) ? Redirect(returnUrl) : RedirectToAction("ManageBook");
         }
 
         var book = db.Books.Find(bookId);
@@ -367,7 +368,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         {
             TempData["ToastMessage"] = "Book not found.";
             TempData["ToastType"] = "error";
-            return RedirectToAction("ManageBook");
+            return !string.IsNullOrEmpty(returnUrl) ? Redirect(returnUrl) : RedirectToAction("ManageBook");
         }
 
         var addedCopies = new List<object>();
@@ -390,7 +391,112 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         TempData["ToastType"] = "success";
         TempData["AddedCopies"] = System.Text.Json.JsonSerializer.Serialize(addedCopies);
 
+        if (!string.IsNullOrEmpty(returnUrl))
+        {
+            return Redirect(returnUrl);
+        }
+
         return RedirectToAction("ManageBook");
+    }
+
+    [Authorize(Roles = "ADMIN, STAFF")]
+    public IActionResult ManageBookDetail(string id, string? search, int page = 1, string sort = "Id", string order = "asc")
+    {
+        var book = db.Books
+            .Include(b => b.Authors)
+            .Include(b => b.Genres)
+            .FirstOrDefault(b => b.Id == id);
+
+        if (book == null)
+        {
+            TempData["ToastMessage"] = "Book not found.";
+            TempData["ToastType"] = "error";
+            return RedirectToAction("ManageBook");
+        }
+
+        var query = db.Copies.Where(c => c.BookId == id).AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            search = search.Trim();
+            query = query.Where(c => c.Id.Contains(search) || c.Barcode.Contains(search));
+        }
+
+        bool isDesc = order == "desc";
+        query = sort switch
+        {
+            "Id" => isDesc ? query.OrderByDescending(c => c.Id) : query.OrderBy(c => c.Id),
+            "Barcode" => isDesc ? query.OrderByDescending(c => c.Barcode) : query.OrderBy(c => c.Barcode),
+            "Status" => isDesc ? query.OrderByDescending(c => c.Status) : query.OrderBy(c => c.Status),
+            _ => isDesc ? query.OrderByDescending(c => c.Id) : query.OrderBy(c => c.Id)
+        };
+
+        int pageSize = 10;
+        int totalItems = query.Count();
+        int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+        if (page < 1) page = 1;
+        if (page > totalPages && totalPages > 0) page = totalPages;
+
+        var copies = query.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+        var vm = new BookDetailVM
+        {
+            Book = book,
+            Copies = copies,
+            CurrentPage = page,
+            TotalPages = totalPages,
+            SearchTerm = search,
+            SortColumn = sort,
+            SortOrder = order
+        };
+
+        if (Request.IsAjax())
+        {
+            return PartialView("_TableCopy", vm);
+        }
+
+        return View(vm);
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "ADMIN, STAFF")]
+    public IActionResult DeleteCopy(string id, string bookId)
+    {
+        var copy = db.Copies.Find(id);
+        if (copy != null)
+        {
+            db.Copies.Remove(copy);
+            db.SaveChanges();
+            TempData["ToastMessage"] = "Copy deleted successfully.";
+            TempData["ToastType"] = "success";
+        }
+        else
+        {
+            TempData["ToastMessage"] = "Copy not found.";
+            TempData["ToastType"] = "error";
+        }
+        return RedirectToAction("ManageBookDetail", new { id = bookId });
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "ADMIN, STAFF")]
+    public IActionResult BatchDeleteCopy(List<string> ids, string bookId)
+    {
+        if (ids == null || ids.Count == 0)
+        {
+            TempData["ToastMessage"] = "No items selected.";
+            TempData["ToastType"] = "warning";
+            return RedirectToAction("ManageBookDetail", new { id = bookId });
+        }
+
+        var copies = db.Copies.Where(c => ids.Contains(c.Id)).ToList();
+        db.Copies.RemoveRange(copies);
+        db.SaveChanges();
+
+        TempData["ToastMessage"] = $"Successfully deleted {copies.Count} copy(s).";
+        TempData["ToastType"] = "success";
+
+        return RedirectToAction("ManageBookDetail", new { id = bookId });
     }
 
     [HttpPost]
