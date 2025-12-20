@@ -9,7 +9,6 @@
 
 @section head {
     <link rel="stylesheet" href="/css/book.css" asp-append-version="true" />
-    <link rel="stylesheet" href="/css/table.css" asp-append-version="true" />
 }
 
 <div class="public-detail-container">
@@ -61,27 +60,36 @@
                     <span class="rating-text">@avgRating.ToString("0.0") (@reviews.Count reviews)</span>
                 </div>
 
-                <div class="public-detail-actions" style="flex-direction: column; align-items: stretch; gap: 0.5rem;">
-                    @if (available > 0)
+                <div class="public-detail-actions" style="display: flex; gap: 0.5rem; align-items: flex-start;">
+                    <div style="flex: 1; display: flex; flex-direction: column; gap: 0.5rem;">
+                        @if (available > 0)
+                        {
+                            <div style="color: var(--color-success); font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
+                                <i class="fa-solid fa-check-circle"></i> @available @(available == 1 ? "Copy" : "Copies") Available
+                            </div>
+                            <button type="button" class="form__button form__button--submit js-loan-trigger" data-book-id="@Model.Id" data-book-title="@Model.Title" style="width: 100%;">
+                                <i class="fa-solid fa-book-open"></i> Loan
+                            </button>
+                        }
+                        else
+                        {
+                            <div style="color: var(--color-error); font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
+                                <i class="fa-solid fa-circle-xmark"></i> No Copies Available
+                            </div>
+                            <button type="button" class="form__button btn--secondary js-reserve-trigger" data-book-id="@Model.Id" data-book-title="@Model.Title" style="width: 100%;">
+                                <i class="fa-solid fa-bookmark"></i> Reserve
+                            </button>
+                            <p style="font-size: 0.85rem; color: var(--color-gray-500);">
+                                All copies are currently on loan. Place a reservation to join the queue.
+                            </p>
+                        }
+                    </div>
+                    
+                    @if (User.Identity.IsAuthenticated)
                     {
-                        <div style="color: var(--color-success); font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
-                            <i class="fa-solid fa-check-circle"></i> @available @(available == 1 ? "Copy" : "Copies") Available
-                        </div>
-                        <button type="button" class="form__button form__button--submit js-loan-trigger" data-book-id="@Model.Id" data-book-title="@Model.Title" style="width: 50%;">
-                            <i class="fa-solid fa-book-open"></i> Loan
+                        <button type="button" class="form__button btn--secondary js-wishlist-trigger" onclick="toggleWishlist(this, '@Model.Id')" title="Add to Wishlist" style="width: 42px; padding: 0;">
+                            <i class="fa-regular fa-heart"></i>
                         </button>
-                    }
-                    else
-                    {
-                        <div style="color: var(--color-error); font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
-                            <i class="fa-solid fa-circle-xmark"></i> No Copies Available
-                        </div>
-                        <button type="button" class="form__button btn--secondary js-reserve-trigger" data-book-id="@Model.Id" data-book-title="@Model.Title" style="width: 50%;">
-                            <i class="fa-solid fa-bookmark"></i> Reserve
-                        </button>
-                        <p style="font-size: 0.85rem; color: var(--color-gray-500);">
-                            All copies are currently on loan. Place a reservation to join the queue.
-                        </p>
                     }
                 </div>
             </div>
@@ -196,4 +204,21 @@
 
 @section foot {
     <script src="/js/book.js" asp-append-version="true"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // Check initial wishlist status
+            const btn = document.querySelector(".js-wishlist-trigger");
+            if (btn) {
+                fetch(`/Wishlist/CheckStatus?bookId=@Model.Id`)
+                    .then(res => res.json())
+                    .then(data => {
+                        const icon = btn.querySelector("i");
+                        if (data.isInWishlist) {
+                            icon.classList.remove("fa-regular");
+                            icon.classList.add("fa-solid");
+                        }
+                    });
+            }
+        });
+    </script>
 }

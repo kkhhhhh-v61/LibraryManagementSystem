@@ -1,9 +1,47 @@
-﻿@{
+﻿@inject LibraryManagementSystem.Models.LMSDB db
+@{
     ViewBag.Title = "Home";
 }
 
-<section class="layout__feed">
+@section head {
+    <link rel="stylesheet" href="/css/book.css" asp-append-version="true" />
+}
 
+<section class="layout__feed">
+    @if (User.Identity.IsAuthenticated)
+    {
+        <!-- TEMPORARY: Notification Test Feature -->
+        <div style="background-color: var(--color-white); padding: var(--spacing-md); border-radius: var(--spacing-sm); border: 2px dashed var(--color-gray-300); margin-bottom: var(--spacing-md);">
+            <h3 style="margin-bottom: var(--spacing-sm); color: var(--color-gray-700);">🔔 Notification Test</h3>
+            <p style="margin-bottom: var(--spacing-md); color: var(--color-gray-500); font-size: var(--text-sm);">
+                This is a temporary form to test the notification system. Messages will be sent to the currently logged-in user.
+            </p>
+            <form asp-controller="Notification" asp-action="TestCreate" method="post" style="display: flex; flex-direction: column; gap: var(--spacing-sm);">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-sm);">
+                    <select name="userId" class="field__input" style="height: 40px; padding: 0 12px; font-size: 0.9rem;">
+                        <option value="current">Current User (Me)</option>
+                        @foreach (var u in db.Users.OrderBy(u => u.Username))
+                        {
+                            <option value="@u.Id">@u.Username (@u.Role)</option>
+                        }
+                    </select>
+                    <select name="link" class="field__input" style="height: 40px; padding: 0 12px; font-size: 0.9rem;">
+                        <option value="">-- No Link --</option>
+                        <option value="/">Home</option>
+                        <option value="/Book/Catalogue">Catalogue</option>
+                        <option value="/Account/Profile">My Profile</option>
+                        <option value="/Loan/History">Loan History</option>
+                        <option value="/Booking/Index">Room Booking</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: var(--spacing-sm);">
+                    <input type="text" name="message" placeholder="Type a test message..." required 
+                           class="field__input" style="flex: 1; height: 40px; padding: 0 12px; font-size: 0.9rem;" />
+                    <button type="submit" class="btn" style="white-space: nowrap; background-color: var(--color-primary-base)">Send</button>
+                </div>
+            </form>
+        </div>
+    }
 </section>
 
 <aside class="layout__details">

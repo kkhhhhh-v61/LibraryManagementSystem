@@ -1,0 +1,56 @@
+@model List<Notification>
+
+<div class="notification-header">
+    <span class="notification-title">Notifications</span>
+    <div class="notification-actions">
+        @if (Model.Any(n => !n.IsRead))
+        {
+            <button type="button" class="notification-action-btn" onclick="markAllNotificationsRead()" title="Mark all as read">
+                <i class="fa-solid fa-check-double"></i>
+            </button>
+        }
+        @if (Model.Any())
+        {
+            <button type="button" class="notification-action-btn notification-action-btn--danger" onclick="clearAllNotifications()" title="Clear all">
+                <i class="fa-solid fa-trash"></i>
+            </button>
+        }
+    </div>
+</div>
+
+<div class="notification-list">
+    @if (Model == null || !Model.Any())
+    {
+        <div class="header-dropdown__empty">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" /></svg>
+            <span>No new notifications.</span>
+        </div>
+    }
+    else
+    {
+        foreach (var note in Model)
+        {
+            <div class="notification-item @(!note.IsRead ? "notification-item--unread" : "")"
+                 onclick="handleNotificationClick(@note.Id, '@note.Link')">
+                <div class="notification-content">
+                    <p class="notification-message">@note.Message</p>
+                    <span class="notification-time">@GetTimeAgo(note.CreatedAt)</span>
+                </div>
+                <button class="notification-delete" onclick="deleteNotification(event, @note.Id)" title="Delete">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        }
+    }
+</div>
+
+@functions {
+    string GetTimeAgo(DateTime date)
+    {
+        var span = DateTime.Now - date;
+        if (span.TotalMinutes < 1) return "Just now";
+        if (span.TotalMinutes < 60) return $"{(int)span.TotalMinutes}m ago";
+        if (span.TotalHours < 24) return $"{(int)span.TotalHours}h ago";
+        return date.ToString("MMM dd");
+    }
+}

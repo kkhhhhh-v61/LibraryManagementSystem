@@ -296,6 +296,40 @@ namespace LibraryManagementSystem.Migrations
                     b.ToTable("Loans");
                 });
 
+            modelBuilder.Entity("LibraryManagementSystem.Models.Notification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Link")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(6)
+                        .HasColumnType("nvarchar(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Notifications");
+                });
+
             modelBuilder.Entity("LibraryManagementSystem.Models.PasswordResetToken", b =>
                 {
                     b.Property<int>("Id")
@@ -667,6 +701,17 @@ namespace LibraryManagementSystem.Migrations
                         .IsRequired();
 
                     b.Navigation("Copy");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("LibraryManagementSystem.Models.Notification", b =>
+                {
+                    b.HasOne("LibraryManagementSystem.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });

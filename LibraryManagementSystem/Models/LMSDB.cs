@@ -22,6 +22,7 @@ public class LMSDB(DbContextOptions options) : DbContext(options)
     public DbSet<Fine> Fines { get; set; }
     public DbSet<Booking> Bookings { get; set; }
     public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
 
 }
 
@@ -110,7 +111,6 @@ public class PasswordResetToken
 
     public User User { get; set; }
 }
-
 
 
 
@@ -270,6 +270,26 @@ public class Wishlist
     public User User { get; set; }
 
     public Book Book { get; set; }
+}
+
+public class Notification
+{
+    [Key]
+    public int Id { get; set; }
+
+    [MaxLength(6)]
+    public string UserId { get; set; }
+
+    [MaxLength(500)]
+    public string Message { get; set; }
+
+    public string? Link { get; set; } // Optional URL to redirect when clicked
+
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
+
+    public bool IsRead { get; set; } = false;
+
+    public User User { get; set; }
 }
 
 

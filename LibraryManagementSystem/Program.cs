@@ -28,6 +28,9 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 builder.Services.AddTransient<IEmailService, EmailService>();
 
+builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<IWishlistService, WishlistService>();
+
 builder.Services.AddHostedService<BookingReminderService>();
 
 builder.Services.AddAuthorization(options =>
