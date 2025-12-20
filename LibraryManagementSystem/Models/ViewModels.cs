@@ -381,38 +381,39 @@ public class AuthorVM
 
 public class ReservationVM
 {
+    [Required(ErrorMessage = "User is required.")]
+    [StringLength(6, ErrorMessage = "Invalid User ID.")]
+    [Display(Name = "User ID")]
+    public string UserId { get; set; }
+
+    [Required(ErrorMessage = "Book is required.")]
+    [StringLength(6, ErrorMessage = "Invalid Book ID.")]
+    [Display(Name = "Book ID")]
+    public string BookId { get; set; }
+
+    /* -------------------------------
+       Display-only fields (ReadOnly)
+       ------------------------------- */
+
     [Display(Name = "Reservation ID")]
     public string? Id { get; set; }
 
-    [DisplayName("User")]
-    [Required(ErrorMessage = "{0} is required.")]
-    [StringLength(6, ErrorMessage = "{0} must be 6 characters.")]
-    public string UserId { get; set; }
-
-    [DisplayName("Book")]
-    [Required(ErrorMessage = "{0} is required.")]
-    [StringLength(6, ErrorMessage = "{0} must be 6 characters.")]
-    public string BookId { get; set; }
-
-    [DisplayName("Copy")]
-    [StringLength(6, ErrorMessage = "{0} must be 6 characters.")]
+    [Display(Name = "Copy ID")]
     public string? CopyId { get; set; }
 
-    [DisplayName("Reservation Date")]
-    public DateTime ReservationDate { get; set; } = DateTime.Now;
+    [Display(Name = "Reservation Date")]
+    [DataType(DataType.DateTime)]
+    public DateTime? ReservationDate { get; set; }
 
-    [DisplayName("Reservation Due")]
+    [Display(Name = "Pickup Due Date")]
+    [DataType(DataType.DateTime)]
     public DateTime? ReservationDue { get; set; }
 
-    [DisplayName("Reservation Status")]
-    [Required(ErrorMessage = "{0} is required.")]
-    public Reservation.ReservationStatus Status { get; set; } = Reservation.ReservationStatus.PENDING;
+    [Display(Name = "Status")]
+    public Reservation.ReservationStatus Status { get; set; }
 
-    [DisplayName("User")]
-    public List<SelectListItem> UserList { get; set; } = new();
-
-    [DisplayName("Book")]
-    public List<SelectListItem> BookList { get; set; } = new();
+    [Display(Name = "Queue Position")]
+    public int? QueuePosition { get; set; }
 }
 
 
