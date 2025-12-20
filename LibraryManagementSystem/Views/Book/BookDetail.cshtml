@@ -9,13 +9,15 @@
 
 @section head {
     <link rel="stylesheet" href="/css/book.css" asp-append-version="true" />
+    <link rel="stylesheet" href="/css/table.css" asp-append-version="true" />
 }
 
 <div class="public-detail-container">
     <div class="public-detail-card">
         <div class="public-detail-header">
-            <a asp-action="Catalogue" class="action__button button--back" title="Back to Catalogue">
+            <a asp-action="Catalogue" class="btn button--back" title="Back to Catalogue">
                 <svg class="button__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000"><path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z"/></svg>
+                <span>Back</span>
             </a>
         </div>
 
@@ -76,10 +78,19 @@
                 </div>
 
                 <div class="public-detail-actions">
-                    <button class="form__button form__button--submit" @(available > 0 ? "" : "disabled")>
-                        <i class="fa-solid fa-book-open"></i> Loan
-                    </button>
-                    <button class="form__button form__button--reset">
+                    @if (available > 0)
+                    {
+                        <a asp-controller="Loan" asp-action="Create" asp-route-bookId="@Model.Id" class="form__button form__button--submit" style="text-decoration: none; display: inline-flex; justify-content: center; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-book-open"></i> Loan
+                        </a>
+                    }
+                    else
+                    {
+                        <button class="form__button form__button--submit" disabled>
+                            <i class="fa-solid fa-book-open"></i> Loan
+                        </button>
+                    }
+                    <button class="form__button btn--secondary">
                         <i class="fa-solid fa-bookmark"></i> Reserve
                     </button>
                 </div>

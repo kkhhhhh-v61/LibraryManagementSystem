@@ -131,9 +131,9 @@ public class ReservationController : Controller
             Id = Guid.NewGuid().ToString("N")[..6].ToUpper(),
             UserId = reservation.UserId,
             CopyId = reservation.CopyId!,
-            LoanDate = DateTime.Now,
-            PickupDue = DateTime.Now.AddDays(1),
-            LoanDue = DateTime.Now.AddDays(14),
+            // LoanDate = DateTime.Now,
+            // PickupDue = DateTime.Now.AddDays(1),
+            // LoanDue = DateTime.Now.AddDays(14),
             Status = Loan.LoanStatus.RESERVED
         };
 

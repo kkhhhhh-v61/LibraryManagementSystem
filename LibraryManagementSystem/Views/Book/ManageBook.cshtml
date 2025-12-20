@@ -6,6 +6,7 @@
 
 @section head {
     <link rel="stylesheet" href="/css/book.css" asp-append-version="true" />
+    <link rel="stylesheet" href="/css/table.css" asp-append-version="true" />
 }
 
 <form class="manage__content" asp-action="BatchDeleteBook" method="post" id="batchForm">
@@ -129,14 +130,14 @@
         <div class="action-bar">
             <div class="action-bar__selection">
                 <span class="selection-count" id="selectionCount"></span>
-                <button class="form__button form__button--reset button--deselect-all" id="deselectAllButton" type="button" style="width: auto; padding: 0 var(--spacing-md); height: 40px;">
+                <button class="form__button form__button--cancel button--deselect-all" id="deselectAllButton" type="button">
                     Deselect All
                 </button>
-                <button class="form__button form__button--danger button--batch-delete" id="batchDeleteButton" type="button" style="width: auto; padding: 0 var(--spacing-md); height: 40px;">
+                <button class="form__button form__button--danger button--batch-delete" id="batchDeleteButton" type="button">
                     Delete Selected
                 </button>
             </div>
-            <a asp-action="InsertBook" class="form__button form__button--submit" style="width: auto; padding: 0 var(--spacing-md); height: 40px; display: inline-flex; align-items: center; text-decoration: none;">
+            <a asp-action="InsertBook" class="form__button form__button--submit">
                 + Add Book
             </a>
         </div>
@@ -148,7 +149,7 @@
         <div class="modal__header">
             <h2 class="modal__title">Confirm Delete</h2>
             <button class="modal__close js-close-modal" type="button">
-                <svg class="close__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000">
+                <svg class="close__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
                     <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/>
                 </svg>
             </button>
@@ -163,7 +164,7 @@
                 <input type="hidden" name="id" value="" />
             </div>
             <div class="modal__footer">
-                <button class="form__button form__button--reset js-cancel-delete" type="button">Cancel</button>
+                <button class="form__button form__button--cancel js-cancel-delete" type="button">Cancel</button>
                 <button class="form__button form__button--danger" type="submit">Delete</button>
             </div>
         </form>
@@ -175,7 +176,7 @@
         <div class="modal__header">
             <h2 class="modal__title">Confirm Batch Delete</h2>
             <button class="modal__close js-close-modal" type="button">
-                <svg class="close__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000">
+                <svg class="close__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
                     <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
                 </svg>
             </button>
@@ -185,7 +186,7 @@
             <div class="delete-list" id="batchDeleteList"></div>
         </div>
         <div class="modal__footer">
-            <button class="form__button form__button--reset js-cancel-batch" type="button">Cancel</button>
+            <button class="form__button form__button--cancel js-cancel-batch" type="button">Cancel</button>
             <button class="form__button form__button--danger" id="confirmBatchDelete" type="button">Confirm Delete</button>
         </div>
     </div>
@@ -196,7 +197,7 @@
         <div class="modal__header">
             <h2 class="modal__title">Add Copies</h2>
             <button class="modal__close js-close-modal" type="button">
-                <svg class="close__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
+                <svg class="close__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
             </button>
         </div>
         <form class="modal__form" asp-action="AddCopy" method="post">
@@ -209,9 +210,13 @@
                     <label class="field__label field__label--required">Quantity</label>
                     <input class="field__input input--number" name="quantity" type="number" min="1" max="100" value="1" required />
                 </div>
+                <div class="form__field" style="margin-top: var(--spacing-sm);">
+                    <label class="field__label">Existing Copies</label>
+                    <div id="addCopyExistingList" class="modal__list-container"></div>
+                </div>
             </div>
             <div class="modal__footer">
-                <button class="form__button form__button--reset js-cancel-modal" type="button">Cancel</button>
+                <button class="form__button form__button--cancel js-cancel-modal" type="button">Cancel</button>
                 <button class="form__button form__button--submit" type="submit">Add Copies</button>
             </div>
         </form>
@@ -222,7 +227,7 @@
     <div class="modal__container">
         <div class="modal__header">
             <h2 class="modal__title">Copies Added</h2>
-            <button class="modal__close js-close-modal" type="button"><svg class="close__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg></button>
+            <button class="modal__close js-close-modal" type="button"><svg class="close__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg></button>
         </div>
         <div class="modal__content">
             <p class="modal__text">The following copies have been successfully generated:</p>
@@ -239,9 +244,7 @@
         <div class="modal__header">
             <h2 class="modal__title">Confirm Action</h2>
             <button class="modal__close js-close-modal" type="button">
-                <svg class="close__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000">
-                    <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224 224 224 224Z"/>
-                </svg>
+                <svg class="close__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
             </button>
         </div>
         <div class="modal__content">
@@ -254,7 +257,7 @@
             </div>
         </div>
         <div class="modal__footer">
-            <button class="form__button form__button--reset js-cancel-toggle" type="button">Cancel</button>
+            <button class="form__button form__button--cancel js-cancel-toggle" type="button">Cancel</button>
             <button class="form__button form__button--submit" id="confirmToggleBtn" type="button">Confirm</button>
         </div>
     </div>
@@ -262,6 +265,7 @@
 
 @section foot {
     <script src="/js/book.js" asp-append-version="true"></script>
+    <script src="/js/table.js" asp-append-version="true"></script>
 
     @if (TempData["BookInsertSuccess"] != null)
     {

@@ -491,6 +491,13 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
     }
 
     [Authorize(Roles = "ADMIN, STAFF")]
+    public IActionResult GetCopiesList(string bookId)
+    {
+        var copies = db.Copies.Where(c => c.BookId == bookId).OrderBy(c => c.Id).ToList();
+        return PartialView("_ListCopy", copies);
+    }
+
+    [Authorize(Roles = "ADMIN, STAFF")]
     public IActionResult ManageBookDetail(string id, string? search, string? status, int page = 1, string sort = "Id", string order = "asc")
     {
         var book = db.Books

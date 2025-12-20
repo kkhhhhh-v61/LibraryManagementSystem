@@ -8,7 +8,7 @@ namespace LibraryManagementSystem.Models;
 
 #nullable disable warnings
 
-/* ------------------------------ LAI CHEE KIT ------------------------------ */
+/* ============================== LAI CHEE KIT ============================== */
 
 public class LoginVM
 {
@@ -176,7 +176,9 @@ public class LoginVM
         public string ConfirmNewPassword { get; set; }
     }
 
-/* ------------------------------ TAN KAI HAO ------------------------------ */
+
+
+/* ============================== TAN KAI HAO ============================== */
 
 public class BookManagementVM
 {
@@ -377,7 +379,7 @@ public class AuthorVM
 
 
 
-/* ------------------------------ JASON TYE HONG YI ------------------------------ */
+/* ============================== JASON TYE HONG YI ============================== */
 
 public class ReservationVM
 {
@@ -418,7 +420,7 @@ public class ReservationVM
 
 
 
-/* ------------------------------ BRIAN OOI SHU YI ------------------------------ */
+/* ============================== BRIAN OOI SHU YI ============================== */
 
 public class RoomCategoryCreateVM
 {

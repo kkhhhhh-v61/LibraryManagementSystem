@@ -1,0 +1,39 @@
+@model List<Copy>
+
+<div class="copy-summary-container">
+    <div class="copy-total-display">
+        <span class="total-number">@Model.Count</span>
+        <span class="total-label">Total Copies</span>
+    </div>
+
+    @if (Model.Any())
+    {
+        <div class="copy-status-grid">
+            @{
+                var allStatuses = Enum.GetValues<Copy.CopyStatus>();
+            }
+            @foreach (var status in allStatuses)
+            {
+                var count = Model.Count(c => c.Status == status);
+                string statusClass = status switch
+                {
+                    Copy.CopyStatus.AVAILABLE => "available",
+                    Copy.CopyStatus.BORROWED => "borrowed",
+                    Copy.CopyStatus.RESERVED => "reserved",
+                    _ => "default"
+                };
+                
+                <div class="status-card status-card--@statusClass">
+                    <span class="status-count">@count</span>
+                    <span class="status-name">@status</span>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="empty-state-compact">
+            <p>No existing copies found.</p>
+        </div>
+    }
+</div>
