@@ -252,6 +252,11 @@ public class BookInsertVM
 
     [DisplayName("Archived")]
     public bool IsArchived { get; set; } = false;
+
+    public int? CropX { get; set; }
+    public int? CropY { get; set; }
+    public int? CropWidth { get; set; }
+    public int? CropHeight { get; set; }
 }
 
 public class BookEditVM
@@ -304,6 +309,11 @@ public class BookEditVM
 
     [DisplayName("Archived")]
     public bool IsArchived { get; set; } = false;
+
+    public int? CropX { get; set; }
+    public int? CropY { get; set; }
+    public int? CropWidth { get; set; }
+    public int? CropHeight { get; set; }
 }
 
 public class BookDetailVM

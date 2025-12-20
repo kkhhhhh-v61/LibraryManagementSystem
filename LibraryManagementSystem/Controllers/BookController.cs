@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using LibraryManagementSystem.Extensions;
 using Microsoft.AspNetCore.Authorization;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
 
 namespace LibraryManagementSystem.Controllers;
 
@@ -240,7 +242,14 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         string? imageUrl = null;
         if (vm.Image != null)
         {
-            imageUrl = Helper.SaveImage(vm.Image, "books", en.WebRootPath);
+            if (vm.CropWidth.HasValue && vm.CropHeight.HasValue)
+            {
+                imageUrl = SaveCroppedImage(vm.Image, vm.CropX ?? 0, vm.CropY ?? 0, vm.CropWidth.Value, vm.CropHeight.Value, en.WebRootPath);
+            }
+            else
+            {
+                imageUrl = Helper.SaveImage(vm.Image, "books", en.WebRootPath);
+            }
         }
 
         // 5. Generate ID
@@ -373,7 +382,14 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         if (vm.Image != null)
         {
             DeleteImage(book.ImageURL);
-            book.ImageURL = Helper.SaveImage(vm.Image, "books", en.WebRootPath);
+            if (vm.CropWidth.HasValue && vm.CropHeight.HasValue)
+            {
+                book.ImageURL = SaveCroppedImage(vm.Image, vm.CropX ?? 0, vm.CropY ?? 0, vm.CropWidth.Value, vm.CropHeight.Value, en.WebRootPath);
+            }
+            else
+            {
+                book.ImageURL = Helper.SaveImage(vm.Image, "books", en.WebRootPath);
+            }
         }
 
         // 5. Update Properties
@@ -1032,5 +1048,25 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
                 System.IO.File.Delete(imagePath);
             }
         }
+    }
+
+    private string SaveCroppedImage(IFormFile image, int x, int y, int width, int height, string webRootPath)
+    {
+        string filename = Guid.NewGuid().ToString("N") + ".jpg";
+        string folderPath = Path.Combine(webRootPath, "images", "books");
+        string fullPath = Path.Combine(folderPath, filename);
+
+        Directory.CreateDirectory(folderPath);
+
+        using var stream = image.OpenReadStream();
+        using var img = Image.Load(stream);
+
+        // Ensure crop rectangle is within bounds
+        var cropRect = new Rectangle(x, y, width, height);
+        
+        img.Mutate(ctx => ctx.Crop(cropRect));
+        img.Save(fullPath);
+
+        return filename;
     }
 }

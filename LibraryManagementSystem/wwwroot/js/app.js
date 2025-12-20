@@ -653,6 +653,34 @@ window.toggleWishlist = function (btn, bookId) {
         .catch((err) => console.error(err));
 };
 
+window.removeFromWishlist = function (e, bookId) {
+    e.stopPropagation();
+    e.preventDefault();
+
+    fetch(`/Wishlist/Toggle?bookId=${bookId}`, { method: "POST" })
+        .then((res) => res.json())
+        .then((data) => {
+            if (data.success) {
+                if (window.showToast)
+                    window.showToast("Removed from wishlist", "info");
+                window.loadWishlist();
+
+                // Update book detail button if present
+                const detailBtn = document.querySelector(
+                    `.js-wishlist-trigger[onclick*="${bookId}"]`
+                );
+                if (detailBtn) {
+                    const icon = detailBtn.querySelector("i");
+                    if (icon) {
+                        icon.classList.remove("fa-solid");
+                        icon.classList.add("fa-regular");
+                    }
+                }
+            }
+        })
+        .catch((err) => console.error(err));
+};
+
 document.addEventListener("DOMContentLoaded", () => {
     if (document.getElementById("wishlistDropdown")) {
         window.loadWishlist();
@@ -665,7 +693,7 @@ $(document).ready(function () {
     let typingTimer;
     let doneTypingInterval = 300; // 300ms delay
 
-    $("#ajaxSearch").on('input', function () {
+    $("#ajaxSearch").on("input", function () {
         clearTimeout(typingTimer);
         var query = $(this).val();
 
@@ -676,15 +704,15 @@ $(document).ready(function () {
 
     function performSearch(query) {
         $.ajax({
-            url: '/Staff/FilterUsers', // Ensure this matches your StaffController
-            type: 'GET',
+            url: "/Staff/FilterUsers", // Ensure this matches your StaffController
+            type: "GET",
             data: { searchString: query },
             success: function (result) {
                 $("#tableBody").html(result);
             },
             error: function (xhr, status, error) {
                 console.error("Search Error:", error);
-            }
+            },
         });
     }
 });
