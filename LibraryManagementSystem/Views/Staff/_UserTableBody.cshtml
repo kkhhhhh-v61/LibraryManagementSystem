@@ -1,0 +1,71 @@
+﻿@model IEnumerable<LibraryManagementSystem.Models.User>
+
+@foreach (var item in Model)
+{
+    <tr>
+        <td style="font-weight: bold; color: #555;">
+            @item.Id
+        </td>
+
+        <td>
+            <div class="user-profile-flex">
+                <img src="/images/profiles/@(item.ImageURL ?? "default-profile.png")" class="table-avatar" alt="profile" />
+                <div>
+                    <span class="user-text-main">@item.Username</span>
+                    <span class="user-text-sub">@item.Email</span>
+                </div>
+            </div>
+        </td>
+
+        <td>
+            @{
+                string roleName = item.Role.ToString();
+                string roleColor = roleName == "ADMIN" ? "#7209b7" : (roleName == "STAFF" ? "#4361ee" : "#64748b");
+            }
+            <span class="role-text" style="color: @roleColor">@roleName</span>
+        </td>
+
+        <td>
+            @{
+                string statusName = item.Status.ToString();
+                string dotClass = statusName == "ACTIVE" ? "dot-active" : "dot-inactive";
+            }
+            <div style="display:flex; align-items:center;">
+                <span class="status-dot @dotClass"></span>
+                <span style="font-size: 0.9rem; color: #4b5563;">@statusName</span>
+            </div>
+        </td>
+
+        <td>@(item.ContactNo ?? "-")</td>
+
+        <td class="text-end">
+            <a asp-controller="Staff" asp-action="UserDetails" asp-route-id="@item.Id" class="btn-icon" title="View Details">
+                <i class="fas fa-edit"></i>
+            </a>
+        </td>
+    </tr>
+}
+
+@if (!Model.Any())
+{
+    <tr>
+        <td colspan="6" style="text-align:center; padding: 50px; color: #999;">
+            No users found matching your search.
+        </td>
+    </tr>
+}
+
+<input type="hidden" id="pagingMetadata"
+       data-has-prev="@ViewBag.HasPrevious.ToString().ToLower()"
+       data-has-next="@ViewBag.HasNext.ToString().ToLower()"
+       data-page-index="@ViewBag.CurrentPage"
+       data-total-pages="@ViewBag.TotalPages"
+       data-total-records="@ViewBag.TotalRecords" />
+@if (!Model.Any())
+{
+    <tr>
+        <td colspan="6" style="text-align:center; padding: 50px; color: #999;">
+            No users found matching your search.
+        </td>
+    </tr>
+}

@@ -1,0 +1,50 @@
+﻿@model IEnumerable<LibraryManagementSystem.Models.Payment>
+
+<div class="container mt-4">
+    <h2>Refund Requests</h2>
+    <p>Below are payments listed as 'Success' for Bookings that have been 'Cancelled'.</p>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>User</th>
+                <th>Room / Reason</th>
+                <th>Amount</th>
+                <th>Cancelled On</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @item.Booking.User.Username <br />
+                        <small>@item.Booking.User.Email</small>
+                    </td>
+                    <td>
+                        Booking ID: @item.BookingId <br />
+                        <em>Reason: @item.Booking.CancellationReason</em>
+                    </td>
+                    <td>@item.Booking.TotalPrice.ToString("C")</td>
+                    <td>@(item.Booking.CancelledAt.HasValue? item.Booking.CancelledAt.Value.ToShortDateString() : "-")</td>
+                    <td>
+                        <form asp-action="ApproveRefund" method="post" onsubmit="return confirm('Confirm refund of @item.Booking.TotalPrice?');">
+                            <input type="hidden" name="paymentId" value="@item.Id" />
+                            <button type="submit" class="btn btn-warning btn-sm">Approve Refund</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">No pending refunds found.</div>
+    }
+</div>

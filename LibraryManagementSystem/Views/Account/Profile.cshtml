@@ -43,6 +43,7 @@
 
         <div class="profile-tabs">
             <button class="tab-btn active" onclick="switchTab('profile')">Personal Details</button>
+            <button class="tab-btn" onclick="switchTab('history')">Borrow History</button>
             <button class="tab-btn" onclick="switchTab('security')">Security</button>
         </div>
 
@@ -50,30 +51,27 @@
             <h3 class="section-title">Edit Profile</h3>
             <form id="profileForm">
                 @Html.AntiForgeryToken()
-
                 <input type="hidden" asp-for="Username" />
                 <input type="hidden" asp-for="Role" />
                 <input type="hidden" asp-for="CredibilityScore" />
                 <input type="hidden" asp-for="ProfilePhotoUrl" />
+
                 <div class="form-grid">
                     <div class="form-group">
                         <label asp-for="FirstName" class="form-label"></label>
                         <input asp-for="FirstName" class="form-input" placeholder="e.g. John" />
                         <span asp-validation-for="FirstName" class="text-danger small"></span>
                     </div>
-
                     <div class="form-group">
                         <label asp-for="LastName" class="form-label"></label>
                         <input asp-for="LastName" class="form-input" placeholder="e.g. Doe" />
                         <span asp-validation-for="LastName" class="text-danger small"></span>
                     </div>
-
                     <div class="form-group full-width">
                         <label asp-for="Email" class="form-label"></label>
                         <input asp-for="Email" class="form-input" placeholder="name@example.com" />
                         <span asp-validation-for="Email" class="text-danger small"></span>
                     </div>
-
                     <div class="form-group full-width">
                         <label asp-for="ContactNo" class="form-label"></label>
                         <input asp-for="ContactNo" class="form-input" placeholder="012-3456789" />
@@ -97,71 +95,99 @@
             </form>
         </div>
 
-        <div id="tab-security" class="tab-content" style="display: none;">
-            <div class="profile-details-card">
-                <h3 class="section-title">Change Password</h3>
+        <div id="tab-history" class="tab-content" style="display: none;">
+            <h3 class="section-title">Borrowing History</h3>
 
-                <form id="passwordForm">
-                    @Html.AntiForgeryToken()    
-                    <div class="form-grid">
-
-                        <div class="form-group full-width">
-                            <label for="currentPassword" class="form-label">Current Password</label>
-
-                            <div class="password-wrapper">
-                                <input type="password"
-                                       id="currentPassword"
-                                       name="CurrentPassword"
-                                       class="form-input"
-                                       placeholder="Enter current password"
-                                       required>
-                                <i class="fa-solid fa-eye toggle-icon" onclick="togglePassword('currentPassword', this)"></i>
-                            </div>
-                            <span class="text-danger field-validation-valid" data-valmsg-for="CurrentPassword" data-valmsg-replace="true" style="color: #dc2626; font-size: 0.875rem; margin-top: 4px; display: block;"></span>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="newPassword" class="form-label">New Password</label>
-
-                            <div class="password-wrapper">
-                                <input type="password"
-                                       id="newPassword"
-                                       name="NewPassword"
-                                       class="form-input"
-                                       placeholder="Enter new password"
-                                       required>
-                                <i class="fa-solid fa-eye toggle-icon" onclick="togglePassword('newPassword', this)"></i>
-                            </div>
-                            <span class="text-danger field-validation-valid" data-valmsg-for="NewPassword" data-valmsg-replace="true" style="color: #dc2626; font-size: 0.875rem; margin-top: 4px; display: block;"></span>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="confirmPassword" class="form-label">Confirm Password</label>
-
-                            <div class="password-wrapper">
-                                <input type="password"
-                                       id="confirmPassword"
-                                       name="ConfirmNewPassword"
-                                       class="form-input"
-                                       placeholder="Confirm new password"
-                                       required>
-                                <i class="fa-solid fa-eye toggle-icon" onclick="togglePassword('confirmPassword', this)"></i>
-                            </div>
-                            <span class="text-danger field-validation-valid" data-valmsg-for="ConfirmNewPassword" data-valmsg-replace="true" style="color: #dc2626; font-size: 0.875rem; margin-top: 4px; display: block;"></span>
-                        </div>
-
-                    </div>
-
-                    <div id="passwordAlert" class="alert" style="display:none; margin-bottom: 20px;"></div>
-
-                    <div class="form-actions">
-                        <button type="submit" id="savePasswordBtn" class="btn btn-primary" style="background-color: var(--color-primary-base); color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">
-                            Update Password
-                        </button>
-                    </div>
-                </form>
+            <div class="table-responsive">
+                <table class="table" style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                    <thead>
+                        <tr style="background-color: #f8f9fa; border-bottom: 2px solid #e9ecef;">
+                            <th style="padding: 12px; text-align: left;">Book Title</th>
+                            <th style="padding: 12px; text-align: left;">Borrowed Date</th>
+                            <th style="padding: 12px; text-align: left;">Due Date</th>
+                            <th style="padding: 12px; text-align: center;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @* NOTE: You need to add a BorrowHistory list to your ProfileVM. 
+                           For now, this checks if it exists to prevent errors. *@
+                        @if (ViewBag.BorrowHistory != null)
+                        {
+                            foreach (var item in ViewBag.BorrowHistory)
+                            {
+                                <tr style="border-bottom: 1px solid #e9ecef;">
+                                    <td style="padding: 12px;">@item.BookTitle</td>
+                                    <td style="padding: 12px;">@item.BorrowDate.ToString("dd MMM yyyy")</td>
+                                    <td style="padding: 12px;">@item.DueDate.ToString("dd MMM yyyy")</td>
+                                    <td style="padding: 12px; text-align: center;">
+                                        @if (item.Status == "Returned")
+                                        {
+                                            <span class="badge bg-success" style="padding: 5px 10px; border-radius: 20px; color: white; background: #10b981;">Returned</span>
+                                        }
+                                        else if (item.Status == "Late")
+                                        {
+                                            <span class="badge bg-danger" style="padding: 5px 10px; border-radius: 20px; color: white; background: #ef4444;">Overdue</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning" style="padding: 5px 10px; border-radius: 20px; color: black; background: #f59e0b;">Active</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="4" style="text-align:center; padding: 20px; color: #6b7280;">
+                                    No borrowing history found.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             </div>
         </div>
+
+        <div id="tab-security" class="tab-content" style="display: none;">
+            <h3 class="section-title">Change Password</h3>
+            <form id="passwordForm">
+                @Html.AntiForgeryToken()
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="currentPassword" class="form-label">Current Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="currentPassword" name="CurrentPassword" class="form-input" placeholder="Enter current password" required>
+                            <i class="fa-solid fa-eye toggle-icon" onclick="togglePassword('currentPassword', this)"></i>
+                        </div>
+                        <span class="text-danger field-validation-valid" data-valmsg-for="CurrentPassword" data-valmsg-replace="true"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="newPassword" class="form-label">New Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="newPassword" name="NewPassword" class="form-input" placeholder="Enter new password" required>
+                            <i class="fa-solid fa-eye toggle-icon" onclick="togglePassword('newPassword', this)"></i>
+                        </div>
+                        <span class="text-danger field-validation-valid" data-valmsg-for="NewPassword" data-valmsg-replace="true"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword" class="form-label">Confirm Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="confirmPassword" name="ConfirmNewPassword" class="form-input" placeholder="Confirm new password" required>
+                            <i class="fa-solid fa-eye toggle-icon" onclick="togglePassword('confirmPassword', this)"></i>
+                        </div>
+                        <span class="text-danger field-validation-valid" data-valmsg-for="ConfirmNewPassword" data-valmsg-replace="true"></span>
+                    </div>
+                </div>
+                <div id="passwordAlert" class="alert" style="display:none; margin-bottom: 20px;"></div>
+                <div class="form-actions">
+                    <button type="submit" id="savePasswordBtn" class="btn btn-primary" style="background-color: var(--color-primary-base); border:none;">Update Password</button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
 
 <div id="customCropModal" class="custom-modal-overlay" style="display: none;">
     <div class="custom-modal-content">
@@ -176,11 +202,7 @@
         </div>
         <div class="custom-modal-footer">
             <button type="button" id="btnCancelCrop" class="btn btn-secondary">Cancel</button>
-            <button type="button" id="btnCrop" class="btn btn-primary"
-                    style="background-color: var(--color-primary-base);"
-                    data-url="@Url.Action("UpdateProfilePhoto", "Account")">
-                Crop & Save
-            </button>
+            <button type="button" id="btnCrop" class="btn btn-primary" style="background-color: var(--color-primary-base);" data-url="@Url.Action("UpdateProfilePhoto", "Account")">Crop & Save</button>
         </div>
     </div>
 </div>
@@ -189,4 +211,22 @@
     <partial name="_ValidationScriptsPartial" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script src="~/js/app.js"></script>
+    <script>
+        // Simple JS to handle tab switching
+        function switchTab(tabName) {
+            // Hide all contents
+            document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+
+            // Remove active class from buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+            // Show selected content
+            document.getElementById('tab-' + tabName).style.display = 'block';
+            document.getElementById('tab-' + tabName).classList.add('active');
+
+            // Add active class to clicked button
+            event.target.classList.add('active');
+        }
+    </script>
 }

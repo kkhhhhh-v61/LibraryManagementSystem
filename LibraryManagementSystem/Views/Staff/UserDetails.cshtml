@@ -1,0 +1,81 @@
+﻿@model LibraryManagementSystem.Models.User
+
+<div class="container mt-4">
+    <a asp-action="UserList" class="btn btn-secondary mb-3">&larr; Back to List</a>
+    
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-2">
+                    <img src="@(Model.ImageURL ?? "/images/default-user.png")" class="img-fluid rounded-circle" alt="User Image">
+                </div>
+                <div class="col-md-10">
+                    <h3>@Model.FirstName @Model.LastName <span class="badge bg-info">@Model.Role</span></h3>
+                    <p><strong>Email:</strong> @Model.Email | <strong>Phone:</strong> @Model.ContactNo</p>
+                    <p><strong>Credibility Score:</strong> @Model.CredibilityScore</p>
+                    <p><strong>Status:</strong> @Model.Status</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <ul class="nav nav-tabs" id="userTabs" role="tablist">
+        <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#loans">Borrow History</a></li>
+        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#bookings">Booking Timetable</a></li>
+        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#fines">Fines</a></li>
+    </ul>
+
+    <div class="tab-content border border-top-0 p-3 bg-white" id="myTabContent">
+        
+        <div class="tab-pane fade show active" id="loans">
+            <table class="table table-striped">
+                <thead><tr><th>Book</th><th>Borrowed</th><th>Due</th><th>Returned</th><th>Status</th></tr></thead>
+                <tbody>
+                    @foreach(var item in Model.Loans.OrderByDescending(l => l.LoanDate))
+                    {
+                        <tr>
+                            <td>@item.Copy.Book.Title</td>
+                            <td>@item.LoanDate.ToShortDateString()</td>
+                            <td>@item.LoanDue.ToShortDateString()</td>
+                            <td>@(item.ReturnDate.HasValue ? item.ReturnDate.Value.ToShortDateString() : "-")</td>
+                            <td>@item.Status</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="tab-pane fade" id="bookings">
+            <table class="table table-striped">
+                <thead><tr><th>Room</th><th>Date</th><th>Time</th><th>Status</th></tr></thead>
+                <tbody>
+                    @foreach(var item in Model.Bookings.OrderByDescending(b => b.BookingDate))
+                    {
+                        <tr>
+                            <td>@item.Room.Name</td>
+                            <td>@item.BookingDate.ToShortDateString()</td>
+                            <td>@item.StartTime.ToShortTimeString() - @item.EndTime.ToShortTimeString()</td>
+                            <td>@item.Status</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="tab-pane fade" id="fines">
+            <table class="table table-striped">
+                <thead><tr><th>Amount</th><th>Issued</th><th>Status</th></tr></thead>
+                <tbody>
+                    @foreach(var item in Model.Fines)
+                    {
+                        <tr>
+                            <td>@item.Amount.ToString("C")</td>
+                            <td>@item.IssuedDate.ToShortDateString()</td>
+                            <td>@(item.IsPaid ? "Paid" : "Unpaid")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -658,3 +658,33 @@ document.addEventListener("DOMContentLoaded", () => {
         window.loadWishlist();
     }
 });
+/* ===========================================================================
+   STAFF: LIVE USER SEARCH (ADDED THIS NEW SECTION)
+   =========================================================================== */
+$(document).ready(function () {
+    let typingTimer;
+    let doneTypingInterval = 300; // 300ms delay
+
+    $("#ajaxSearch").on('input', function () {
+        clearTimeout(typingTimer);
+        var query = $(this).val();
+
+        typingTimer = setTimeout(function () {
+            performSearch(query);
+        }, doneTypingInterval);
+    });
+
+    function performSearch(query) {
+        $.ajax({
+            url: '/Staff/FilterUsers', // Ensure this matches your StaffController
+            type: 'GET',
+            data: { searchString: query },
+            success: function (result) {
+                $("#tableBody").html(result);
+            },
+            error: function (xhr, status, error) {
+                console.error("Search Error:", error);
+            }
+        });
+    }
+});
