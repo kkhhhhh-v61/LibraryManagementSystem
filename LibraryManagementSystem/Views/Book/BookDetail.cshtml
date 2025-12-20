@@ -177,17 +177,20 @@
 <div class="modal" id="modal-reserve">
     <div class="modal__container">
         <div class="modal__header">
-            <h2 class="modal__title">Reserve Book</h2>
+            <h2 class="modal__title">Confirm Reservation</h2>
             <button class="modal__close js-close-modal" type="button">
                 <svg class="close__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
             </button>
         </div>
-        <div class="modal__content">
-            <p class="modal__text">Reservation details coming soon...</p>
-        </div>
-        <div class="modal__footer">
-            <button class="form__button form__button--cancel js-close-modal" type="button">Close</button>
-        </div>
+        <form class="modal__form" asp-controller="" asp-action="" method="post"> @* TODO: @Jason link this to your action method *@
+            <div class="modal__content">
+                <p class="modal__text">Are you sure you wish to reserve this book?</p>
+            </div>
+            <div class="modal__footer">
+                <button class="form__button form__button--cancel js-close-modal" type="button">Cancel</button>
+                <button class="form__button form__button--submit" type="submit">Confirm</button>
+            </div>
+        </form>
     </div>
 </div>
 
