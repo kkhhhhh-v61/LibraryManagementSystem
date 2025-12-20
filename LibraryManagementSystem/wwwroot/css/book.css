@@ -750,10 +750,6 @@
     overflow-y: auto;
 }
 
-.button--back {
-    margin-right: 1rem;
-}
-
 .button--header {
     display: inline-flex;
     align-items: center;
@@ -984,7 +980,6 @@
 .public-detail-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: var(--spacing-lg);
     display: flex;
     flex-direction: column;
     gap: var(--spacing-xl);

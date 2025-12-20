@@ -559,7 +559,7 @@ a.count-badge:hover {
 .btn--secondary:hover,
 .form__button--cancel:hover,
 .button--back:hover {
-    background-color: var(--color-gray-100);
+    background-color: var(--color-gray-200);
     border-color: var(--color-gray-400);
     color: var(--color-gray-900);
 }

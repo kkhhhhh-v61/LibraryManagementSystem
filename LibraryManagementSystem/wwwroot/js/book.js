@@ -305,6 +305,81 @@ function initializeCatalogue() {
 }
 
 /* ===========================================================================
+   BOOK DETAIL PAGE LOGIC
+   =========================================================================== */
+
+function initializeBookDetails() {
+    const loanModal = document.getElementById("modal-loan-confirm");
+
+    if (loanModal) {
+        const loanBtn = document.querySelector(".js-loan-trigger");
+        const closeBtns = loanModal.querySelectorAll(".js-close-modal");
+        const bookIdInput = loanModal.querySelector(".js-loan-book-id");
+        const bookTitleSpan = loanModal.querySelector(".js-loan-book-title");
+
+        if (loanBtn) {
+            loanBtn.addEventListener("click", function () {
+                bookIdInput.value = this.dataset.bookId;
+                bookTitleSpan.textContent = this.dataset.bookTitle;
+
+                const options = {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                };
+                const today = new Date();
+                const pickup = new Date();
+                pickup.setDate(today.getDate() + 3);
+
+                loanModal.querySelector(".js-loan-date").textContent =
+                    today.toLocaleDateString("en-US", options);
+                loanModal.querySelector(".js-pickup-date").textContent =
+                    pickup.toLocaleDateString("en-US", options);
+                loanModal.querySelector(".js-loan-duration").textContent =
+                    "7 Days (from pickup)";
+
+                loanModal.classList.add("active");
+            });
+        }
+
+        closeBtns.forEach((btn) => {
+            btn.addEventListener("click", () => {
+                loanModal.classList.remove("active");
+            });
+        });
+
+        loanModal.addEventListener("click", (e) => {
+            if (e.target === loanModal) loanModal.classList.remove("active");
+        });
+    }
+
+    // Reserve Modal Logic
+    const reserveModal = document.getElementById("modal-reserve");
+    if (reserveModal) {
+        const reserveBtn = document.querySelector(".js-reserve-trigger");
+        const reserveCloseBtns =
+            reserveModal.querySelectorAll(".js-close-modal");
+
+        if (reserveBtn) {
+            reserveBtn.addEventListener("click", function () {
+                reserveModal.classList.add("active");
+            });
+        }
+
+        reserveCloseBtns.forEach((btn) => {
+            btn.addEventListener("click", () => {
+                reserveModal.classList.remove("active");
+            });
+        });
+
+        reserveModal.addEventListener("click", (e) => {
+            if (e.target === reserveModal)
+                reserveModal.classList.remove("active");
+        });
+    }
+}
+
+/* ===========================================================================
    INITIALIZATION
    =========================================================================== */
 
@@ -327,4 +402,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Initialize Catalogue Page
     initializeCatalogue();
+
+    // Initialize Book Details Page
+    initializeBookDetails();
 });

@@ -15,9 +15,8 @@
 <div class="public-detail-container">
     <div class="public-detail-card">
         <div class="public-detail-header">
-            <a asp-action="Catalogue" class="btn button--back" title="Back to Catalogue">
+            <a asp-action="Catalogue" class="btn button--back" title="Back">
                 <svg class="button__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000"><path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z"/></svg>
-                <span>Back</span>
             </a>
         </div>
 
@@ -62,37 +61,28 @@
                     <span class="rating-text">@avgRating.ToString("0.0") (@reviews.Count reviews)</span>
                 </div>
 
-                <div class="public-detail-availability">
-                    @if(available > 0)
-                    {
-                        <span class="status-badge status-available">
-                            <i class="fa-solid fa-check-circle"></i> @available / @total Copies Available
-                        </span>
-                    }
-                    else
-                    {
-                        <span class="status-badge status-unavailable">
-                            <i class="fa-solid fa-times-circle"></i> Out of Stock
-                        </span>
-                    }
-                </div>
-
-                <div class="public-detail-actions">
+                <div class="public-detail-actions" style="flex-direction: column; align-items: stretch; gap: 0.5rem;">
                     @if (available > 0)
                     {
-                        <a asp-controller="Loan" asp-action="Create" asp-route-bookId="@Model.Id" class="form__button form__button--submit" style="text-decoration: none; display: inline-flex; justify-content: center; align-items: center; gap: 8px;">
-                            <i class="fa-solid fa-book-open"></i> Loan
-                        </a>
-                    }
-                    else
-                    {
-                        <button class="form__button form__button--submit" disabled>
+                        <div style="color: var(--color-success); font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fa-solid fa-check-circle"></i> @available @(available == 1 ? "Copy" : "Copies") Available
+                        </div>
+                        <button type="button" class="form__button form__button--submit js-loan-trigger" data-book-id="@Model.Id" data-book-title="@Model.Title" style="width: 50%;">
                             <i class="fa-solid fa-book-open"></i> Loan
                         </button>
                     }
-                    <button class="form__button btn--secondary">
-                        <i class="fa-solid fa-bookmark"></i> Reserve
-                    </button>
+                    else
+                    {
+                        <div style="color: var(--color-error); font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fa-solid fa-circle-xmark"></i> No Copies Available
+                        </div>
+                        <button type="button" class="form__button btn--secondary js-reserve-trigger" data-book-id="@Model.Id" data-book-title="@Model.Title" style="width: 50%;">
+                            <i class="fa-solid fa-bookmark"></i> Reserve
+                        </button>
+                        <p style="font-size: 0.85rem; color: var(--color-gray-500);">
+                            All copies are currently on loan. Place a reservation to join the queue.
+                        </p>
+                    }
                 </div>
             </div>
         </div>
@@ -140,6 +130,63 @@
                 <p>No reviews yet. Be the first to review this book!</p>
             </div>
         }
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="modal-loan-confirm">
+    <div class="modal__container">
+        <div class="modal__header">
+            <h2 class="modal__title">Confirm Loan</h2>
+            <button class="modal__close js-close-modal" type="button">
+                <svg class="close__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
+            </button>
+        </div>
+        <form class="modal__form" asp-controller="Loan" asp-action="Create" method="post">
+            <div class="modal__content">
+                <p class="modal__text" style="margin-bottom: 1rem;">
+                    Please confirm the loan details for <span class="text--highlight js-loan-book-title"></span>:
+                </p>
+                <div style="background-color: var(--color-gray-100); padding: 1rem; border-radius: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--color-gray-600);">Loan Date:</span>
+                        <span style="font-weight: 600;" class="js-loan-date"></span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--color-gray-600);">Pickup By:</span>
+                        <span style="font-weight: 600; color: var(--color-primary-base);" class="js-pickup-date"></span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; border-top: 1px solid var(--color-gray-200); padding-top: 0.5rem; margin-top: 0.25rem;">
+                        <span style="color: var(--color-gray-600);">Loan Duration:</span>
+                        <span style="font-weight: 600;" class="js-loan-duration"></span>
+                    </div>
+                </div>
+                <p class="modal__text" style="font-size: 0.85rem; color: var(--color-gray-500); margin-top: 1rem; text-align: center;">
+                    * You must pick up the book at the library counter before the pickup deadline.
+                </p>
+                <input type="hidden" name="bookId" class="js-loan-book-id" value="" />
+            </div>
+            <div class="modal__footer">
+                <button class="form__button form__button--cancel js-close-modal" type="button">Cancel</button>
+                <button class="form__button form__button--submit" type="submit">Confirm</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal" id="modal-reserve">
+    <div class="modal__container">
+        <div class="modal__header">
+            <h2 class="modal__title">Reserve Book</h2>
+            <button class="modal__close js-close-modal" type="button">
+                <svg class="close__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
+            </button>
+        </div>
+        <div class="modal__content">
+            <p class="modal__text">Reservation details coming soon...</p>
+        </div>
+        <div class="modal__footer">
+            <button class="form__button form__button--cancel js-close-modal" type="button">Close</button>
         </div>
     </div>
 </div>
