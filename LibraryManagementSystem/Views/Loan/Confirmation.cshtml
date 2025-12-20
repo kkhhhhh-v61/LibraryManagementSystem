@@ -1,0 +1,91 @@
+@model Loan
+@{
+    ViewBag.Title = "Loan Slip";
+
+    var slipSubtitle = "";
+    var subtitleColor = "var(--color-success)";
+
+    switch (Model.Status)
+    {
+        case Loan.LoanStatus.RESERVED:
+            slipSubtitle = "Loan Successful";
+            subtitleColor = "var(--color-success)";
+            break;
+        case Loan.LoanStatus.IN_LOAN:
+            slipSubtitle = "Loan Active";
+            subtitleColor = "var(--color-primary-base)";
+            break;
+        case Loan.LoanStatus.OVERDUE:
+            slipSubtitle = "Loan Overdue";
+            subtitleColor = "var(--color-error)";
+            break;
+        case Loan.LoanStatus.RETURNED:
+            slipSubtitle = "Loan Returned";
+            subtitleColor = "var(--color-gray-600)";
+            break;
+        case Loan.LoanStatus.EXPIRED:
+            slipSubtitle = "Loan Expired";
+            subtitleColor = "var(--color-warning)";
+            break;
+    }
+}
+
+@section head {
+    <link rel="stylesheet" href="/css/book.css" asp-append-version="true" />
+    <link rel="stylesheet" href="/css/loan.css" asp-append-version="true" />
+}
+
+<div class="confirmation-container">
+    <div class="slip-header">
+        <div class="slip-title">Loan Slip</div>
+        <div class="slip-subtitle" style="color: @subtitleColor;">@slipSubtitle</div>
+    </div>
+
+    <div class="slip-details">
+        <div class="detail-row"><span class="detail-label">Loan ID</span><span class="detail-value">@Model.Id</span></div>
+        <div class="detail-row"><span class="detail-label">Borrower</span><span class="detail-value">@Model.User.Username (@Model.UserId)</span></div>
+        <div class="detail-row"><span class="detail-label">Book Title</span><span class="detail-value">@Model.Copy.Book.Title</span></div>
+        <div class="detail-row"><span class="detail-label">Reserved On</span><span class="detail-value">@Model.LoanDate.ToString("yyyy-MM-dd")</span></div>
+
+        @switch (Model.Status)
+        {
+            case Loan.LoanStatus.RESERVED:
+                <div class="detail-row"><span class="detail-label">Pickup Deadline</span><span class="detail-value" style="color: var(--color-primary-base);">@Model.PickupDue.ToString("yyyy-MM-dd")</span></div>
+                break;
+
+            case Loan.LoanStatus.IN_LOAN:
+                @if (Model.PickupDate.HasValue) { <div class="detail-row"><span class="detail-label">Picked Up On</span><span class="detail-value">@Model.PickupDate.Value.ToString("yyyy-MM-dd")</span></div> }
+                <div class="detail-row"><span class="detail-label">Return Due Date</span><span class="detail-value" style="color: var(--color-primary-base);">@Model.LoanDue.ToString("yyyy-MM-dd")</span></div>
+                break;
+
+            case Loan.LoanStatus.OVERDUE:
+                @if (Model.PickupDate.HasValue) { <div class="detail-row"><span class="detail-label">Picked Up On</span><span class="detail-value">@Model.PickupDate.Value.ToString("yyyy-MM-dd")</span></div> }
+                <div class="detail-row"><span class="detail-label">Return Was Due</span><span class="detail-value" style="color: var(--color-error);">@Model.LoanDue.ToString("yyyy-MM-dd")</span></div>
+                break;
+
+            case Loan.LoanStatus.RETURNED:
+                @if (Model.PickupDate.HasValue) { <div class="detail-row"><span class="detail-label">Picked Up On</span><span class="detail-value">@Model.PickupDate.Value.ToString("yyyy-MM-dd")</span></div> }
+                <div class="detail-row"><span class="detail-label">Returned On</span><span class="detail-value">@(Model.ReturnDate.HasValue ? Model.ReturnDate.Value.ToString("yyyy-MM-dd") : "-")</span></div>
+                break;
+
+            case Loan.LoanStatus.EXPIRED:
+                <div class="detail-row"><span class="detail-label">Pickup Deadline</span><span class="detail-value" style="color: var(--color-error);">@Model.PickupDue.ToString("yyyy-MM-dd") (Missed)</span></div>
+                break;
+        }
+    </div>
+
+    <div class="barcode-section">
+        <div class="barcode-item"><div class="barcode-label">User ID</div><svg id="barcode-user" data-value="@Model.UserId"></svg></div>
+        <div class="barcode-item"><div class="barcode-label">Book Copy (@Model.Copy.Barcode)</div><svg id="barcode-book" data-value="@Model.Copy.Barcode"></svg></div>
+    </div>
+
+    <div class="print-hide">
+        <a href="@Url.Action("History", "Loan")" class="form__button btn--secondary">View My Loans</a>
+        <button onclick="window.print()" class="form__button form__button--submit">Print Slip</button>
+    </div>
+</div>
+
+@section foot {
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <script src="/js/loan.js" asp-append-version="true"></script>
+}

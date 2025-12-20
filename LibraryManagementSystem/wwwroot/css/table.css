@@ -590,6 +590,18 @@ a.count-badge:hover {
     box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
 }
 
+/* Success (Merge, Confirm) */
+.form__button--success {
+    background-color: var(--color-success);
+    color: var(--color-white);
+    border-color: transparent;
+}
+
+.form__button--success:hover {
+    background-color: #15803d; /* Darker green */
+    box-shadow: 0 2px 4px rgba(34, 197, 94, 0.2);
+}
+
 /* Disabled State */
 .btn:disabled,
 .form__button:disabled {

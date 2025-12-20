@@ -1,7 +1,3 @@
-/* ===========================================================================
-   TABLE MANAGEMENT (MANAGE GENRE / AUTHOR / BOOK)
-   =========================================================================== */
-
 // Store selected items (ID -> {name, books}) to persist across searches
 const selectionState = new Map();
 
@@ -348,6 +344,7 @@ function updateBatchButtonState() {
     const batchButton = document.getElementById("batchDeleteButton");
     const deselectButton = document.getElementById("deselectAllButton");
     const selectionCountSpan = document.getElementById("selectionCount");
+    const mergeButton = document.getElementById("mergeSlipsButton");
 
     if (!batchButton) return;
 
@@ -360,10 +357,21 @@ function updateBatchButtonState() {
         }
         batchButton.classList.add("active");
         if (deselectButton) deselectButton.classList.add("active");
+
+        if (mergeButton) {
+            if (count > 1) {
+                mergeButton.style.display = "inline-flex";
+            } else {
+                mergeButton.style.display = "none";
+            }
+        }
     } else {
         if (selectionCountSpan) selectionCountSpan.classList.remove("active");
         batchButton.classList.remove("active");
         if (deselectButton) deselectButton.classList.remove("active");
+        if (mergeButton) {
+            mergeButton.style.display = "none";
+        }
     }
 }
 
@@ -384,6 +392,7 @@ function bindTableContentEvents() {
                     selectionState.set(cb.value, {
                         name: cb.dataset.name,
                         books: cb.dataset.books,
+                        status: cb.dataset.status,
                     });
                 } else {
                     selectionState.delete(cb.value);
@@ -404,6 +413,7 @@ function bindTableContentEvents() {
                 selectionState.set(this.value, {
                     name: this.dataset.name,
                     books: this.dataset.books,
+                    status: this.dataset.status,
                 });
             } else {
                 selectionState.delete(this.value);
@@ -455,7 +465,19 @@ function bindStaticModalEvents() {
                 selectionState.forEach((data, id) => {
                     const name = data.name;
                     const books = parseInt(data.books || "0");
-                    const isUnsafe = books > 0;
+                    const status = data.status;
+                    let isUnsafe = books > 0;
+                    let statusText = isUnsafe
+                        ? `Cannot delete (${books} books linked)`
+                        : "Ready to process";
+
+                    if (status && status !== "AVAILABLE") {
+                        isUnsafe = true;
+                        const formattedStatus =
+                            status.charAt(0).toUpperCase() +
+                            status.slice(1).toLowerCase();
+                        statusText = `Cannot delete (${formattedStatus})`;
+                    }
 
                     const item = document.createElement("div");
                     item.className = `delete-item ${
@@ -465,10 +487,6 @@ function bindStaticModalEvents() {
                     const icon = isUnsafe
                         ? `<svg class="delete-item__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="#ef4444"><path d="M480-280q17 0 28.5-11.5T520-320q0-17-11.5-28.5T480-360q-17 0-28.5 11.5T440-320q0 17 11.5 28.5T480-280Zm-40-160h80v-240h-80v240Zm40 360q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"/></svg>`
                         : `<svg class="delete-item__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="#22c55e"><path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z"/></svg>`;
-
-                    const statusText = isUnsafe
-                        ? `Cannot delete (${books} books linked)`
-                        : "Ready to delete";
 
                     item.innerHTML = `
                         <div class="delete-item__info">
@@ -507,6 +525,31 @@ function bindStaticModalEvents() {
                 batchModal.onclick = (e) => {
                     if (e.target === batchModal) closeBatchModal();
                 };
+            }
+        });
+    }
+
+    const mergeButton = document.getElementById("mergeSlipsButton");
+    if (mergeButton && batchForm) {
+        mergeButton.addEventListener("click", function () {
+            if (selectionState.size > 1) {
+                const originalAction = batchForm.action;
+                batchForm.action = "/Loan/MergedConfirmation";
+                batchForm.method = "post";
+
+                batchForm
+                    .querySelectorAll('input[name="ids"]')
+                    .forEach((el) => el.remove());
+                selectionState.forEach((_, id) => {
+                    const input = document.createElement("input");
+                    input.type = "hidden";
+                    input.name = "ids";
+                    input.value = id;
+                    batchForm.appendChild(input);
+                });
+
+                batchForm.submit();
+                batchForm.action = originalAction;
             }
         });
     }
