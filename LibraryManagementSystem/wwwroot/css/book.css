@@ -1086,6 +1086,16 @@
     color: #991b1b;
 }
 
+.status-reserved {
+    background-color: #eff6ff;
+    color: #1e40af;
+}
+
+.status-neutral {
+    background-color: var(--color-gray-100);
+    color: var(--color-gray-600);
+}
+
 .public-detail-description h3 {
     font-size: var(--text-lg);
     margin-bottom: var(--spacing-xs);

@@ -587,3 +587,54 @@ public class BookingCreateVM : IValidatableObject
             yield return new ValidationResult($"Library closes at {CloseHour}:00.", new[] { nameof(EndTime) });
     }
 }
+
+/* ============================== LOAN MANAGEMENT ============================== */
+
+public class LoanManagementVM
+{
+    public List<Loan> ExistingLoans { get; set; } = new();
+    public int CurrentPage { get; set; }
+    public int TotalPages { get; set; }
+    public string? SearchTerm { get; set; }
+    public string SortColumn { get; set; } = "Id";
+    public string SortOrder { get; set; } = "desc";
+    public string? FilterStatus { get; set; }
+    public DateOnly? DateFrom { get; set; }
+    public DateOnly? DateTo { get; set; }
+    public LoanEditVM EditForm { get; set; } = new();
+}
+
+public class LoanEditVM
+{
+    [Required]
+    public string Id { get; set; }
+
+    [DisplayName("Loan Date")]
+    [Required]
+    public DateOnly LoanDate { get; set; }
+
+    [DisplayName("Pickup Due")]
+    [Required]
+    public DateOnly PickupDue { get; set; }
+
+    [DisplayName("Pickup Date")]
+    public DateOnly? PickupDate { get; set; }
+
+    [DisplayName("Due Date")]
+    [Required]
+    public DateOnly LoanDue { get; set; }
+
+    [DisplayName("Return Date")]
+    public DateOnly? ReturnDate { get; set; }
+}
+
+public class LoanHistoryVM
+{
+    public List<Loan> Loans { get; set; } = new();
+    public int CurrentPage { get; set; }
+    public int TotalPages { get; set; }
+    public string? SearchTerm { get; set; }
+    public string SortColumn { get; set; } = "LoanDate";
+    public string SortOrder { get; set; } = "desc";
+    public string? FilterStatus { get; set; }
+}

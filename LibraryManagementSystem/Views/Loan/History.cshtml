@@ -1,5 +1,118 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model LoanHistoryVM
+
 @{
+    ViewBag.Title = "My Loans";
+}
+
+@section head {
+    <link rel="stylesheet" href="/css/book.css" asp-append-version="true" />
+}
+
+<form class="manage__content" asp-action="BatchCancelLoan" method="post" id="batchForm">
+    <div class="manage__panel">
+        <div class="panel__header">
+            <div class="header__start">
+                <h2 class="panel__title">My Loans (@ViewBag.TotalItems)</h2>
+            </div>
+            <div class="header__controls">
+                <div class="header__filters">
+                    <div class="filter-menu" id="filterMenu">
+                        <button class="filter-menu__trigger" type="button" id="filterMenuTrigger">
+                            <svg class="trigger__icon" xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#666">
+                                <path d="M440-160q-17 0-28.5-11.5T400-200v-240L168-736q-15-20-4.5-42t36.5-22h560q26 0 36.5 22t-4.5 42L560-440v240q0 17-11.5 28.5T520-160h-80Zm40-308 198-252H282l198 252Zm0 0Z"/>
+                            </svg>
+                            <span class="trigger__text">Filters</span>
+                        </button>
+                        <div class="filter-menu__dropdown">
+                            <div class="filter-group">
+                                <label class="filter-label">Status</label>
+                                <div class="filter-dropdown" id="statusFilterWrapper" style="width: 100%;">
+                                    <input type="hidden" id="filterStatus" value="@Model.FilterStatus" />
+                                    <button class="filter-dropdown__trigger" type="button">
+                                        <span class="trigger__text">
+                                            @(string.IsNullOrEmpty(Model.FilterStatus) ? "All Statuses" : System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(Model.FilterStatus.ToLower()))
+                                        </span>
+                                        <svg class="trigger__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="M480-360 280-560h400L480-360Z"/></svg>
+                                    </button>
+                                    <button class="filter-clear" type="button" title="Clear Filter"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg></button>
+                                    <div class="filter-dropdown__menu">
+                                        <div class="filter-dropdown__item @(string.IsNullOrEmpty(Model.FilterStatus) ? "selected" : "")" data-value="">All Statuses</div>
+                                        @foreach (var status in Enum.GetNames(typeof(Loan.LoanStatus)))
+                                        {
+                                            <div class="filter-dropdown__item @(status == Model.FilterStatus ? "selected" : "")" data-value="@status">@System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(status.ToLower())</div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="search__wrapper">
+                    <svg class="search__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#999"><path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z" /></svg>
+                    <input class="search__input--header" id="nameSearchInput" type="text" placeholder="Search my loans..." autocomplete="off" />
+                    <svg class="search__clear" id="searchClearButton" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" /></svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel__table-container" id="tableContainer">
+            <partial name="_TableHistory" model="Model" />
+        </div>
+
+        <div class="action-bar">
+            <div class="action-bar__selection">
+                <span class="selection-count" id="selectionCount"></span>
+                <button class="form__button form__button--cancel button--deselect-all" id="deselectAllButton" type="button">
+                    Deselect All
+                </button>
+                <button class="form__button form__button--danger button--batch-delete" id="batchDeleteButton" type="button">
+                    Cancel Selected
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<div class="modal" id="modal-delete">
+    <div class="modal__container">
+        <div class="modal__header">
+            <h2 class="modal__title">Confirm Cancellation</h2>
+            <button class="modal__close js-close-modal" type="button">
+                <svg class="close__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
+            </button>
+        </div>
+        <form class="modal__form" asp-action="CancelLoan" method="post">
+            <div class="modal__content">
+                <p class="modal__text">Are you sure you want to cancel the loan for '<span class="text--highlight js-delete-name"></span>'?</p>
+                <input type="hidden" name="id" value="" />
+            </div>
+            <div class="modal__footer">
+                <button class="form__button form__button--cancel js-cancel-delete" type="button">Keep Loan</button>
+                <button class="form__button form__button--danger" type="submit">Confirm Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal" id="modal-batch-delete">
+    <div class="modal__container">
+        <div class="modal__header">
+            <h2 class="modal__title">Confirm Cancellation</h2>
+            <button class="modal__close js-close-modal" type="button">
+                <svg class="close__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
+            </button>
+        </div>
+        <div class="modal__content">
+            <p class="modal__text">Are you sure you want to cancel the following loans?</p>
+            <div class="delete-list" id="batchDeleteList"></div>
+        </div>
+        <div class="modal__footer">
+            <button class="form__button form__button--cancel js-cancel-batch" type="button">Keep Loans</button>
+            <button class="form__button form__button--danger" id="confirmBatchDelete" type="button">Confirm Cancel</button>
+        </div>
+    </div>
+</div>
+
+@section foot {
+    <script src="/js/table.js" asp-append-version="true"></script>
 }
