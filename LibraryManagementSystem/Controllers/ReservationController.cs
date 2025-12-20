@@ -1,5 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using LibraryManagementSystem.Models;
 
 namespace LibraryManagementSystem.Controllers;
 
@@ -12,10 +13,9 @@ public class ReservationController : Controller
         _context = context;
     }
 
-    // --------------------------------------------------
-    // VIEW RESERVATION LIST
-    // --------------------------------------------------
-    /*
+    // ==================================================
+    // INDEX
+    // ==================================================
     public async Task<IActionResult> Index()
     {
         var reservations = await _context.Reservations
@@ -24,47 +24,24 @@ public class ReservationController : Controller
 
         return View(reservations);
     }
-    */
 
-    public IActionResult Index()
-    {
-        var reservations = new List<Reservation>
-    {
-        new Reservation
-        {
-            Id = "R001",
-            UserId = "U001",
-            BookId = "B001",
-            Status = Reservation.ReservationStatus.PENDING,
-            ReservationDate = DateTime.Now.AddDays(-2)
-        },
-        new Reservation
-        {
-            Id = "R002",
-            UserId = "U002",
-            BookId = "B002",
-            Status = Reservation.ReservationStatus.READY,
-            ReservationDate = DateTime.Now.AddDays(-1)
-        }
-    };
-
-        return View(reservations);
-    }
-
-
-    // --------------------------------------------------
-    // VIEW RESERVATION DETAILS
-    // --------------------------------------------------
+    // ==================================================
+    // DETAILS
+    // ==================================================
     public async Task<IActionResult> Details(string id)
     {
         var reservation = await _context.Reservations.FindAsync(id);
         if (reservation == null) return NotFound();
 
-        int queuePosition = await _context.Reservations
-            .Where(r => r.BookId == reservation.BookId &&
-                        r.Status == Reservation.ReservationStatus.PENDING &&
-                        r.ReservationDate < reservation.ReservationDate)
-            .CountAsync() + 1;
+        int queuePosition = 0;
+        if (reservation.Status == Reservation.ReservationStatus.PENDING)
+        {
+            queuePosition = await _context.Reservations
+                .Where(r => r.BookId == reservation.BookId &&
+                            r.Status == Reservation.ReservationStatus.PENDING &&
+                            r.ReservationDate < reservation.ReservationDate)
+                .CountAsync() + 1;
+        }
 
         var vm = new ReservationVM
         {
@@ -75,31 +52,46 @@ public class ReservationController : Controller
             ReservationDate = reservation.ReservationDate,
             ReservationDue = reservation.ReservationDue,
             Status = reservation.Status,
+            QueuePosition = queuePosition
         };
 
         return View(vm);
     }
 
-    // --------------------------------------------------
-    // CREATE RESERVATION (CHECK AVAILABILITY)
-    // --------------------------------------------------
+    // ==================================================
+    // CREATE
+    // ==================================================
     [HttpGet]
-    public IActionResult Create()
-    {
-        return View();
-    }
+    public IActionResult Create() => View();
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(ReservationVM vm)
     {
-        if (!ModelState.IsValid)
+        if (!ModelState.IsValid) return View(vm);
+
+        // Book must exist
+        if (!await _context.Books.AnyAsync(b => b.Id == vm.BookId))
+        {
+            ModelState.AddModelError("", "Book does not exist.");
             return View(vm);
+        }
 
-        bool hasAvailableCopy = await _context.Copies
-            .AnyAsync(c => c.BookId == vm.BookId &&
-                           c.Status == Copy.CopyStatus.AVAILABLE);
+        // No duplicate active reservation
+        if (await _context.Reservations.AnyAsync(r =>
+            r.UserId == vm.UserId &&
+            r.BookId == vm.BookId &&
+            (r.Status == Reservation.ReservationStatus.PENDING ||
+             r.Status == Reservation.ReservationStatus.READY)))
+        {
+            ModelState.AddModelError("", "You already have an active reservation.");
+            return View(vm);
+        }
 
-        if (hasAvailableCopy)
+        // Block if any copy is available
+        if (await _context.Copies.AnyAsync(c =>
+            c.BookId == vm.BookId &&
+            c.Status == Copy.CopyStatus.AVAILABLE))
         {
             ModelState.AddModelError("", "Book is available. Please borrow directly.");
             return View(vm);
@@ -107,7 +99,7 @@ public class ReservationController : Controller
 
         var reservation = new Reservation
         {
-            Id = await GenerateReservationId(),   // ✅ AUTO INCREMENT STRING
+            Id = await GenerateReservationId(),
             UserId = vm.UserId,
             BookId = vm.BookId,
             ReservationDate = DateTime.Now,
@@ -120,82 +112,123 @@ public class ReservationController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    // --------------------------------------------------
-    // CANCEL RESERVATION
-    // --------------------------------------------------
+    // ==================================================
+    // BORROW (READY → LOAN)
+    // ==================================================
+    public async Task<IActionResult> Borrow(string id)
+    {
+        var reservation = await _context.Reservations
+            .Include(r => r.Copy)
+            .FirstOrDefaultAsync(r => r.Id == id);
+
+        if (reservation == null ||
+            reservation.Status != Reservation.ReservationStatus.READY ||
+            reservation.Copy == null)
+            return BadRequest();
+
+        var loan = new Loan
+        {
+            Id = Guid.NewGuid().ToString("N")[..6].ToUpper(),
+            UserId = reservation.UserId,
+            CopyId = reservation.CopyId!,
+            LoanDate = DateTime.Now,
+            PickupDue = DateTime.Now.AddDays(1),
+            LoanDue = DateTime.Now.AddDays(14),
+            Status = Loan.LoanStatus.RESERVED
+        };
+
+        reservation.Copy.Status = Copy.CopyStatus.BORROWED;
+        reservation.Status = Reservation.ReservationStatus.COMPLETED;
+
+        _context.Loans.Add(loan);
+        await _context.SaveChangesAsync();
+
+        return RedirectToAction("Details", "Loan", new { id = loan.Id });
+    }
+
+    // ==================================================
+    // CANCEL
+    // ==================================================
     public async Task<IActionResult> Cancel(string id)
     {
-        var reservation = await _context.Reservations.FindAsync(id);
+        var reservation = await _context.Reservations
+            .Include(r => r.Copy)
+            .FirstOrDefaultAsync(r => r.Id == id);
+
         if (reservation == null) return NotFound();
 
-        reservation.Status = Reservation.ReservationStatus.CANCELLED;
+        if (reservation.Copy != null)
+            reservation.Copy.Status = Copy.CopyStatus.AVAILABLE;
+
         reservation.CopyId = null;
+        reservation.Status = Reservation.ReservationStatus.CANCELLED;
 
         await _context.SaveChangesAsync();
-
         await PromoteNextReservation(reservation.BookId);
 
         return RedirectToAction(nameof(Index));
     }
 
-    // --------------------------------------------------
-    // EXPIRE RESERVATION
-    // --------------------------------------------------
+    // ==================================================
+    // EXPIRE
+    // ==================================================
     public async Task<IActionResult> Expire(string id)
     {
-        var reservation = await _context.Reservations.FindAsync(id);
+        var reservation = await _context.Reservations
+            .Include(r => r.Copy)
+            .FirstOrDefaultAsync(r => r.Id == id);
+
         if (reservation == null) return NotFound();
 
-        reservation.Status = Reservation.ReservationStatus.EXPIRED;
+        if (reservation.Copy != null)
+            reservation.Copy.Status = Copy.CopyStatus.AVAILABLE;
+
         reservation.CopyId = null;
+        reservation.Status = Reservation.ReservationStatus.EXPIRED;
 
         await _context.SaveChangesAsync();
-
         await PromoteNextReservation(reservation.BookId);
 
         return RedirectToAction(nameof(Index));
     }
 
-    // --------------------------------------------------
-    // AUTO-PROMOTION SYSTEM
-    // --------------------------------------------------
+    // ==================================================
+    // AUTO-PROMOTION (FIFO)
+    // ==================================================
     private async Task PromoteNextReservation(string bookId)
     {
-        var nextReservation = await _context.Reservations
+        var next = await _context.Reservations
             .Where(r => r.BookId == bookId &&
                         r.Status == Reservation.ReservationStatus.PENDING)
             .OrderBy(r => r.ReservationDate)
             .FirstOrDefaultAsync();
 
-        if (nextReservation == null)
-            return;
+        if (next == null) return;
 
         var copy = await _context.Copies
-            .FirstOrDefaultAsync(c => c.BookId == bookId &&
-                                      c.Status == Copy.CopyStatus.AVAILABLE);
+            .Where(c => c.BookId == bookId &&
+                        c.Status == Copy.CopyStatus.AVAILABLE)
+            .FirstOrDefaultAsync();
 
-        if (copy == null)
-            return;
+        if (copy == null) return;
 
         copy.Status = Copy.CopyStatus.RESERVED;
-
-        nextReservation.CopyId = copy.Id;
-        nextReservation.Status = Reservation.ReservationStatus.READY;
-        nextReservation.ReservationDue = DateTime.Now.AddDays(2);
+        next.CopyId = copy.Id;
+        next.Status = Reservation.ReservationStatus.READY;
+        next.ReservationDue = DateTime.Now.AddDays(2);
 
         await _context.SaveChangesAsync();
     }
+
     private async Task<string> GenerateReservationId()
     {
-        var lastId = await _context.Reservations
+        var last = await _context.Reservations
             .OrderByDescending(r => r.Id)
             .Select(r => r.Id)
             .FirstOrDefaultAsync();
 
-        if (lastId == null)
-            return "R001";
-
-        int number = int.Parse(lastId.Substring(1));
-        return $"R{(number + 1):D3}";
+        return last == null
+            ? "R001"
+            : $"R{(int.Parse(last[1..]) + 1):D3}";
     }
 }
