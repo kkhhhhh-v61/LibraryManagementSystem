@@ -56,23 +56,6 @@ namespace LibraryManagementSystem.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Reservations",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "nvarchar(6)", maxLength: 6, nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(6)", maxLength: 6, nullable: false),
-                    BookId = table.Column<string>(type: "nvarchar(6)", maxLength: 6, nullable: false),
-                    CopyId = table.Column<string>(type: "nvarchar(6)", maxLength: 6, nullable: true),
-                    ReservationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ReservationDue = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Status = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Reservations", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "RoomCategories",
                 columns: table => new
                 {
@@ -255,11 +238,11 @@ namespace LibraryManagementSystem.Migrations
                     Id = table.Column<string>(type: "nvarchar(6)", maxLength: 6, nullable: false),
                     UserId = table.Column<string>(type: "nvarchar(6)", maxLength: 6, nullable: false),
                     CopyId = table.Column<string>(type: "nvarchar(6)", maxLength: 6, nullable: false),
-                    LoanDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    PickupDue = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    PickupDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    LoanDue = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ReturnDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    LoanDate = table.Column<DateOnly>(type: "date", nullable: false),
+                    PickupDue = table.Column<DateOnly>(type: "date", nullable: false),
+                    PickupDate = table.Column<DateOnly>(type: "date", nullable: true),
+                    LoanDue = table.Column<DateOnly>(type: "date", nullable: false),
+                    ReturnDate = table.Column<DateOnly>(type: "date", nullable: true),
                     Status = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -273,6 +256,40 @@ namespace LibraryManagementSystem.Migrations
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Loans_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Reservations",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(6)", maxLength: 6, nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(6)", maxLength: 6, nullable: false),
+                    BookId = table.Column<string>(type: "nvarchar(6)", maxLength: 6, nullable: false),
+                    CopyId = table.Column<string>(type: "nvarchar(6)", maxLength: 6, nullable: true),
+                    ReservationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ReservationDue = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Status = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Reservations", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Reservations_Books_BookId",
+                        column: x => x.BookId,
+                        principalTable: "Books",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Reservations_Copies_CopyId",
+                        column: x => x.CopyId,
+                        principalTable: "Copies",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Reservations_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
@@ -450,6 +467,21 @@ namespace LibraryManagementSystem.Migrations
                 name: "IX_Payments_FineId",
                 table: "Payments",
                 column: "FineId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Reservations_BookId",
+                table: "Reservations",
+                column: "BookId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Reservations_CopyId",
+                table: "Reservations",
+                column: "CopyId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Reservations_UserId",
+                table: "Reservations",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Reviews_LoanId",

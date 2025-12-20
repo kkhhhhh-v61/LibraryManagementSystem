@@ -264,20 +264,20 @@ namespace LibraryManagementSystem.Migrations
                         .HasMaxLength(6)
                         .HasColumnType("nvarchar(6)");
 
-                    b.Property<DateTime>("LoanDate")
-                        .HasColumnType("datetime2");
+                    b.Property<DateOnly>("LoanDate")
+                        .HasColumnType("date");
 
-                    b.Property<DateTime>("LoanDue")
-                        .HasColumnType("datetime2");
+                    b.Property<DateOnly>("LoanDue")
+                        .HasColumnType("date");
 
-                    b.Property<DateTime?>("PickupDate")
-                        .HasColumnType("datetime2");
+                    b.Property<DateOnly?>("PickupDate")
+                        .HasColumnType("date");
 
-                    b.Property<DateTime>("PickupDue")
-                        .HasColumnType("datetime2");
+                    b.Property<DateOnly>("PickupDue")
+                        .HasColumnType("date");
 
-                    b.Property<DateTime?>("ReturnDate")
-                        .HasColumnType("datetime2");
+                    b.Property<DateOnly?>("ReturnDate")
+                        .HasColumnType("date");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -392,6 +392,12 @@ namespace LibraryManagementSystem.Migrations
                         .HasColumnType("nvarchar(6)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("BookId");
+
+                    b.HasIndex("CopyId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Reservations");
                 });
@@ -689,6 +695,31 @@ namespace LibraryManagementSystem.Migrations
                     b.Navigation("Booking");
 
                     b.Navigation("Fine");
+                });
+
+            modelBuilder.Entity("LibraryManagementSystem.Models.Reservation", b =>
+                {
+                    b.HasOne("LibraryManagementSystem.Models.Book", "Book")
+                        .WithMany()
+                        .HasForeignKey("BookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("LibraryManagementSystem.Models.Copy", "Copy")
+                        .WithMany()
+                        .HasForeignKey("CopyId");
+
+                    b.HasOne("LibraryManagementSystem.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Book");
+
+                    b.Navigation("Copy");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("LibraryManagementSystem.Models.Review", b =>

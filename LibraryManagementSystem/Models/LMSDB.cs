@@ -237,15 +237,15 @@ public class Loan
     [MaxLength(6)]
     public string CopyId { get; set; }
     
-    public DateTime LoanDate { get; set; }
+    public DateOnly LoanDate { get; set; }
     
-    public DateTime PickupDue { get; set; }
+    public DateOnly PickupDue { get; set; }
     
-    public DateTime? PickupDate { get; set; }
+    public DateOnly? PickupDate { get; set; }
     
-    public DateTime LoanDue { get; set; }
+    public DateOnly LoanDue { get; set; }
     
-    public DateTime? ReturnDate { get; set; }
+    public DateOnly? ReturnDate { get; set; }
     
     public LoanStatus Status { get; set; }
 
@@ -280,20 +280,21 @@ public class Reservation
 {
     public enum ReservationStatus
     {
-        PENDING,    // Set when User's reservation is still waiting in line
-        READY,      // Set when a copy of the book is available and reserved for the User
-        CANCELLED,  // Set when User manually cancels the reservation after a copy is available
-        EXPIRED     // Set when User doesn't perform any action (Borrow or Cancel) in time
+        PENDING,   
+        READY,     
+        CANCELLED,  
+        EXPIRED,    
+        COMPLETED 
     }
 
     [Key]
     [MaxLength(6)]
     public string Id { get; set; }
 
-    [MaxLength(6)]
+    [Required, MaxLength(6)]
     public string UserId { get; set; }
 
-    [MaxLength(6)]
+    [Required, MaxLength(6)]
     public string BookId { get; set; }
 
     [MaxLength(6)]
@@ -304,6 +305,10 @@ public class Reservation
     public DateTime? ReservationDue { get; set; }
 
     public ReservationStatus Status { get; set; }
+
+    public User User { get; set; }
+    public Book Book { get; set; }
+    public Copy? Copy { get; set; }
 }
 
 public class Payment
