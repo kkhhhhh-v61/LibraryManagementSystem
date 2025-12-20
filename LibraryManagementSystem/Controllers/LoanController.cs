@@ -127,10 +127,7 @@ namespace LibraryManagementSystem.Controllers
             db.Loans.Add(loan);
             db.SaveChanges();
 
-            TempData["ToastMessage"] = "Book reserved successfully! Please pick it up within 3 days.";
-            TempData["ToastType"] = "success";
-
-            return RedirectToAction("BookDetails", "Book", new { id = bookId });
+            return RedirectToAction("Confirmation", new { id = loan.Id });
         }
 
         [HttpPost]
@@ -196,6 +193,56 @@ namespace LibraryManagementSystem.Controllers
             }
 
             return RedirectToAction("History");
+        }
+
+        public IActionResult Confirmation(string id)
+        {
+            var username = User.Identity?.Name;
+            var user = db.Users.FirstOrDefault(u => u.Username == username);
+            if (user == null) return RedirectToAction("Login", "Account");
+
+            var loan = db.Loans
+                .Include(l => l.Copy)
+                .ThenInclude(c => c.Book)
+                .Include(l => l.User)
+                .FirstOrDefault(l => l.Id == id);
+
+            if (loan == null || loan.UserId != user.Id)
+            {
+                return RedirectToAction("History");
+            }
+
+            return View(loan);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> MergedConfirmation(List<string> ids)
+        {
+            if (ids == null || ids.Count <= 1)
+            {
+                TempData["ToastMessage"] = "Please select more than one loan to merge.";
+                TempData["ToastType"] = "warning";
+                return RedirectToAction("History");
+            }
+
+            var username = User.Identity?.Name;
+            var user = await db.Users.FirstOrDefaultAsync(u => u.Username == username);
+            if (user == null) return RedirectToAction("Login", "Account");
+
+            var loans = await db.Loans
+                .Include(l => l.Copy)
+                .ThenInclude(c => c.Book)
+                .Include(l => l.User)
+                .Where(l => ids.Contains(l.Id) && l.UserId == user.Id && (l.Status == Loan.LoanStatus.RESERVED || l.Status == Loan.LoanStatus.IN_LOAN || l.Status == Loan.LoanStatus.OVERDUE))
+                .OrderBy(l => l.LoanDate)
+                .ToListAsync();
+
+            if (!loans.Any())
+            {
+                return RedirectToAction("History");
+            }
+
+            return View(loans);
         }
 
         [Authorize(Roles = "ADMIN, STAFF")]
@@ -388,6 +435,83 @@ namespace LibraryManagementSystem.Controllers
             TempData["ToastMessage"] = "Loan updated successfully.";
             TempData["ToastType"] = "success";
             return RedirectToAction("ManageLoan");
+        }
+
+        [Authorize(Roles = "ADMIN, STAFF")]
+        public IActionResult Process()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "ADMIN, STAFF")]
+        public IActionResult GetUserReservations(string userId)
+        {
+            var user = db.Users.FirstOrDefault(u => u.Id == userId);
+            if (user == null) return NotFound();
+
+            var reservations = db.Loans
+                .Include(l => l.Copy)
+                .ThenInclude(c => c.Book)
+                .Where(l => l.UserId == user.Id && l.Status == Loan.LoanStatus.RESERVED)
+                .ToList();
+
+            return PartialView("_ListPickup", reservations);
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "ADMIN, STAFF")]
+        public IActionResult ConfirmPickup(List<string> loanIds)
+        {
+            if (loanIds == null || !loanIds.Any())
+            {
+                return Json(new { success = false, message = "No items selected." });
+            }
+
+            var loans = db.Loans
+                .Include(l => l.Copy)
+                .Where(l => loanIds.Contains(l.Id) && l.Status == Loan.LoanStatus.RESERVED)
+                .ToList();
+
+            foreach (var loan in loans)
+            {
+                loan.Status = Loan.LoanStatus.IN_LOAN;
+                loan.PickupDate = DateOnly.FromDateTime(DateTime.Now);
+                if (loan.Copy != null) loan.Copy.Status = Copy.CopyStatus.BORROWED;
+            }
+
+            db.SaveChanges();
+            return Json(new { success = true, count = loans.Count, message = $"Successfully processed {loans.Count} pickup(s)." });
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "ADMIN, STAFF")]
+        public IActionResult ProcessReturn(string barcode)
+        {
+            var copy = db.Copies.FirstOrDefault(c => c.Barcode == barcode);
+            if (copy == null) return Json(new { success = false, message = "Copy not found." });
+
+            var loan = db.Loans
+                .Include(l => l.User)
+                .Include(l => l.Copy)
+                .ThenInclude(c => c.Book)
+                .FirstOrDefault(l => l.CopyId == copy.Id && 
+                                     (l.Status == Loan.LoanStatus.IN_LOAN || l.Status == Loan.LoanStatus.OVERDUE));
+
+            if (loan == null) return Json(new { success = false, message = "No active loan found for this copy." });
+
+            loan.Status = Loan.LoanStatus.RETURNED;
+            loan.ReturnDate = DateOnly.FromDateTime(DateTime.Now);
+            copy.Status = Copy.CopyStatus.AVAILABLE;
+
+            db.SaveChanges();
+
+            return Json(new { 
+                success = true, 
+                message = "Book returned successfully.",
+                bookTitle = loan.Copy.Book.Title,
+                username = loan.User.Username
+            });
         }
     }
 }

@@ -1,0 +1,70 @@
+@{
+    ViewBag.Title = "Process Loan";
+}
+
+@section head {
+    <link rel="stylesheet" href="/css/book.css" asp-append-version="true" />
+    <link rel="stylesheet" href="/css/table.css" asp-append-version="true" />
+    <link rel="stylesheet" href="/css/loan.css" asp-append-version="true" />
+}
+
+<div class="manage__content">
+    <div class="process-container">
+        <!-- Left: Scanner & Controls -->
+        <div class="scanner-panel">
+            <div class="mode-tabs">
+                <div class="mode-tab" data-mode="pickup">Pickup</div>
+                <div class="mode-tab" data-mode="return">Return</div>
+            </div>
+
+            <div class="scanner-viewport">
+                <div id="reader"></div>
+            </div>
+
+            <div class="manual-input-group">
+                <input type="text" id="manualInput" class="field__input" placeholder="Scan or type User ID..." style="height: 40px;" />
+                <button class="form__button form__button--submit" id="manualSubmit" style="width: auto; padding: 0 12px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor"><path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/></svg>
+                </button>
+            </div>
+            
+            <div id="scanFeedback" style="text-align: center; font-size: 0.9rem; color: var(--color-gray-500); min-height: 1.2em;"></div>
+        </div>
+
+        <!-- Right: Results -->
+        <div class="results-panel">
+            <h2 class="panel__title" id="resultsTitle">Select Mode</h2>
+            <div id="resultsContent" style="flex: 1; overflow-y: auto; margin-top: var(--spacing-md);">
+                <div class="empty-state">
+                    <p class="empty-state__text">Please select a mode to begin.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="modal-mode-selection">
+    <div class="modal__container" style="max-width: 500px;">
+        <div class="modal__header">
+            <h2 class="modal__title">Select Process Mode</h2>
+        </div>
+        <div class="modal__content">
+            <div class="mode-selection-grid">
+                <button class="form__button form__button--submit mode-selection-btn js-select-mode" data-mode="pickup">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 -960 960 960" width="48" fill="currentColor"><path d="M480-480q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Z"/></svg>
+                    <span>Pickup</span>
+                </button>
+                <button class="form__button btn--secondary mode-selection-btn js-select-mode" data-mode="return">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 -960 960 960" width="48" fill="currentColor"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg>
+                    <span>Return</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section foot {
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <script src="/js/loan.js" asp-append-version="true"></script>
+    <script src="/js/table.js" asp-append-version="true"></script>
+}

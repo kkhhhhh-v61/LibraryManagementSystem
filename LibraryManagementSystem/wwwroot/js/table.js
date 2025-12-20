@@ -344,6 +344,7 @@ function updateBatchButtonState() {
     const batchButton = document.getElementById("batchDeleteButton");
     const deselectButton = document.getElementById("deselectAllButton");
     const selectionCountSpan = document.getElementById("selectionCount");
+    const mergeButton = document.getElementById("mergeSlipsButton");
 
     if (!batchButton) return;
 
@@ -356,10 +357,21 @@ function updateBatchButtonState() {
         }
         batchButton.classList.add("active");
         if (deselectButton) deselectButton.classList.add("active");
+
+        if (mergeButton) {
+            if (count > 1) {
+                mergeButton.style.display = "inline-flex";
+            } else {
+                mergeButton.style.display = "none";
+            }
+        }
     } else {
         if (selectionCountSpan) selectionCountSpan.classList.remove("active");
         batchButton.classList.remove("active");
         if (deselectButton) deselectButton.classList.remove("active");
+        if (mergeButton) {
+            mergeButton.style.display = "none";
+        }
     }
 }
 
@@ -513,6 +525,31 @@ function bindStaticModalEvents() {
                 batchModal.onclick = (e) => {
                     if (e.target === batchModal) closeBatchModal();
                 };
+            }
+        });
+    }
+
+    const mergeButton = document.getElementById("mergeSlipsButton");
+    if (mergeButton && batchForm) {
+        mergeButton.addEventListener("click", function () {
+            if (selectionState.size > 1) {
+                const originalAction = batchForm.action;
+                batchForm.action = "/Loan/MergedConfirmation";
+                batchForm.method = "post";
+
+                batchForm
+                    .querySelectorAll('input[name="ids"]')
+                    .forEach((el) => el.remove());
+                selectionState.forEach((_, id) => {
+                    const input = document.createElement("input");
+                    input.type = "hidden";
+                    input.name = "ids";
+                    input.value = id;
+                    batchForm.appendChild(input);
+                });
+
+                batchForm.submit();
+                batchForm.action = originalAction;
             }
         });
     }
