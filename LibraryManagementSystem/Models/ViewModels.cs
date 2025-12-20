@@ -418,6 +418,51 @@ public class ReservationVM
     public int? QueuePosition { get; set; }
 }
 
+public class PaymentVM : IValidatableObject
+{
+    [Required]
+    public string BookingId { get; set; }
+
+    [Required(ErrorMessage = "Cardholder Name is required.")]
+    [Display(Name = "Cardholder Name")]
+    public string CardName { get; set; }
+
+    [Required(ErrorMessage = "Card Number is required.")]
+    [RegularExpression(@"^[\d ]{16,19}$", ErrorMessage = "Invalid card number format.")]
+    [Display(Name = "Card Number")]
+    public string CardNumber { get; set; }
+
+    [Required(ErrorMessage = "Expiry Date is required.")]
+    [RegularExpression(@"^(0[1-9]|1[0-2])\/?([0-9]{2})$", ErrorMessage = "Format must be MM/YY.")]
+    [Display(Name = "Expiry Date")]
+    public string ExpiryDate { get; set; }
+
+    [Required(ErrorMessage = "CVC is required.")]
+    [RegularExpression(@"^\d{3}$", ErrorMessage = "CVC must be 3 digits.")]
+    public string Cvc { get; set; }
+
+    public Booking? Booking { get; set; }
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (!string.IsNullOrEmpty(ExpiryDate) && ExpiryDate.Contains('/'))
+        {
+            var parts = ExpiryDate.Split('/');
+            if (parts.Length == 2 && int.TryParse(parts[0], out int month) && int.TryParse(parts[1], out int year))
+            {
+                int fullYear = 2000 + year;
+
+                var now = DateTime.Now;
+
+                if (fullYear < now.Year || (fullYear == now.Year && month < now.Month))
+                {
+                    yield return new ValidationResult("Card has expired.", new[] { nameof(ExpiryDate) });
+                }
+            }
+        }
+    }
+}
+
 
 
 /* ============================== BRIAN OOI SHU YI ============================== */

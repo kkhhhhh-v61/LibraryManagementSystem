@@ -6,7 +6,6 @@ function openAddRoomModal() {
     const modal = document.getElementById(addRoomModalId);
     if (modal) {
         modal.style.display = 'block';
-
         const form = modal.querySelector('form');
         if (form) form.reset();
     }
@@ -29,10 +28,8 @@ function openEditModal(roomId, name, location, capacity, status) {
 
     document.getElementById('modalRoomIdHidden').value = roomId;
     document.getElementById('modalRoomIdDisplay').value = roomId;
-
     document.getElementById('modalRoomName').value = name;
     document.getElementById('modalRoomLocation').value = location;
-
     document.getElementById('modalCapacity').value = capacity;
     document.getElementById('modalStatus').value = status;
 
@@ -46,25 +43,26 @@ function closeEditModal() {
     }
 }
 
-// Close on click outside
 window.addEventListener('click', (e) => {
     const editModal = document.getElementById('roomEditModal');
     const addModal = document.getElementById('addRoomModal');
+    const dModal = document.getElementById(deleteModalId);
 
-    if (editModal && e.target === editModal) {
-        closeEditModal();
-    }
-
-    if (addModal && e.target === addModal) {
-        closeAddRoomModal();
-    }
+    if (editModal && e.target === editModal) closeEditModal();
+    if (addModal && e.target === addModal) closeAddRoomModal();
+    if (dModal && e.target === dModal) closeDeleteModal();
 });
 
-// Close on Escape key
 window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
         closeEditModal();
         closeAddRoomModal();
+        closeDeleteModal();
+    }
+
+    if (e.altKey && e.key.toLowerCase() === 'c') {
+        e.preventDefault();
+        openAddRoomModal();
     }
 });
 
@@ -74,7 +72,6 @@ function openDeleteModal(actionUrl, itemName) {
 
     const deleteForm = document.getElementById('deleteForm');
     deleteForm.action = actionUrl;
-
     document.getElementById('deleteItemName').textContent = itemName;
 
     modal.style.display = 'block';
@@ -85,24 +82,16 @@ function closeDeleteModal() {
     if (modal) modal.style.display = 'none';
 }
 
-window.addEventListener('click', (e) => {
-    const dModal = document.getElementById(deleteModalId);
-    if (e.target === dModal) closeDeleteModal();
-});
-
 function addCategoryToDropdown(data) {
     var select = document.getElementById('RoomInput_RoomCategoryId');
-
     if (select) {
         var option = new Option(data.name, data.id);
         select.add(option, 1);
-
         select.style.borderColor = "var(--success)";
         setTimeout(() => select.style.borderColor = "", 1000);
     }
 }
 
-// Image cropper
 let categoryCropper = null;
 const MAX_FILE_SIZE = 1024 * 1024;
 
@@ -154,9 +143,7 @@ document.addEventListener('click', function (e) {
             });
 
             compressImage(canvas, 1.0, function (blob) {
-
                 const newFile = new File([blob], "cropped-image.jpg", { type: "image/jpeg" });
-
                 const dataTransfer = new DataTransfer();
                 dataTransfer.items.add(newFile);
                 input.files = dataTransfer.files;
@@ -169,7 +156,6 @@ document.addEventListener('click', function (e) {
                 e.target.innerText = "Crop & Save";
                 e.target.disabled = false;
                 closeCropperModal();
-
                 console.log(`Final Image Size: ${(blob.size / 1024).toFixed(2)} KB`);
             });
         }
@@ -178,16 +164,13 @@ document.addEventListener('click', function (e) {
 
 function compressImage(canvas, quality, callback) {
     canvas.toBlob(function (blob) {
-
         if (blob.size <= MAX_FILE_SIZE || quality <= 0.6) {
             callback(blob);
         }
         else {
             const newQuality = parseFloat((quality - 0.1).toFixed(1));
-            console.log(`Image size ${(blob.size / 1024).toFixed(2)}KB is too big. Retrying with quality: ${newQuality}`);
             compressImage(canvas, newQuality, callback);
         }
-
     }, 'image/jpeg', quality);
 }
 
@@ -201,3 +184,30 @@ function closeCropperModal() {
         categoryCropper = null;
     }
 }
+
+let searchTimeout;
+
+function submitSearch() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(function () {
+        $("#searchForm").submit();
+    }, 500);
+}
+
+let roomSearchTimeout;
+
+function submitRoomSearch() {
+    clearTimeout(roomSearchTimeout);
+    roomSearchTimeout = setTimeout(function () {
+        $("#roomSearchForm").submit();
+    }, 500);
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    if (window.serverSideHasErrors && window.serverSideActiveModal) {
+        var modal = document.getElementById(window.serverSideActiveModal);
+        if (modal) {
+            modal.style.display = 'block';
+        }
+    }
+});

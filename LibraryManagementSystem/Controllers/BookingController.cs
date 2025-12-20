@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using static LibraryManagementSystem.Models.Booking;
+using static LibraryManagementSystem.Models.Payment;
 using static LibraryManagementSystem.Models.Room;
 
 namespace LibraryManagementSystem.Controllers
@@ -130,12 +131,9 @@ namespace LibraryManagementSystem.Controllers
                 Id = GenerateBookingId(),
                 RoomId = availableRoom.Id,
                 UserId = userId,
-
                 BookingDate = DateTime.Now,
-
                 StartTime = reqStart,
                 EndTime = reqEnd,
-
                 TotalPrice = totalPrice,
                 Status = BookingStatus.PENDING
             };
@@ -143,8 +141,7 @@ namespace LibraryManagementSystem.Controllers
             db.Bookings.Add(newBooking);
             db.SaveChanges();
 
-            TempData["Success"] = "Booking created successfully!";
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", "Payment", new { bookingId = newBooking.Id });
         }
 
         [Authorize(Roles = "MEMBER")]
@@ -196,20 +193,76 @@ namespace LibraryManagementSystem.Controllers
             return View(list);
         }
 
+        // POST: Cancel / Refund Booking
         [HttpPost]
         [Authorize(Roles = "MEMBER")]
-        public IActionResult Cancel(string id)
+        public IActionResult Cancel(string id, string? reason)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var booking = db.Bookings.FirstOrDefault(b => b.Id == id && b.UserId == userId);
 
-            if (booking != null && booking.Status != BookingStatus.COMPLETED && booking.Status != BookingStatus.CANCELLED)
+            if (booking == null || booking.Status == BookingStatus.COMPLETED || booking.Status == BookingStatus.CANCELLED)
+            {
+                return RedirectToAction("BookingHistory");
+            }
+
+            string cleanReason = reason?.Trim() ?? "";
+
+            if (booking.Status == BookingStatus.CONFIRMED)
+            {
+                if (string.IsNullOrEmpty(cleanReason))
+                {
+                    TempData["Error"] = "Please provide a reason for the refund.";
+                    return RedirectToAction("BookingHistory");
+                }
+
+                if (cleanReason.Length < 5)
+                {
+                    TempData["Error"] = "Reason is too short. Please provide at least 5 characters.";
+                    return RedirectToAction("BookingHistory");
+                }
+
+            }
+
+            if (cleanReason.Length > 250)
+            {
+                TempData["Error"] = "Reason is too long. Max 250 characters allowed.";
+                return RedirectToAction("BookingHistory");
+            }
+
+            if (booking.Status == BookingStatus.PENDING)
             {
                 booking.Status = BookingStatus.CANCELLED;
                 booking.CancelledAt = DateTime.Now;
+                booking.CancellationReason = string.IsNullOrEmpty(cleanReason) ? "User Cancelled" : cleanReason;
+
                 db.SaveChanges();
-                TempData["Success"] = "Booking cancelled.";
+                TempData["Success"] = "Booking cancelled successfully.";
             }
+            else if (booking.Status == BookingStatus.CONFIRMED)
+            {
+                var payment = db.Payments
+                    .OrderByDescending(p => p.Date)
+                    .FirstOrDefault(p => p.BookingId == booking.Id && p.Status == PaymentStatus.SUCCESS);
+
+                if (payment != null)
+                {
+                    var timeSincePayment = DateTime.Now - payment.Date;
+                    if (timeSincePayment.TotalMinutes > 30)
+                    {
+                        TempData["Error"] = "Refund Failed: Refunds are only available within 30 minutes of payment.";
+                        return RedirectToAction("BookingHistory");
+                    }
+                }
+
+                booking.Status = BookingStatus.CANCELLED;
+                booking.CancelledAt = DateTime.Now;
+                booking.CancellationReason = cleanReason;
+
+                db.SaveChanges();
+                TempData["Success"] = "Refund request submitted successfully.";
+            }
+
             return RedirectToAction("BookingHistory");
         }
 
@@ -340,82 +393,86 @@ namespace LibraryManagementSystem.Controllers
         [Authorize(Roles = "ADMIN, STAFF")]
         public IActionResult MoveBooking(string id, string newRoomId)
         {
-            using var transaction = db.Database.BeginTransaction();
+            var strategy = db.Database.CreateExecutionStrategy();
 
-            try
+            return strategy.Execute(() =>
             {
-                var sourceBooking = db.Bookings
-                    .Include(b => b.Room)
-                    .FirstOrDefault(b => b.Id == id);
+                using var transaction = db.Database.BeginTransaction();
 
-                if (sourceBooking == null) return Json(new { success = false, message = "Source booking not found." });
-
-                if (sourceBooking.Status == BookingStatus.COMPLETED || sourceBooking.Status == BookingStatus.CANCELLED)
+                try
                 {
-                    return Json(new { success = false, message = "Cannot move completed or cancelled bookings." });
-                }
+                    var sourceBooking = db.Bookings
+                        .Include(b => b.Room)
+                        .FirstOrDefault(b => b.Id == id);
 
-                var targetRoom = db.Rooms.Find(newRoomId);
-                if (targetRoom == null) return Json(new { success = false, message = "Target room not found." });
+                    if (sourceBooking == null) return Json(new { success = false, message = "Source booking not found." });
 
-                if (targetRoom.Status == RoomStatus.MAINTENANCE)
-                {
-                    return Json(new { success = false, message = "Target room is under maintenance." });
-                }
-
-                var conflictingBooking = db.Bookings
-                    .Include(b => b.Room)
-                    .FirstOrDefault(b =>
-                        b.RoomId == newRoomId &&
-                        b.Status != BookingStatus.CANCELLED &&
-                        sourceBooking.StartTime < b.EndTime &&
-                        sourceBooking.EndTime > b.StartTime
-                    );
-
-                if (conflictingBooking == null)
-                {
-                    sourceBooking.RoomId = newRoomId;
-                    db.SaveChanges();
-                    transaction.Commit();
-                    return Json(new { success = true, message = "Booking moved successfully!", action = "move" });
-                }
-
-                else
-                {
-                    if (sourceBooking.Room.RoomCategoryId != targetRoom.RoomCategoryId)
+                    if (sourceBooking.Status == BookingStatus.COMPLETED || sourceBooking.Status == BookingStatus.CANCELLED)
                     {
-                        return Json(new { success = false, message = "Cannot swap: Different room categories." });
+                        return Json(new { success = false, message = "Cannot move completed or cancelled bookings." });
                     }
 
-                    bool isSourceRoomBlocked = db.Bookings.Any(b =>
-                        b.RoomId == sourceBooking.RoomId &&
-                        b.Id != sourceBooking.Id &&
-                        b.Status != BookingStatus.CANCELLED &&
-                        conflictingBooking.StartTime < b.EndTime &&
-                        conflictingBooking.EndTime > b.StartTime
-                    );
+                    var targetRoom = db.Rooms.Find(newRoomId);
+                    if (targetRoom == null) return Json(new { success = false, message = "Target room not found." });
 
-                    if (isSourceRoomBlocked)
+                    if (targetRoom.Status == RoomStatus.MAINTENANCE)
                     {
-                        return Json(new { success = false, message = "Cannot swap: Source room has overlap with other bookings." });
+                        return Json(new { success = false, message = "Target room is under maintenance." });
                     }
 
-                    string sourceRoomId = sourceBooking.RoomId;
+                    var conflictingBooking = db.Bookings
+                        .Include(b => b.Room)
+                        .FirstOrDefault(b =>
+                            b.RoomId == newRoomId &&
+                            b.Status != BookingStatus.CANCELLED &&
+                            sourceBooking.StartTime < b.EndTime &&
+                            sourceBooking.EndTime > b.StartTime
+                        );
 
-                    sourceBooking.RoomId = newRoomId;
-                    conflictingBooking.RoomId = sourceRoomId;
+                    if (conflictingBooking == null)
+                    {
+                        sourceBooking.RoomId = newRoomId;
+                        db.SaveChanges();
+                        transaction.Commit();
+                        return Json(new { success = true, message = "Booking moved successfully!", action = "move" });
+                    }
+                    else
+                    {
+                        if (sourceBooking.Room.RoomCategoryId != targetRoom.RoomCategoryId)
+                        {
+                            return Json(new { success = false, message = "Cannot swap: Different room categories." });
+                        }
 
-                    db.SaveChanges();
-                    transaction.Commit();
+                        bool isSourceRoomBlocked = db.Bookings.Any(b =>
+                            b.RoomId == sourceBooking.RoomId &&
+                            b.Id != sourceBooking.Id &&
+                            b.Status != BookingStatus.CANCELLED &&
+                            conflictingBooking.StartTime < b.EndTime &&
+                            conflictingBooking.EndTime > b.StartTime
+                        );
 
-                    return Json(new { success = true, message = "Bookings swapped successfully!", action = "swap" });
+                        if (isSourceRoomBlocked)
+                        {
+                            return Json(new { success = false, message = "Cannot swap: Source room has overlap with other bookings." });
+                        }
+
+                        string sourceRoomId = sourceBooking.RoomId;
+
+                        sourceBooking.RoomId = newRoomId;
+                        conflictingBooking.RoomId = sourceRoomId;
+
+                        db.SaveChanges();
+                        transaction.Commit();
+
+                        return Json(new { success = true, message = "Bookings swapped successfully!", action = "swap" });
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                transaction.Rollback();
-                return Json(new { success = false, message = "System Error: " + ex.Message });
-            }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    return Json(new { success = false, message = "System Error: " + ex.Message });
+                }
+            });
         }
     }
 }

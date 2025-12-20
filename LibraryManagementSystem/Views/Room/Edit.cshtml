@@ -261,60 +261,32 @@
 </div>
 
 @section foot {
+    <script>
+        window.serverSideHasErrors = @((!ViewData.ModelState.IsValid && ViewData.ModelState.Keys.Any(k => k.StartsWith("RoomUpdate"))).ToString().ToLower());
+        window.serverSideActiveModal = '@ViewData["ActiveModal"]';
+    </script>
+
     <script src="/js/room.js" asp-append-version="true"></script>
+
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 
     <script>
-        var hasErrors = '@((!ViewData.ModelState.IsValid && ViewData.ModelState.Keys.Any(k => k.StartsWith("RoomUpdate"))).ToString().ToLower())' === 'true';
-
-        var activeModalId = '@ViewData["ActiveModal"]';
-        if (hasErrors && activeModalId) {
-            document.addEventListener("DOMContentLoaded", function() {
-                var modal = document.getElementById(activeModalId);
-                if (modal) {
-                    modal.style.display = 'block';
-                }
-            });
-        }
-
-        document.addEventListener('keydown', function(e) {
-
-            if (e.altKey && e.key.toLowerCase() === 'c') {
-                e.preventDefault();
-                openAddRoomModal();
-        }
-        });
-
-        let roomSearchTimeout = null;
-        function submitRoomSearch() {
-            clearTimeout(roomSearchTimeout);
-            roomSearchTimeout = setTimeout(function () {
-                $("#roomSearchForm").submit();
-            }, 500);
-        }
-
         $(document).ready(function () {
             @if (TempData["Success"] != null)
             {
-                        <text>
-                            showToast('@TempData["Success"]', 'success');
-                        </text>
+                    <text>if(window.showToast) showToast('@TempData["Success"]', 'success');</text>
             }
 
             @if (TempData["Error"] != null)
             {
-                        <text>
-                            showToast('@TempData["Error"]', 'error');
-                        </text>
+                    <text>if(window.showToast) showToast('@TempData["Error"]', 'error');</text>
             }
 
             @if (!ViewData.ModelState.IsValid && TempData["Error"] == null)
             {
-                        <text>
-                            showToast('Please check input fields.', 'error');
-                        </text>
+                    <text>if(window.showToast) showToast('Please check input fields.', 'error');</text>
             }
         });
     </script>
