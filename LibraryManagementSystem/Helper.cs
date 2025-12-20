@@ -73,6 +73,52 @@ public static class Helper
         return filename;
     }
 
+    public static string GenerateNewId(string? lastId, char prefixChar)
+    {
+        // 1. Normalize prefixChar
+        char pChar = char.ToUpper(prefixChar);
+
+        // 2. Empty table handling
+        if (string.IsNullOrEmpty(lastId))
+        {
+            return $"{pChar}0001A";
+        }
+
+        // 3. Normalize lastId
+        lastId = lastId.ToUpper();
+
+        // 4. Validate Format
+        if (lastId.Length != 6 || lastId[0] != pChar)
+        {
+            throw new InvalidOperationException($"Existing ID '{lastId}' is invalid. Expected format like '{pChar}0001A'.");
+        }
+
+        // 5. Parse Parts
+        if (!int.TryParse(lastId.Substring(1, 4), out int currentNum))
+        {
+            throw new InvalidOperationException($"Existing ID '{lastId}' contains an invalid number section.");
+        }
+        char currentSuffix = lastId[5];
+
+        // 6. Increment
+        int nextNum = currentNum + 1;
+        char nextSuffix = currentSuffix;
+        if (nextNum > 9999)
+        {
+            nextNum = 1;
+            nextSuffix++;
+        }
+
+        // 7. Overflow Guard
+        if (nextSuffix > 'Z')
+        {
+            throw new InvalidOperationException($"ID capacity reached for prefix '{pChar}' (Max: {pChar}9999Z).");
+        }
+
+        // 8. Format Result
+        return $"{pChar}{nextNum:D4}{nextSuffix}";
+    }
+
     public class ISBNValidationAttribute : ValidationAttribute
     {
         protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)

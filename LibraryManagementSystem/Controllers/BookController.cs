@@ -230,7 +230,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
                        .OrderByDescending(b => b.Id)
                        .Select(b => b.Id)
                        .FirstOrDefault();
-        string newBookId = GenerateNewId(lastId, 'B');
+        string newBookId = Helper.GenerateNewId(lastId, 'B');
 
         // 6. Create Entity
         var newBook = new Book
@@ -468,7 +468,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
 
         for (int i = 0; i < quantity; i++)
         {
-            string newId = GenerateNewId(lastId, 'C');
+            string newId = Helper.GenerateNewId(lastId, 'C');
             lastId = newId;
 
             var copy = new Copy { Id = newId, BookId = bookId, Status = Copy.CopyStatus.AVAILABLE, Barcode = $"{bookId}-{newId}" };
@@ -688,7 +688,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
             var lastId = db.Genres.OrderByDescending(g => g.Id).Select(g => g.Id).FirstOrDefault();
             var newGenre = new Genre
             {
-                Id = GenerateNewId(lastId, 'G'),
+                Id = Helper.GenerateNewId(lastId, 'G'),
                 Name = cleanName,
             };
             db.Genres.Add(newGenre);
@@ -863,7 +863,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
             var lastId = db.Authors.OrderByDescending(a => a.Id).Select(a => a.Id).FirstOrDefault();
             var newAuthor = new Author
             {
-                Id = GenerateNewId(lastId, 'A'),
+                Id = Helper.GenerateNewId(lastId, 'A'),
                 Name = cleanName,
             };
             db.Authors.Add(newAuthor);
@@ -985,51 +985,5 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
                 System.IO.File.Delete(imagePath);
             }
         }
-    }
-
-    private static string GenerateNewId(string? lastId, char prefixChar)
-    {
-        // 1. Normalize prefixChar
-        char pChar = char.ToUpper(prefixChar);
-
-        // 2. Empty table handling
-        if (string.IsNullOrEmpty(lastId))
-        {
-            return $"{pChar}0001A";
-        }
-
-        // 3. Normalize lastId
-        lastId = lastId.ToUpper();
-
-        // 4. Validate Format
-        if (lastId.Length != 6 || lastId[0] != pChar)
-        {
-            throw new InvalidOperationException($"Existing ID '{lastId}' is invalid. Expected format like '{pChar}0001A'.");
-        }
-
-        // 5. Parse Parts
-        if (!int.TryParse(lastId.Substring(1, 4), out int currentNum))
-        {
-            throw new InvalidOperationException($"Existing ID '{lastId}' contains an invalid number section.");
-        }
-        char currentSuffix = lastId[5];
-
-        // 6. Increment
-        int nextNum = currentNum + 1;
-        char nextSuffix = currentSuffix;
-        if (nextNum > 9999)
-        {
-            nextNum = 1;
-            nextSuffix++;
-        }
-
-        // 7. Overflow Guard
-        if (nextSuffix > 'Z')
-        {
-            throw new InvalidOperationException($"ID capacity reached for prefix '{pChar}' (Max: {pChar}9999Z).");
-        }
-
-        // 8. Format Result
-        return $"{pChar}{nextNum:D4}{nextSuffix}";
     }
 }
