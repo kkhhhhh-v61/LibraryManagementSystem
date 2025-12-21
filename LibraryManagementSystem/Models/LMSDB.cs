@@ -27,11 +27,6 @@ public class LMSDB(DbContextOptions options) : DbContext(options)
 }
 
 /* ------------------------------ LAI CHEE KIT ------------------------------ */
-
-using System.ComponentModel.DataAnnotations;
-
-namespace LibraryManagementSystem.Models
-{
     public class User
     {
         public enum UserRole
@@ -121,7 +116,7 @@ namespace LibraryManagementSystem.Models
 
         public User User { get; set; }
     }
-}
+
 
 
 /* ------------------------------ TAN KAI HAO ------------------------------ */
