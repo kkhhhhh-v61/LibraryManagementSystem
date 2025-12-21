@@ -1,4 +1,4 @@
-﻿﻿@using Microsoft.AspNetCore.Mvc.Rendering
+﻿﻿﻿﻿@using Microsoft.AspNetCore.Mvc.Rendering
 @model List<Book>
 @{
     ViewBag.Title = "Catalogue";
@@ -54,6 +54,42 @@
                                 <div class="filter-dropdown__menu">
                                     <div class="filter-dropdown__item" data-value="">All Authors</div>
                                     @foreach (var item in (IEnumerable<SelectListItem>)ViewBag.Authors)
+                                    {
+                                        <div class="filter-dropdown__item" data-value="@item.Value">@item.Text</div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Year</label>
+                            <div class="filter-dropdown" id="dropdownYear">
+                                <input type="hidden" id="filterYear" name="year" value="" />
+                                <div class="filter-dropdown__trigger">
+                                    <span class="trigger__text">All Years</span>
+                                    <svg class="trigger__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" height="24" width="24" fill="currentColor"><path d="M480-360 280-560h400L480-360Z"/></svg>
+                                    <button class="filter-clear" type="button" title="Clear Filter"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg></button>
+                                </div>
+                                <div class="filter-dropdown__menu">
+                                    <div class="filter-dropdown__item" data-value="">All Years</div>
+                                    @foreach (var item in (IEnumerable<SelectListItem>)ViewBag.Years)
+                                    {
+                                        <div class="filter-dropdown__item" data-value="@item.Value">@item.Text</div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Edition</label>
+                            <div class="filter-dropdown" id="dropdownEdition">
+                                <input type="hidden" id="filterEdition" name="edition" value="" />
+                                <div class="filter-dropdown__trigger">
+                                    <span class="trigger__text">All Editions</span>
+                                    <svg class="trigger__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" height="24" width="24" fill="currentColor"><path d="M480-360 280-560h400L480-360Z"/></svg>
+                                    <button class="filter-clear" type="button" title="Clear Filter"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg></button>
+                                </div>
+                                <div class="filter-dropdown__menu">
+                                    <div class="filter-dropdown__item" data-value="">All Editions</div>
+                                    @foreach (var item in (IEnumerable<SelectListItem>)ViewBag.Editions)
                                     {
                                         <div class="filter-dropdown__item" data-value="@item.Value">@item.Text</div>
                                     }

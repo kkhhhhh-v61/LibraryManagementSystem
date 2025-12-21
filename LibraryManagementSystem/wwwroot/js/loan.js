@@ -173,12 +173,12 @@ function initializeProcessPage() {
         const content = document.getElementById("resultsContent");
 
         if (mode === "pickup") {
-            input.placeholder = "Scan User ID...";
+            input.placeholder = "Enter User ID...";
             title.textContent = "Pickup: Waiting for User Scan...";
             content.innerHTML =
                 '<div class="empty-state"><p class="empty-state__text">Scan a User ID to view reservations.</p></div>';
         } else {
-            input.placeholder = "Scan Book Copy Barcode...";
+            input.placeholder = "Enter Copy Barcode...";
             title.textContent = "Return: Ready to Scan";
             content.innerHTML =
                 '<div class="empty-state"><p class="empty-state__text">Scan books to process returns instantly.</p></div>';
@@ -320,6 +320,14 @@ window.toggleAllPickup = function (source) {
     document
         .querySelectorAll(".pickup-check")
         .forEach((cb) => (cb.checked = source.checked));
+};
+
+window.updateSelectAllPickup = function () {
+    const checkboxes = document.querySelectorAll(".pickup-check");
+    const selectAll = document.getElementById("selectAllPickup");
+    if (selectAll) {
+        selectAll.checked = Array.from(checkboxes).every((cb) => cb.checked);
+    }
 };
 
 window.submitPickup = function (e) {

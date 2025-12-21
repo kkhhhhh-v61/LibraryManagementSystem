@@ -6,6 +6,9 @@
     var available = (int)ViewBag.AvailableCopies;
     var total = (int)ViewBag.TotalCopies;
     var hasActiveLoan = (bool)(ViewBag.HasActiveLoan ?? false);
+    var hasActiveReservation = (bool)(ViewBag.HasActiveReservation ?? false);
+    var activeLoanId = ViewBag.ActiveLoanId as string;
+    var activeReservationId = ViewBag.ActiveReservationId as string;
 }
 
 @section head {
@@ -76,26 +79,35 @@
                     }
 
                     <div style="display: flex; gap: 0.5rem;">
-                        @if (hasActiveLoan)
+                        @if (!User.Identity.IsAuthenticated || User.IsInRole("MEMBER"))
                         {
-                            <button type="button" class="form__button" style="flex: 1; background-color: var(--color-gray-300); color: var(--color-gray-500); cursor: not-allowed;" disabled>
-                                <i class="fa-solid fa-check"></i> Already Loaned
-                            </button>
-                        }
-                        else if (available > 0)
-                        {
-                            <button type="button" class="form__button form__button--submit js-loan-trigger" data-book-id="@Model.Id" data-book-title="@Model.Title" style="flex: 1;">
-                                <i class="fa-solid fa-book-open"></i> Loan
-                            </button>
-                        }
-                        else
-                        {
-                            <button type="button" class="form__button btn--secondary js-reserve-trigger" data-book-id="@Model.Id" data-book-title="@Model.Title" style="flex: 1;">
-                                <i class="fa-solid fa-bookmark"></i> Reserve
-                            </button>
+                            if (hasActiveLoan)
+                            {
+                                <button type="button" class="form__button btn--secondary js-cancel-trigger" data-type="loan" data-id="@activeLoanId" data-book-title="@Model.Title" style="flex: 1;">
+                                    <i class="fa-solid fa-check"></i> Already Loaned
+                                </button>
+                            }
+                            else if (hasActiveReservation)
+                            {
+                                <button type="button" class="form__button btn--secondary js-cancel-trigger" data-type="reservation" data-id="@activeReservationId" data-book-title="@Model.Title" style="flex: 1;">
+                                    <i class="fa-solid fa-bookmark"></i> Already Reserved
+                                </button>
+                            }
+                            else if (available > 0)
+                            {
+                                <button type="button" class="form__button form__button--submit js-loan-trigger" data-book-id="@Model.Id" data-book-title="@Model.Title" style="flex: 1;">
+                                    <i class="fa-solid fa-book-open"></i> Loan
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="button" class="form__button btn--secondary js-reserve-trigger" data-book-id="@Model.Id" data-book-title="@Model.Title" style="flex: 1;">
+                                    <i class="fa-solid fa-bookmark"></i> Reserve
+                                </button>
+                            }
                         }
 
-                    @if (User.Identity!.IsAuthenticated)
+                    @if (User.Identity!.IsAuthenticated && User.IsInRole("MEMBER"))
                     {
                         <button type="button" class="form__button btn--secondary js-wishlist-trigger" onclick="toggleWishlist(this, '@Model.Id')" title="Add to Wishlist" style="width: 42px; padding: 0; flex-shrink: 0;">
                             <i class="fa-regular fa-heart"></i>
@@ -103,10 +115,10 @@
                     }
                     </div>
 
-                    @if (hasActiveLoan)
+                    @if (hasActiveLoan || hasActiveReservation)
                     {
                         <p style="font-size: 0.85rem; color: var(--color-gray-500);">
-                            You currently have an active loan for this book.
+                            You have an active @(hasActiveLoan ? "loan" : "reservation") for this book. Click the button above to manage it.
                         </p>
                     }
                     else if (available <= 0)
@@ -201,9 +213,10 @@
                 <svg class="close__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
             </button>
         </div>
-        <form class="modal__form" asp-controller="" asp-action="" method="post">
+        <form class="modal__form" asp-controller="Reservation" asp-action="Create" method="post">
             <div class="modal__content">
                 <p class="modal__text">Are you sure you wish to reserve this book?</p>
+                <input type="hidden" name="bookId" value="@Model.Id" />
             </div>
             <div class="modal__footer">
                 <button class="form__button form__button--cancel js-close-modal" type="button">Cancel</button>
@@ -213,11 +226,32 @@
     </div>
 </div>
 
+<div class="modal" id="modal-cancel-item">
+    <div class="modal__container">
+        <div class="modal__header">
+            <h2 class="modal__title" id="cancelModalTitle">Confirm Cancellation</h2>
+            <button class="modal__close js-close-modal" type="button">
+                <svg class="close__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
+            </button>
+        </div>
+        <form class="modal__form" method="post" id="cancelItemForm">
+            <div class="modal__content">
+                <p class="modal__text">Are you sure you want to cancel your <span id="cancelItemType" style="font-weight: 600;"></span> for '<span class="text--highlight" id="cancelItemName"></span>'?</p>
+                <input type="hidden" name="id" id="cancelItemId" />
+                <input type="hidden" name="returnUrl" value="@(Context.Request.Path + Context.Request.QueryString)" />
+            </div>
+            <div class="modal__footer">
+                <button class="form__button form__button--cancel js-close-modal" type="button">Keep It</button>
+                <button class="form__button form__button--danger" type="submit">Confirm Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 @section foot {
     <script src="/js/book.js" asp-append-version="true"></script>
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            // Check initial wishlist status
             const btn = document.querySelector(".js-wishlist-trigger");
             if (btn) {
                 fetch(`/Wishlist/CheckStatus?bookId=@Model.Id`)

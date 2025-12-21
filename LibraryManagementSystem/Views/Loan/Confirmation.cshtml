@@ -75,8 +75,16 @@
     </div>
 
     <div class="barcode-section">
-        <div class="barcode-item"><div class="barcode-label">User ID</div><svg id="barcode-user" data-value="@Model.UserId"></svg></div>
-        <div class="barcode-item"><div class="barcode-label">Book Copy (@Model.Copy.Barcode)</div><svg id="barcode-book" data-value="@Model.Copy.Barcode"></svg></div>
+        <div class="barcode-item">
+            <div class="barcode-label">User ID</div>
+            <div style="font-size: 0.8rem; color: var(--color-gray-500); margin-bottom: 0.5rem;">(Scan for Pickup)</div>
+            <svg id="barcode-user" data-value="@Model.UserId"></svg>
+        </div>
+        <div class="barcode-item">
+            <div class="barcode-label">Book Copy (@Model.Copy.Barcode)</div>
+            <div style="font-size: 0.8rem; color: var(--color-gray-500); margin-bottom: 0.5rem;">(Scan for Return)</div>
+            <svg id="barcode-book" data-value="@Model.Copy.Barcode"></svg>
+        </div>
     </div>
 
     <div class="print-hide">

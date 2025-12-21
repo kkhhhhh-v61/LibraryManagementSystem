@@ -17,6 +17,8 @@ namespace LibraryManagementSystem.Controllers
         [Authorize(Roles = "MEMBER")]
         public IActionResult Index(string? roomCategoryId, string? date)
         {
+            CheckAndCompleteExpiredBookings();
+
             DateTime targetDate = string.IsNullOrEmpty(date) ? DateTime.Today : DateTime.Parse(date);
             if (targetDate < DateTime.Today) targetDate = DateTime.Today;
 
@@ -159,6 +161,8 @@ namespace LibraryManagementSystem.Controllers
         [Authorize(Roles = "MEMBER")]
         public IActionResult BookingHistory(string search = "", string date = "")
         {
+            CheckAndCompleteExpiredBookings();
+
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             var query = db.Bookings
@@ -312,18 +316,7 @@ namespace LibraryManagementSystem.Controllers
         [HttpGet]
         public IActionResult GetCalendarData(string? categoryId)
         {
-            var expiredBookings = db.Bookings
-                .Where(b => b.Status == BookingStatus.CONFIRMED && b.EndTime <= DateTime.Now)
-                .ToList();
-
-            if (expiredBookings.Any())
-            {
-                foreach (var b in expiredBookings)
-                {
-                    b.Status = BookingStatus.COMPLETED;
-                }
-                db.SaveChanges();
-            }
+            CheckAndCompleteExpiredBookings();
 
             var query = db.Bookings
                 .Include(b => b.Room)
@@ -473,6 +466,28 @@ namespace LibraryManagementSystem.Controllers
                     return Json(new { success = false, message = "System Error: " + ex.Message });
                 }
             });
+        }
+
+        private void CheckAndCompleteExpiredBookings()
+        {
+            var expiredBookings = db.Bookings
+                .Include(b => b.Room)
+                .Where(b => b.Status == BookingStatus.CONFIRMED && b.EndTime <= DateTime.Now)
+                .ToList();
+
+            if (expiredBookings.Any())
+            {
+                foreach (var b in expiredBookings)
+                {
+                    b.Status = BookingStatus.COMPLETED;
+
+                    if (b.Room != null && b.Room.Status == RoomStatus.UNAVAILABLE)
+                    {
+                        b.Room.Status = RoomStatus.AVAILABLE;
+                    }
+                }
+                db.SaveChanges();
+            }
         }
     }
 }

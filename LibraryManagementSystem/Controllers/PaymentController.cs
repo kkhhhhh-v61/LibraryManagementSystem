@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using static LibraryManagementSystem.Models.Booking;
 using static LibraryManagementSystem.Models.Payment;
+using static LibraryManagementSystem.Models.Room;
 
 namespace LibraryManagementSystem.Controllers
 {
@@ -85,6 +86,12 @@ namespace LibraryManagementSystem.Controllers
                     db.Payments.Add(newPayment);
 
                     booking.Status = BookingStatus.CONFIRMED;
+
+                    var room = db.Rooms.FirstOrDefault(r => r.Id == booking.RoomId);
+                    if (room != null)
+                    {
+                        room.Status = RoomStatus.UNAVAILABLE;
+                    }
 
                     db.SaveChanges();
                     transaction.Commit();

@@ -1,0 +1,168 @@
+@model ReviewManagementVM
+
+@{
+    ViewBag.Title = "Review Moderation";
+}
+
+@section head {
+    <link rel="stylesheet" href="/css/book.css" asp-append-version="true" />
+}
+
+<div class="manage__content">
+    <div class="manage__panel">
+        <div class="panel__header">
+            <div class="header__start">
+                <h2 class="panel__title">Reviews (@ViewBag.TotalItems)</h2>
+            </div>
+            <div class="header__controls">
+                <div class="header__filters">
+                    <div class="filter-menu" id="filterMenu">
+                        <button class="filter-menu__trigger" type="button" id="filterMenuTrigger">
+                            <svg class="trigger__icon" xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#666">
+                                <path d="M440-160q-17 0-28.5-11.5T400-200v-240L168-736q-15-20-4.5-42t36.5-22h560q26 0 36.5 22t-4.5 42L560-440v240q0 17-11.5 28.5T520-160h-80Zm40-308 198-252H282l198 252Zm0 0Z"/>
+                            </svg>
+                            <span class="trigger__text">Filters</span>
+                        </button>
+                        <div class="filter-menu__dropdown">
+                            <div class="filter-group">
+                                <label class="filter-label">Rating</label>
+                                <div class="filter-dropdown" id="ratingFilterWrapper" style="width: 100%;">
+                                    <input type="hidden" id="filterRating" value="@Model.FilterRating" />
+                                    <button class="filter-dropdown__trigger" type="button">
+                                        <span class="trigger__text">
+                                            @(Model.FilterRating.HasValue ? $"{Model.FilterRating} Stars" : "All Ratings")
+                                        </span>
+                                        <svg class="trigger__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="M480-360 280-560h400L480-360Z"/></svg>
+                                    </button>
+                                    <button class="filter-clear" type="button" title="Clear Filter"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg></button>
+                                    <div class="filter-dropdown__menu">
+                                        <div class="filter-dropdown__item @(!Model.FilterRating.HasValue ? "selected" : "")" data-value="">All Ratings</div>
+                                        <div class="filter-dropdown__item @(Model.FilterRating == 5 ? "selected" : "")" data-value="5">5 Stars</div>
+                                        <div class="filter-dropdown__item @(Model.FilterRating == 4 ? "selected" : "")" data-value="4">4 Stars</div>
+                                        <div class="filter-dropdown__item @(Model.FilterRating == 3 ? "selected" : "")" data-value="3">3 Stars</div>
+                                        <div class="filter-dropdown__item @(Model.FilterRating == 2 ? "selected" : "")" data-value="2">2 Stars</div>
+                                        <div class="filter-dropdown__item @(Model.FilterRating == 1 ? "selected" : "")" data-value="1">1 Star</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="filter-group">
+                                <label class="filter-label">Review Date</label>
+                                <div class="filter-date-range" style="display: flex; gap: 0.5rem; align-items: center;">
+                                    <input type="date" id="filterDateFrom" class="filter-input" 
+                                           min="@ViewBag.MinDate" max="@ViewBag.MaxDate" value="@(Model.DateFrom?.ToString("yyyy-MM-dd"))" 
+                                           style="width: 100%; padding: 8px; border: 1px solid var(--color-gray-300); border-radius: var(--spacing-sm); font-family: var(--font-main);" />
+                                    <span style="color: var(--color-gray-500);">-</span>
+                                    <input type="date" id="filterDateTo" class="filter-input" 
+                                           min="@ViewBag.MinDate" max="@ViewBag.MaxDate" value="@(Model.DateTo?.ToString("yyyy-MM-dd"))"
+                                           style="width: 100%; padding: 8px; border: 1px solid var(--color-gray-300); border-radius: var(--spacing-sm); font-family: var(--font-main);" />
+                                </div>
+                            </div>
+                            <div class="filter-actions">
+                                <button type="button" id="clearFilters" class="filter-action-clear">
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="currentColor"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg>
+                                    Clear All Filters
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="search__wrapper">
+                    <svg class="search__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#999">
+                        <path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z" />
+                    </svg>
+                    <input class="search__input--header" id="nameSearchInput" type="text" placeholder="Search reviews..." autocomplete="off" data-trim />
+                    <svg class="search__clear" id="searchClearButton" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
+                        <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel__table-container" id="tableContainer">
+            <partial name="_TableReview" model="Model" />
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="modal-delete-review">
+    <div class="modal__container">
+        <div class="modal__header">
+            <h2 class="modal__title">Delete Review</h2>
+            <button class="modal__close js-close-modal" type="button">
+                <svg class="close__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
+                    <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/>
+                </svg>
+            </button>
+        </div>
+
+        <form class="modal__form" asp-action="DeleteReview" method="post" id="deleteReviewForm">
+            <div class="modal__content">
+                <p class="modal__text" style="margin-bottom: 1rem;">
+                    You are about to delete a review by <span class="text--highlight js-review-user"></span>.
+                </p>
+                <input type="hidden" name="id" id="deleteReviewId" />
+                
+                <div class="form__field">
+                    <label class="field__label field__label--required">Reason for Deletion</label>
+                    <textarea class="field__input input--textarea" name="reason" id="deleteReason" placeholder="e.g. Inappropriate language, Spam, Irrelevant content..." required data-trim style="height: 100px;"></textarea>
+                    <p style="font-size: 0.85rem; color: var(--color-gray-500); margin-top: 0.5rem;">
+                        This reason will be sent to the user via notification.
+                    </p>
+                </div>
+            </div>
+            <div class="modal__footer">
+                <button class="form__button form__button--cancel js-close-modal" type="button">Cancel</button>
+                <button class="form__button form__button--danger" type="submit">Delete & Notify</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section foot {
+    <script src="/js/table.js" asp-append-version="true"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const deleteModal = document.getElementById("modal-delete-review");
+            const deleteIdInput = document.getElementById("deleteReviewId");
+            const deleteUserInput = deleteModal.querySelector(".js-review-user");
+            const deleteReasonInput = document.getElementById("deleteReason");
+            
+            // Open Modal
+            document.body.addEventListener("click", (e) => {
+                const btn = e.target.closest(".js-delete-review");
+                if (btn) {
+                    deleteIdInput.value = btn.dataset.id;
+                    deleteUserInput.textContent = btn.dataset.user;
+                    deleteReasonInput.value = ""; // Reset reason
+                    deleteModal.classList.add("active");
+                    setTimeout(() => deleteReasonInput.focus(), 50);
+                }
+            });
+
+            // Close Modal
+            deleteModal.querySelectorAll(".js-close-modal").forEach(btn => {
+                btn.addEventListener("click", () => deleteModal.classList.remove("active"));
+            });
+
+            deleteModal.addEventListener("click", (e) => {
+                if (e.target === deleteModal) deleteModal.classList.remove("active");
+            });
+            
+            // Clear Filters Override
+            const clearBtn = document.getElementById("clearFilters");
+            if(clearBtn) {
+                clearBtn.addEventListener("click", () => {
+                    const filterRating = document.getElementById("filterRating");
+                    if(filterRating) filterRating.value = "";
+                    
+                    // Trigger search update via table.js logic
+                    const searchInput = document.getElementById("nameSearchInput");
+                    if(searchInput) {
+                        // Manually trigger the search logic if needed, or let table.js handle it
+                        // table.js listens to clearFilters click but we need to ensure it clears our custom filter
+                    }
+                });
+            }
+        });
+    </script>
+}

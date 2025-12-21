@@ -1,10 +1,11 @@
 ﻿using LibraryManagementSystem.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
-using Microsoft.AspNetCore.Authorization;
 using System;
+using static LibraryManagementSystem.Models.Room;
 
 namespace LibraryManagementSystem.Controllers
 {
@@ -345,6 +346,14 @@ namespace LibraryManagementSystem.Controllers
             {
                 TempData["Error"] = "Room not found.";
                 return RedirectToAction("Index");
+            }
+
+            if (room.Status == RoomStatus.UNAVAILABLE)
+            {
+                if (vm.RoomUpdate.Status != RoomStatus.UNAVAILABLE)
+                {
+                    ModelState.AddModelError("RoomUpdate.Status", "Cannot change status while room is currently occupied.");
+                }
             }
 
             bool nameExists = db.Rooms.Any(r => r.RoomCategoryId == room.RoomCategoryId && r.Name == vm.RoomUpdate.Name.Trim() && r.Id != vm.RoomUpdate.RoomId);

@@ -24,6 +24,7 @@
         <div class="barcode-section" style="margin-bottom: 2rem;">
             <div class="barcode-item">
                 <div class="barcode-label">User ID</div>
+                <div style="font-size: 0.8rem; color: var(--color-gray-500); margin-bottom: 0.5rem;">(Scan for Pickup)</div>
                 <svg id="barcode-user" data-value="@user.Id"></svg>
             </div>
         </div>
@@ -65,6 +66,7 @@
                  <div class="barcode-section" style="margin: 1rem 0 0 0;">
                     <div class="barcode-item">
                         <div class="barcode-label">Book Copy (@loan.Copy.Barcode)</div>
+                        <div style="font-size: 0.8rem; color: var(--color-gray-500); margin-bottom: 0.5rem;">(Scan for Return)</div>
                         <svg class="barcode-book" data-value="@loan.Copy.Barcode"></svg>
                     </div>
                 </div>

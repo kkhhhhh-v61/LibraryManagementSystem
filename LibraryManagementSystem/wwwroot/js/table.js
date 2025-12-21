@@ -15,6 +15,8 @@ function initializeTableManagement() {
     const filterArchived = document.getElementById("filterArchived");
     const filterDateFrom = document.getElementById("filterDateFrom");
     const filterDateTo = document.getElementById("filterDateTo");
+    const filterRating = document.getElementById("filterRating");
+    const filterHasBooks = document.getElementById("filterHasBooks");
 
     // Determine if we are using AJAX search (Genre/Author) or Client-side (Book)
     const isAjax = tableContainer !== null;
@@ -98,6 +100,18 @@ function initializeTableManagement() {
             );
         }
 
+        if (filterRating) {
+            filterRating.addEventListener("change", () =>
+                triggerSearch(searchInput)
+            );
+        }
+
+        if (filterHasBooks) {
+            filterHasBooks.addEventListener("change", () =>
+                triggerSearch(searchInput)
+            );
+        }
+
         if (clearFiltersBtn) {
             clearFiltersBtn.addEventListener("click", () => {
                 const filterAuthor = document.getElementById("filterAuthor");
@@ -114,6 +128,11 @@ function initializeTableManagement() {
                 if (filterArchived) filterArchived.checked = false;
                 if (filterDateFrom) filterDateFrom.value = "";
                 if (filterDateTo) filterDateTo.value = "";
+                const filterRating = document.getElementById("filterRating");
+                if (filterRating) filterRating.value = "";
+                const filterHasBooks =
+                    document.getElementById("filterHasBooks");
+                if (filterHasBooks) filterHasBooks.value = "";
                 filterMenu.classList.remove("active");
                 triggerSearch(searchInput);
             });
@@ -290,6 +309,8 @@ function performAjaxSearch(term, page, sort, order) {
     const filterStatus = document.getElementById("filterStatus");
     const filterDateFrom = document.getElementById("filterDateFrom");
     const filterDateTo = document.getElementById("filterDateTo");
+    const filterRating = document.getElementById("filterRating");
+    const filterHasBooks = document.getElementById("filterHasBooks");
 
     const url = new URL(window.location.href);
 
@@ -328,6 +349,14 @@ function performAjaxSearch(term, page, sort, order) {
     if (filterDateTo && filterDateTo.value)
         url.searchParams.set("dateTo", filterDateTo.value);
     else url.searchParams.delete("dateTo");
+
+    if (filterRating && filterRating.value)
+        url.searchParams.set("rating", filterRating.value);
+    else url.searchParams.delete("rating");
+
+    if (filterHasBooks && filterHasBooks.value)
+        url.searchParams.set("hasBooks", filterHasBooks.value);
+    else url.searchParams.delete("hasBooks");
 
     fetch(url, {
         headers: { "X-Requested-With": "XMLHttpRequest" },
@@ -473,10 +502,24 @@ function bindStaticModalEvents() {
 
                     const isLoanCancel =
                         batchForm.action.includes("BatchCancelLoan");
+                    const isReservationCancel =
+                        batchForm.action.includes("BatchCancel") &&
+                        !isLoanCancel;
 
                     if (status) {
                         if (isLoanCancel) {
                             if (status === "RESERVED") {
+                                isUnsafe = false;
+                                statusText = "Ready to cancel";
+                            } else {
+                                isUnsafe = true;
+                                const formattedStatus =
+                                    status.charAt(0).toUpperCase() +
+                                    status.slice(1).toLowerCase();
+                                statusText = `Cannot cancel (${formattedStatus})`;
+                            }
+                        } else if (isReservationCancel) {
+                            if (status === "PENDING" || status === "READY") {
                                 isUnsafe = false;
                                 statusText = "Ready to cancel";
                             } else {

@@ -1,0 +1,119 @@
+@model ReviewManagementVM
+
+<table class="table">
+    <thead>
+        <tr class="table__header">
+            <th class="table__cell sortable-header @(Model.SortColumn == "User" ? "active" : "")" data-sort="User" data-order="@(Model.SortColumn == "User" ? Model.SortOrder : "asc")">
+                User
+                @if (Model.SortColumn == "User")
+                {
+                    <span class="sort-icon">@(Model.SortOrder == "asc" ? "▲" : "▼")</span>
+                }
+            </th>
+            <th class="table__cell sortable-header @(Model.SortColumn == "Book" ? "active" : "")" data-sort="Book" data-order="@(Model.SortColumn == "Book" ? Model.SortOrder : "asc")" style="min-width: 200px;">
+                Book
+                @if (Model.SortColumn == "Book")
+                {
+                    <span class="sort-icon">@(Model.SortOrder == "asc" ? "▲" : "▼")</span>
+                }
+            </th>
+            <th class="table__cell sortable-header @(Model.SortColumn == "Rating" ? "active" : "")" data-sort="Rating" data-order="@(Model.SortColumn == "Rating" ? Model.SortOrder : "asc")" style="width: 150px;">
+                Rating
+                @if (Model.SortColumn == "Rating")
+                {
+                    <span class="sort-icon">@(Model.SortOrder == "asc" ? "▲" : "▼")</span>
+                }
+            </th>
+            <th class="table__cell" style="min-width: 300px;">Comment</th>
+            <th class="table__cell sortable-header @(Model.SortColumn == "Date" ? "active" : "")" data-sort="Date" data-order="@(Model.SortColumn == "Date" ? Model.SortOrder : "asc")" style="width: 150px;">
+                Date
+                @if (Model.SortColumn == "Date")
+                {
+                    <span class="sort-icon">@(Model.SortOrder == "asc" ? "▲" : "▼")</span>
+                }
+            </th>
+            <th class="table__cell table__cell--actions" style="width: 80px; text-align: center;">Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (!Model.Reviews.Any())
+        {
+            <tr class="table__row">
+                <td class="table__cell" colspan="6" style="text-align:center; color: var(--color-gray-500);">
+                    No reviews found.
+                </td>
+            </tr>
+        }
+        else 
+        {
+            @foreach (var review in Model.Reviews)
+            {
+                <tr class="table__row">
+                    <td class="table__cell">
+                        <div style="display: flex; flex-direction: column;">
+                            <span style="font-weight: 600; color: var(--color-gray-900);">@review.Loan.User.Username</span>
+                            <span style="font-size: 0.8rem; color: var(--color-gray-500);">@review.Loan.UserId</span>
+                        </div>
+                    </td>
+                    <td class="table__cell">
+                        <a href="@Url.Action("BookDetails", "Book", new { id = review.Loan.Copy.BookId })" style="text-decoration: none; color: inherit; font-weight: 500;">
+                            @review.Loan.Copy.Book.Title
+                        </a>
+                    </td>
+                    <td class="table__cell">
+                        <div style="color: var(--color-warning); font-size: 0.9rem;">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                <i class="fa-solid fa-star @(i <= review.Rating ? "star-filled" : "star-empty")" style="@(i > review.Rating ? "color: var(--color-gray-300);" : "")"></i>
+                            }
+                        </div>
+                    </td>
+                    <td class="table__cell">
+                        @if (!string.IsNullOrEmpty(review.Comment))
+                        {
+                            <span style="color: var(--color-gray-700); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" title="@review.Comment">@review.Comment</span>
+                        }
+                        else
+                        {
+                            <span style="color: var(--color-gray-400); font-style: italic;">No comment</span>
+                        }
+                    </td>
+                    <td class="table__cell">@review.ReviewDate.ToString("yyyy-MM-dd")</td>
+                    <td class="table__cell table__cell--actions">
+                        <div class="table__actions">
+                            <button class="action__button action__button--delete js-delete-review" 
+                                    data-id="@review.Id" 
+                                    data-user="@review.Loan.User.Username"
+                                    title="Delete Review"
+                                    type="button">
+                                <svg class="button__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000">
+                                    <path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+@if (Model.TotalPages > 1)
+{
+    <div class="pagination">
+        @if (Model.CurrentPage > 1)
+        {
+            <button class="pagination__link" type="button" data-page="@(Model.CurrentPage - 1)">Previous</button>
+        }
+
+        @for (int i = 1; i <= Model.TotalPages; i++)
+        {
+            <button class="pagination__link @(i == Model.CurrentPage ? "pagination__link--active" : "")" type="button" data-page="@i">@i</button>
+        }
+
+        @if (Model.CurrentPage < Model.TotalPages)
+        {
+            <button class="pagination__link" type="button" data-page="@(Model.CurrentPage + 1)">Next</button>
+        }
+    </div>
+}

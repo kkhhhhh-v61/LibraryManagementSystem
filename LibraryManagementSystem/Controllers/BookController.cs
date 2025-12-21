@@ -6,18 +6,33 @@ using LibraryManagementSystem.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
+using LibraryManagementSystem.Services;
 
 namespace LibraryManagementSystem.Controllers;
 
-public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
+public class BookController(LMSDB db, IWebHostEnvironment en, INotificationService ns, IReservationService rs) : Controller
 {
-    public IActionResult Catalogue(string? search, string? genreId, string? authorId, int? rating)
+    public IActionResult Catalogue(string? search, string? genreId, string? authorId, int? rating, int? year, int? edition)
     {
-        var genres = db.Genres.OrderBy(g => g.Name).Select(g => new SelectListItem(g.Name, g.Id)).ToList();
-        var authors = db.Authors.OrderBy(a => a.Name).Select(a => new SelectListItem(a.Name, a.Id)).ToList();
+        var nonArchivedBooks = db.Books.Where(b => !b.IsArchived);
+
+        var genres = nonArchivedBooks
+            .SelectMany(b => b.Genres)
+            .Distinct()
+            .OrderBy(g => g.Name)
+            .Select(g => new SelectListItem(g.Name, g.Id)).ToList();
+        var authors = nonArchivedBooks
+            .SelectMany(b => b.Authors)
+            .Distinct()
+            .OrderBy(a => a.Name)
+            .Select(a => new SelectListItem(a.Name, a.Id)).ToList();
+        var years = nonArchivedBooks.Select(b => b.PublicationYear).Distinct().OrderByDescending(y => y).Select(y => new SelectListItem(y.ToString(), y.ToString())).ToList();
+        var editions = nonArchivedBooks.Select(b => b.Edition).Distinct().OrderBy(e => e).Select(e => new SelectListItem(e.ToString(), e.ToString())).ToList();
 
         ViewBag.Genres = genres;
         ViewBag.Authors = authors;
+        ViewBag.Years = years;
+        ViewBag.Editions = editions;
 
         var query = db.Books
             .Include(b => b.Authors)
@@ -38,6 +53,16 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         if (!string.IsNullOrWhiteSpace(authorId))
         {
             query = query.Where(b => b.Authors.Any(a => a.Id == authorId));
+        }
+
+        if (year.HasValue)
+        {
+            query = query.Where(b => b.PublicationYear == year.Value);
+        }
+
+        if (edition.HasValue)
+        {
+            query = query.Where(b => b.Edition == edition.Value);
         }
 
         var books = query.OrderByDescending(b => b.DateAdded).ToList();
@@ -103,6 +128,9 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         Review? userReview = null;
         string? currentUserId = null;
         ViewBag.HasActiveLoan = false;
+        ViewBag.ActiveLoanId = null;
+        ViewBag.HasActiveReservation = false;
+        ViewBag.ActiveReservationId = null;
 
         if (User.Identity!.IsAuthenticated)
         {
@@ -111,14 +139,27 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
             if (user != null)
             {
                 currentUserId = user.Id;
-                var hasActiveLoan = db.Loans
+                var activeLoan = db.Loans
                     .Include(l => l.Copy)
-                    .Any(l => l.UserId == user.Id &&
+                    .FirstOrDefault(l => l.UserId == user.Id &&
                               l.Copy.BookId == id &&
                               (l.Status == Loan.LoanStatus.RESERVED ||
                                l.Status == Loan.LoanStatus.IN_LOAN ||
                                l.Status == Loan.LoanStatus.OVERDUE));
-                ViewBag.HasActiveLoan = hasActiveLoan;
+                
+                if (activeLoan != null)
+                {
+                    ViewBag.HasActiveLoan = true;
+                    ViewBag.ActiveLoanId = activeLoan.Id;
+                }
+
+                var activeReservation = db.Reservations.FirstOrDefault(r => r.UserId == user.Id && r.BookId == id && (r.Status == Reservation.ReservationStatus.PENDING || r.Status == Reservation.ReservationStatus.READY));
+
+                if (activeReservation != null)
+                {
+                    ViewBag.HasActiveReservation = true;
+                    ViewBag.ActiveReservationId = activeReservation.Id;
+                }
 
                 // Find user's review for this book
                 userReview = reviewsQuery.FirstOrDefault(r => r.Loan.UserId == user.Id);
@@ -233,11 +274,25 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         int pageSize = 10;
         int totalItems = query.Count();
         int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+        if (totalItems <= 1)
+        {
+            dateFrom ??= DateOnly.FromDateTime(DateTime.Today);
+            dateTo ??= DateOnly.FromDateTime(DateTime.Today);
+        }
+
         ViewBag.TotalItems = db.Books.Count();
         if (page < 1) page = 1;
         if (page > totalPages && totalPages > 0) page = totalPages;
 
         var items = query.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+        var bookIds = items.Select(b => b.Id).ToList();
+        var activeCopiesBookIds = db.Copies
+            .Where(c => bookIds.Contains(c.BookId) && (c.Status == Copy.CopyStatus.RESERVED || c.Status == Copy.CopyStatus.BORROWED))
+            .Select(c => c.BookId)
+            .Distinct()
+            .ToHashSet();
 
         var vm = new BookManagementVM
         {
@@ -251,8 +306,9 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
             SelectedGenreId = genreId,
             FilterFeatured = featured,
             FilterArchived = archived,
-            AuthorList = db.Authors.OrderBy(a => a.Name).Select(a => new SelectListItem(a.Name, a.Id)).ToList(),
-            GenreList = db.Genres.OrderBy(g => g.Name).Select(g => new SelectListItem(g.Name, g.Id)).ToList()
+            AuthorList = db.Books.SelectMany(b => b.Authors).Distinct().OrderBy(a => a.Name).Select(a => new SelectListItem(a.Name, a.Id)).ToList(),
+            GenreList = db.Books.SelectMany(b => b.Genres).Distinct().OrderBy(g => g.Name).Select(g => new SelectListItem(g.Name, g.Id)).ToList(),
+            CanDelete = items.ToDictionary(b => b.Id, b => !activeCopiesBookIds.Contains(b.Id))
         };
 
         var allDates = db.Books.Select(b => b.DateAdded);
@@ -504,7 +560,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
     }
 
     [HttpPost]
-    [Authorize(Roles = "ADMIN, STAFF")]
+    [Authorize(Roles = "ADMIN")]
     public IActionResult DeleteBook(string id)
     {
         var book = db.Books.Find(id);
@@ -527,7 +583,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
     }
 
     [HttpPost]
-    [Authorize(Roles = "ADMIN, STAFF")]
+    [Authorize(Roles = "ADMIN")]
     public IActionResult BatchDeleteBook(List<string> ids)
     {
         if (ids == null || ids.Count == 0)
@@ -587,6 +643,12 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         }
 
         db.SaveChanges();
+
+        foreach (var obj in addedCopies)
+        {
+            var copyId = obj.GetType().GetProperty("Id")?.GetValue(obj, null) as string;
+            if (copyId != null) rs.AssignNextReservation(bookId, copyId);
+        }
 
         TempData["ToastMessage"] = $"{quantity} copies added successfully.";
         TempData["ToastType"] = "success";
@@ -753,7 +815,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
     }
 
     [Authorize(Roles = "ADMIN, STAFF")]
-    public IActionResult ManageGenre(string? search, int page = 1, string sort = "Name", string order = "asc")
+    public IActionResult ManageGenre(string? search, bool? hasBooks, int page = 1, string sort = "Name", string order = "asc")
     {
         var query = db.Genres.Include(g => g.Books).AsQueryable();
 
@@ -761,6 +823,12 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         {
             search = search.Trim();
             query = query.Where(g => g.Name.Contains(search));
+        }
+
+        if (hasBooks.HasValue)
+        {
+            if (hasBooks.Value) query = query.Where(g => g.Books.Any());
+            else query = query.Where(g => !g.Books.Any());
         }
 
         bool isDesc = order == "desc";
@@ -788,7 +856,8 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
             TotalPages = totalPages,
             SearchTerm = search,
             SortColumn = sort,
-            SortOrder = order
+            SortOrder = order,
+            FilterHasBooks = hasBooks
         };
 
         if (Request.IsAjax())
@@ -850,7 +919,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
     }
 
     [HttpPost]
-    [Authorize(Roles = "ADMIN, STAFF")]
+    [Authorize(Roles = "ADMIN")]
     public IActionResult DeleteGenre(string id)
     {
         // 1. Fetch Genres with all their Books
@@ -885,7 +954,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
     }
 
     [HttpPost]
-    [Authorize(Roles = "ADMIN, STAFF")]
+    [Authorize(Roles = "ADMIN")]
     public IActionResult BatchDeleteGenre(List<string> ids)
     {
         if (ids == null || ids.Count == 0)
@@ -928,7 +997,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
     }
 
     [Authorize(Roles = "ADMIN, STAFF")]
-    public IActionResult ManageAuthor(string? search, int page = 1, string sort = "Name", string order = "asc")
+    public IActionResult ManageAuthor(string? search, bool? hasBooks, int page = 1, string sort = "Name", string order = "asc")
     {
         var query = db.Authors.Include(a => a.Books).AsQueryable();
 
@@ -936,6 +1005,12 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         {
             search = search.Trim();
             query = query.Where(a => a.Name.Contains(search));
+        }
+
+        if (hasBooks.HasValue)
+        {
+            if (hasBooks.Value) query = query.Where(a => a.Books.Any());
+            else query = query.Where(a => !a.Books.Any());
         }
 
         bool isDesc = order == "desc";
@@ -963,7 +1038,8 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
             TotalPages = totalPages,
             SearchTerm = search,
             SortColumn = sort,
-            SortOrder = order
+            SortOrder = order,
+            FilterHasBooks = hasBooks
         };
 
         if (Request.IsAjax())
@@ -1025,7 +1101,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
     }
 
     [HttpPost]
-    [Authorize(Roles = "ADMIN, STAFF")]
+    [Authorize(Roles = "ADMIN")]
     public IActionResult DeleteAuthor(string id)
     {
         // 1. Fetch Authors with all their Books
@@ -1060,7 +1136,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
     }
 
     [HttpPost]
-    [Authorize(Roles = "ADMIN, STAFF")]
+    [Authorize(Roles = "ADMIN")]
     public IActionResult BatchDeleteAuthor(List<string> ids)
     {
         if (ids == null || ids.Count == 0)
@@ -1201,5 +1277,130 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         db.SaveChanges();
 
         return Json(new { success = true, message = "Review submitted successfully." });
+    }
+
+    [Authorize(Roles = "ADMIN, STAFF")]
+    public IActionResult ManageReviews(string? search, int? rating, DateOnly? dateFrom, DateOnly? dateTo, int page = 1, string sort = "Date", string order = "desc")
+    {
+        var query = db.Reviews
+            .Include(r => r.Loan)
+            .ThenInclude(l => l.User)
+            .Include(r => r.Loan)
+            .ThenInclude(l => l.Copy)
+            .ThenInclude(c => c.Book)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            search = search.Trim();
+            query = query.Where(r => r.Loan.User.Username.Contains(search) || 
+                                     r.Loan.Copy.Book.Title.Contains(search) || 
+                                     r.Comment.Contains(search));
+        }
+
+        if (rating.HasValue)
+        {
+            query = query.Where(r => r.Rating == rating.Value);
+        }
+
+        if (dateFrom.HasValue)
+        {
+            query = query.Where(r => DateOnly.FromDateTime(r.ReviewDate) >= dateFrom.Value);
+        }
+
+        if (dateTo.HasValue)
+        {
+            query = query.Where(r => DateOnly.FromDateTime(r.ReviewDate) <= dateTo.Value);
+        }
+
+        bool isDesc = order == "desc";
+        query = sort switch
+        {
+            "Date" => isDesc ? query.OrderByDescending(r => r.ReviewDate) : query.OrderBy(r => r.ReviewDate),
+            "Rating" => isDesc ? query.OrderByDescending(r => r.Rating) : query.OrderBy(r => r.Rating),
+            "User" => isDesc ? query.OrderByDescending(r => r.Loan.User.Username) : query.OrderBy(r => r.Loan.User.Username),
+            "Book" => isDesc ? query.OrderByDescending(r => r.Loan.Copy.Book.Title) : query.OrderBy(r => r.Loan.Copy.Book.Title),
+            _ => isDesc ? query.OrderByDescending(r => r.ReviewDate) : query.OrderBy(r => r.ReviewDate)
+        };
+
+        int pageSize = 10;
+        int totalItems = query.Count();
+        int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+        if (totalItems <= 1)
+        {
+            dateFrom ??= DateOnly.FromDateTime(DateTime.Today);
+            dateTo ??= DateOnly.FromDateTime(DateTime.Today);
+        }
+
+        ViewBag.TotalItems = totalItems;
+        if (page < 1) page = 1;
+        if (page > totalPages && totalPages > 0) page = totalPages;
+
+        var allDates = db.Reviews.Select(r => r.ReviewDate);
+        ViewBag.MinDate = allDates.Any() ? allDates.Min().ToString("yyyy-MM-dd") : null;
+        ViewBag.MaxDate = allDates.Any() ? allDates.Max().ToString("yyyy-MM-dd") : null;
+
+        var reviews = query.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+        var vm = new ReviewManagementVM
+        {
+            Reviews = reviews,
+            CurrentPage = page,
+            TotalPages = totalPages,
+            SearchTerm = search,
+            SortColumn = sort,
+            SortOrder = order,
+            FilterRating = rating,
+            DateFrom = dateFrom,
+            DateTo = dateTo
+        };
+
+        if (Request.IsAjax())
+        {
+            return PartialView("_TableReview", vm);
+        }
+
+        return View(vm);
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "ADMIN, STAFF")]
+    public IActionResult DeleteReview(string id, string reason)
+    {
+        var review = db.Reviews
+            .Include(r => r.Loan)
+            .ThenInclude(l => l.Copy)
+            .ThenInclude(c => c.Book)
+            .FirstOrDefault(r => r.Id == id);
+
+        if (review == null)
+        {
+            TempData["ToastMessage"] = "Review not found.";
+            TempData["ToastType"] = "error";
+            return RedirectToAction("ManageReviews");
+        }
+
+        if (string.IsNullOrWhiteSpace(reason))
+        {
+            TempData["ToastMessage"] = "A reason is required to delete a review.";
+            TempData["ToastType"] = "warning";
+            return RedirectToAction("ManageReviews");
+        }
+
+        // Send Notification
+        var userId = review.Loan.UserId;
+        var bookTitle = review.Loan.Copy.Book.Title;
+        var message = $"Your review for '{bookTitle}' was deleted by a moderator. Reason: {reason}";
+        
+        ns.Notify(userId, message, "/Loan/Reviews");
+
+        db.Reviews.Remove(review);
+        db.SaveChanges();
+
+        TempData["ToastMessage"] = "Review deleted and user notified.";
+        TempData["ToastType"] = "success";
+
+        return RedirectToAction("ManageReviews");
     }
 }

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+﻿﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using static LibraryManagementSystem.Helper;
@@ -255,6 +255,8 @@ public class BookManagementVM
     public List<SelectListItem> AuthorList { get; set; } = new();
 
     public List<SelectListItem> GenreList { get; set; } = new();
+
+    public Dictionary<string, bool> CanDelete { get; set; } = new();
 }
 
 public class BookInsertVM
@@ -393,6 +395,8 @@ public class GenreManagementVM
     public string SortColumn { get; set; } = "Name";
 
     public string SortOrder { get; set; } = "asc";
+
+    public bool? FilterHasBooks { get; set; }
 }
 
 public class GenreVM
@@ -422,6 +426,8 @@ public class AuthorManagementVM
     public string SortColumn { get; set; } = "Name";
     
     public string SortOrder { get; set; } = "asc";
+
+    public bool? FilterHasBooks { get; set; }
 }
 
 
@@ -476,6 +482,23 @@ public class ReservationVM
 
     [Display(Name = "Queue Position")]
     public int? QueuePosition { get; set; }
+
+    public string? BookTitle { get; set; }
+    public string? BookImageURL { get; set; }
+    public string? BookAuthors { get; set; }
+}
+
+public class ReservationListVM
+{
+    public List<ReservationVM> Reservations { get; set; } = new();
+    public int CurrentPage { get; set; }
+    public int TotalPages { get; set; }
+    public string? SearchTerm { get; set; }
+    public string SortColumn { get; set; } = "ReservationDate";
+    public string SortOrder { get; set; } = "desc";
+    public string? FilterStatus { get; set; }
+    public DateOnly? DateFrom { get; set; }
+    public DateOnly? DateTo { get; set; }
 }
 
 public class PaymentVM : IValidatableObject
@@ -742,6 +765,8 @@ public class LoanHistoryVM
     public string SortColumn { get; set; } = "LoanDate";
     public string SortOrder { get; set; } = "desc";
     public string? FilterStatus { get; set; }
+    public DateOnly? DateFrom { get; set; }
+    public DateOnly? DateTo { get; set; }
 }
 
 public class ReviewHistoryVM
@@ -749,4 +774,23 @@ public class ReviewHistoryVM
     public List<Loan> Loans { get; set; } = new();
     public int CurrentPage { get; set; }
     public int TotalPages { get; set; }
+    public string? SearchTerm { get; set; }
+    public string SortColumn { get; set; } = "Date";
+    public string SortOrder { get; set; } = "desc";
+    public int? FilterRating { get; set; }
+    public DateOnly? DateFrom { get; set; }
+    public DateOnly? DateTo { get; set; }
+}
+
+public class ReviewManagementVM
+{
+    public List<Review> Reviews { get; set; } = new();
+    public int CurrentPage { get; set; }
+    public int TotalPages { get; set; }
+    public string? SearchTerm { get; set; }
+    public string SortColumn { get; set; } = "Date";
+    public string SortOrder { get; set; } = "desc";
+    public int? FilterRating { get; set; }
+    public DateOnly? DateFrom { get; set; }
+    public DateOnly? DateTo { get; set; }
 }
