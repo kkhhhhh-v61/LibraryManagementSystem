@@ -693,3 +693,10 @@ public class LoanHistoryVM
     public string SortOrder { get; set; } = "desc";
     public string? FilterStatus { get; set; }
 }
+
+public class ReviewHistoryVM
+{
+    public List<Loan> Loans { get; set; } = new();
+    public int CurrentPage { get; set; }
+    public int TotalPages { get; set; }
+}

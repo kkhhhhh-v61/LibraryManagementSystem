@@ -961,6 +961,12 @@
     gap: var(--spacing-xs);
 }
 
+.book-card__rating {
+    display: flex;
+    align-items: center;
+    margin-top: var(--spacing-sm);
+}
+
 @media (max-width: 768px) {
     .toolbar-top {
         flex-wrap: wrap;
@@ -1138,6 +1144,22 @@
     border: 1px solid var(--color-gray-200);
 }
 
+.review-card--highlight {
+    border-color: var(--color-primary-base);
+    background-color: #f0f9ff;
+}
+
+.review-badge {
+    display: inline-block;
+    background-color: var(--color-primary-base);
+    color: white;
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
 .review-header {
     display: flex;
     align-items: center;
@@ -1311,7 +1333,8 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     z-index: 50;
     display: none;
-    overflow: hidden;
+    overflow-y: auto;
+    max-height: 300px;
 }
 
 .filter-dropdown.active .filter-dropdown__menu {

@@ -75,6 +75,50 @@ namespace LibraryManagementSystem.Controllers
             return View(vm);
         }
 
+        public IActionResult Reviews(int page = 1)
+        {
+            var username = User.Identity?.Name;
+            var user = db.Users.FirstOrDefault(u => u.Username == username);
+            if (user == null) return RedirectToAction("Login", "Account");
+
+            var allLoans = db.Loans
+                .Include(l => l.Review)
+                .Include(l => l.Copy)
+                .ThenInclude(c => c.Book)
+                .Where(l => l.UserId == user.Id && l.Status == Loan.LoanStatus.RETURNED)
+                .OrderByDescending(l => l.ReturnDate)
+                .ToList();
+
+            var uniqueLoans = allLoans
+                .GroupBy(l => l.Copy.BookId)
+                .Select(g => 
+                {
+                    var reviewedLoan = g.FirstOrDefault(l => l.Review != null);
+                    if (reviewedLoan != null) return reviewedLoan;
+
+                    return g.First();
+                })
+                .OrderByDescending(l => l.Review != null ? l.Review.ReviewDate : l.ReturnDate.GetValueOrDefault().ToDateTime(TimeOnly.MinValue))
+                .ToList();
+
+            int pageSize = 10;
+            int totalItems = uniqueLoans.Count;
+            int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+            if (page < 1) page = 1;
+            if (page > totalPages && totalPages > 0) page = totalPages;
+
+            var loans = uniqueLoans.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            var vm = new ReviewHistoryVM
+            {
+                Loans = loans,
+                CurrentPage = page,
+                TotalPages = totalPages
+            };
+
+            return View(vm);
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(string bookId)

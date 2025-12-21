@@ -471,12 +471,28 @@ function bindStaticModalEvents() {
                         ? `Cannot delete (${books} books linked)`
                         : "Ready to process";
 
-                    if (status && status !== "AVAILABLE") {
-                        isUnsafe = true;
-                        const formattedStatus =
-                            status.charAt(0).toUpperCase() +
-                            status.slice(1).toLowerCase();
-                        statusText = `Cannot delete (${formattedStatus})`;
+                    const isLoanCancel =
+                        batchForm.action.includes("BatchCancelLoan");
+
+                    if (status) {
+                        if (isLoanCancel) {
+                            if (status === "RESERVED") {
+                                isUnsafe = false;
+                                statusText = "Ready to cancel";
+                            } else {
+                                isUnsafe = true;
+                                const formattedStatus =
+                                    status.charAt(0).toUpperCase() +
+                                    status.slice(1).toLowerCase();
+                                statusText = `Cannot cancel (${formattedStatus})`;
+                            }
+                        } else if (status !== "AVAILABLE") {
+                            isUnsafe = true;
+                            const formattedStatus =
+                                status.charAt(0).toUpperCase() +
+                                status.slice(1).toLowerCase();
+                            statusText = `Cannot delete (${formattedStatus})`;
+                        }
                     }
 
                     const item = document.createElement("div");

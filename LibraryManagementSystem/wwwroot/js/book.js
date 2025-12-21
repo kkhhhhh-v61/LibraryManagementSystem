@@ -1,4 +1,4 @@
-﻿/* ===========================================================================
+﻿﻿/* ===========================================================================
    MULTI-SELECT DROPDOWN
    =========================================================================== */
 
@@ -220,6 +220,7 @@ function initializeCatalogue() {
     const gridWrapper = document.getElementById("catalogueGrid");
     const filterGenre = document.getElementById("filterGenre");
     const filterAuthor = document.getElementById("filterAuthor");
+    const filterRating = document.getElementById("filterRating");
     const searchClear = document.getElementById("catalogueSearchClear");
 
     if (filterMenu && filterTrigger) {
@@ -240,11 +241,13 @@ function initializeCatalogue() {
         const term = searchInput ? searchInput.value : "";
         const genreId = filterGenre ? filterGenre.value : "";
         const authorId = filterAuthor ? filterAuthor.value : "";
+        const rating = filterRating ? filterRating.value : "";
 
         const params = new URLSearchParams();
         if (term) params.set("search", term);
         if (genreId) params.set("genreId", genreId);
         if (authorId) params.set("authorId", authorId);
+        if (rating) params.set("rating", rating);
 
         fetch(`/Book/Catalogue?${params.toString()}`, {
             headers: { "X-Requested-With": "XMLHttpRequest" },
@@ -288,6 +291,10 @@ function initializeCatalogue() {
 
     if (filterAuthor) {
         filterAuthor.addEventListener("change", debouncedSearch);
+    }
+
+    if (filterRating) {
+        filterRating.addEventListener("change", debouncedSearch);
     }
 
     if (clearBtn) {

@@ -11,7 +11,7 @@ namespace LibraryManagementSystem.Controllers;
 
 public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
 {
-    public IActionResult Catalogue(string? search, string? genreId, string? authorId)
+    public IActionResult Catalogue(string? search, string? genreId, string? authorId, int? rating)
     {
         var genres = db.Genres.OrderBy(g => g.Name).Select(g => new SelectListItem(g.Name, g.Id)).ToList();
         var authors = db.Authors.OrderBy(a => a.Name).Select(a => new SelectListItem(a.Name, a.Id)).ToList();
@@ -41,6 +41,25 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         }
 
         var books = query.OrderByDescending(b => b.DateAdded).ToList();
+
+        // Calculate Ratings
+        var bookIds = books.Select(b => b.Id).ToList();
+        var ratingsData = db.Reviews
+            .Include(r => r.Loan)
+            .ThenInclude(l => l.Copy)
+            .Where(r => bookIds.Contains(r.Loan.Copy.BookId))
+            .GroupBy(r => r.Loan.Copy.BookId)
+            .Select(g => new { BookId = g.Key, Average = g.Average(r => r.Rating) })
+            .ToList();
+
+        var ratingDict = ratingsData.ToDictionary(x => x.BookId, x => x.Average);
+
+        if (rating.HasValue)
+        {
+            books = books.Where(b => ratingDict.ContainsKey(b.Id) && ratingDict[b.Id] >= rating.Value).ToList();
+        }
+
+        ViewBag.BookRatings = ratingDict;
 
         if (Request.IsAjax())
         {
@@ -81,10 +100,49 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         ViewBag.AverageRating = avgRating;
         ViewBag.TotalReviews = totalReviews;
 
+        Review? userReview = null;
+        string? currentUserId = null;
+        ViewBag.HasActiveLoan = false;
+
+        if (User.Identity!.IsAuthenticated)
+        {
+            var username = User.Identity.Name;
+            var user = db.Users.FirstOrDefault(u => u.Username == username);
+            if (user != null)
+            {
+                currentUserId = user.Id;
+                var hasActiveLoan = db.Loans
+                    .Include(l => l.Copy)
+                    .Any(l => l.UserId == user.Id &&
+                              l.Copy.BookId == id &&
+                              (l.Status == Loan.LoanStatus.RESERVED ||
+                               l.Status == Loan.LoanStatus.IN_LOAN ||
+                               l.Status == Loan.LoanStatus.OVERDUE));
+                ViewBag.HasActiveLoan = hasActiveLoan;
+
+                // Find user's review for this book
+                userReview = reviewsQuery.FirstOrDefault(r => r.Loan.UserId == user.Id);
+            }
+        }
+
+        ViewBag.CurrentUserId = currentUserId;
+
         // Filtering
         if (rating.HasValue)
         {
             reviewsQuery = reviewsQuery.Where(r => r.Rating == rating.Value);
+
+            // If user review doesn't match filter, ignore it for pinning
+            if (userReview != null && userReview.Rating != rating.Value)
+            {
+                userReview = null;
+            }
+        }
+
+        // Exclude user review from main query to avoid duplication
+        if (userReview != null)
+        {
+            reviewsQuery = reviewsQuery.Where(r => r.Id != userReview.Id);
         }
 
         // Sorting & Pagination
@@ -94,31 +152,22 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         if (page < 1) page = 1;
         if (page > totalPages && totalPages > 0) page = totalPages;
 
+        // Ensure at least 1 page if we have a pinned review but no other reviews
+        if (totalPages == 0 && userReview != null) totalPages = 1;
+
         var pagedReviews = reviewsQuery.OrderByDescending(r => r.ReviewDate).Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+        // Pin user review to the top if on page 1
+        if (page == 1 && userReview != null)
+        {
+            pagedReviews.Insert(0, userReview);
+        }
 
         ViewBag.Reviews = pagedReviews;
         ViewBag.CurrentPage = page;
         ViewBag.TotalPages = totalPages;
         ViewBag.CurrentRating = rating;
         ViewBag.BookId = id;
-
-        var hasActiveLoan = false;
-        if (User.Identity!.IsAuthenticated)
-        {
-            var username = User.Identity.Name;
-            var user = db.Users.FirstOrDefault(u => u.Username == username);
-            if (user != null)
-            {
-                hasActiveLoan = db.Loans
-                    .Include(l => l.Copy)
-                    .Any(l => l.UserId == user.Id &&
-                              l.Copy.BookId == id &&
-                              (l.Status == Loan.LoanStatus.RESERVED ||
-                               l.Status == Loan.LoanStatus.IN_LOAN ||
-                               l.Status == Loan.LoanStatus.OVERDUE));
-            }
-        }
-        ViewBag.HasActiveLoan = hasActiveLoan;
 
         if (Request.IsAjax())
         {
@@ -1105,25 +1154,50 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         var user = db.Users.FirstOrDefault(u => u.Username == username);
         if (user == null) return Json(new { success = false, message = "User not found." });
 
-        var loan = db.Loans.Include(l => l.Review).FirstOrDefault(l => l.Id == loanId && l.UserId == user.Id);
+        var loan = db.Loans
+            .Include(l => l.Review)
+            .Include(l => l.Copy)
+            .FirstOrDefault(l => l.Id == loanId && l.UserId == user.Id);
 
         if (loan == null) return Json(new { success = false, message = "Loan record not found." });
         if (loan.Status != Loan.LoanStatus.RETURNED) return Json(new { success = false, message = "You can only review returned books." });
-        if (loan.Review != null) return Json(new { success = false, message = "You have already reviewed this book." });
 
         if (rating < 1 || rating > 5) return Json(new { success = false, message = "Please provide a rating." });
 
-        var lastId = db.Reviews.OrderByDescending(r => r.Id).Select(r => r.Id).FirstOrDefault();
-        var review = new Review
+        if (loan.Review != null)
         {
-            Id = Helper.GenerateNewId(lastId, 'R'),
-            LoanId = loanId,
-            Rating = rating,
-            Comment = comment?.Trim(),
-            ReviewDate = DateTime.Now
-        };
+            loan.Review.Rating = rating;
+            loan.Review.Comment = comment?.Trim();
+            loan.Review.ReviewDate = DateTime.Now;
+        }
+        else
+        {
+            var existingReview = db.Reviews
+                .Include(r => r.Loan)
+                .ThenInclude(l => l.Copy)
+                .FirstOrDefault(r => r.Loan.UserId == user.Id && r.Loan.Copy.BookId == loan.Copy.BookId);
 
-        db.Reviews.Add(review);
+            if (existingReview != null)
+            {
+                existingReview.Rating = rating;
+                existingReview.Comment = comment?.Trim();
+                existingReview.ReviewDate = DateTime.Now;
+            }
+            else
+            {
+                var lastId = db.Reviews.OrderByDescending(r => r.Id).Select(r => r.Id).FirstOrDefault();
+                var review = new Review
+                {
+                    Id = Helper.GenerateNewId(lastId, 'R'),
+                    LoanId = loanId,
+                    Rating = rating,
+                    Comment = comment?.Trim(),
+                    ReviewDate = DateTime.Now
+                };
+                db.Reviews.Add(review);
+            }
+        }
+        
         db.SaveChanges();
 
         return Json(new { success = true, message = "Review submitted successfully." });

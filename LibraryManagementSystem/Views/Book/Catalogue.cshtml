@@ -1,4 +1,4 @@
-﻿@using Microsoft.AspNetCore.Mvc.Rendering
+﻿﻿@using Microsoft.AspNetCore.Mvc.Rendering
 @model List<Book>
 @{
     ViewBag.Title = "Catalogue";
@@ -57,6 +57,24 @@
                                     {
                                         <div class="filter-dropdown__item" data-value="@item.Value">@item.Text</div>
                                     }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Rating</label>
+                            <div class="filter-dropdown" id="dropdownRating">
+                                <input type="hidden" id="filterRating" name="rating" value="" />
+                                <div class="filter-dropdown__trigger">
+                                    <span class="trigger__text">All Ratings</span>
+                                    <svg class="trigger__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" height="24" width="24" fill="currentColor"><path d="M480-360 280-560h400L480-360Z"/></svg>
+                                    <button class="filter-clear" type="button" title="Clear Filter"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg></button>
+                                </div>
+                                <div class="filter-dropdown__menu">
+                                    <div class="filter-dropdown__item" data-value="">All Ratings</div>
+                                    <div class="filter-dropdown__item" data-value="4">4 Stars & Up</div>
+                                    <div class="filter-dropdown__item" data-value="3">3 Stars & Up</div>
+                                    <div class="filter-dropdown__item" data-value="2">2 Stars & Up</div>
+                                    <div class="filter-dropdown__item" data-value="1">1 Star & Up</div>
                                 </div>
                             </div>
                         </div>

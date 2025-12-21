@@ -67,6 +67,7 @@
 
                     <div class="sidebar-subnav">
                         <a asp-controller="Loan" asp-action="History" class="sidebar-subnav__link @Html.IsActive("Loan", "History", "sidebar-subnav__link--active")">History</a>
+                        <a asp-controller="Loan" asp-action="Reviews" class="sidebar-subnav__link @Html.IsActive("Loan", "Reviews", "sidebar-subnav__link--active")">My Reviews</a>
                         <div class="sidebar-subnav__separator"></div>
                         <a asp-controller="Loan" asp-action="Process" class="sidebar-subnav__link @Html.IsActive("Loan", "Process", "sidebar-subnav__link--active")">Process Loan</a>
                         <a asp-controller="Loan" asp-action="ManageLoan" class="sidebar-subnav__link @Html.IsActive("Loan", "ManageLoan", "sidebar-subnav__link--active")">Manage Loan</a>

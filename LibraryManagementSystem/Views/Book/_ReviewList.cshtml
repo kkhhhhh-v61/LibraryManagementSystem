@@ -5,6 +5,7 @@
     int? currentRating = ViewBag.CurrentRating;
     string bookId = ViewBag.BookId;
     int totalReviews = ViewBag.TotalReviews ?? 0;
+    string? currentUserId = ViewBag.CurrentUserId as string;
 }
 
 @if (Model != null && Model.Any())
@@ -12,7 +13,12 @@
     <div class="reviews-list">
         @foreach (var review in Model)
         {
-            <div class="review-card">
+            bool isUserReview = !string.IsNullOrEmpty(currentUserId) && review.Loan.UserId == currentUserId;
+            <div class="review-card @(isUserReview ? "review-card--highlight" : "")">
+                @if (isUserReview)
+                {
+                    <div class="review-badge">Your Review</div>
+                }
                 <div class="review-header">
                     <img src="@(string.IsNullOrEmpty(review.Loan.User.ImageURL) || review.Loan.User.ImageURL == "default-profile.png" ? "/images/assets/default-profile.png" : $"/images/profiles/{review.Loan.User.ImageURL}")" class="review-avatar" alt="@review.Loan.User.Username" />
                     <div class="review-user-info">
