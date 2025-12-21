@@ -23,7 +23,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     .AddCookie(options =>
     {
         options.LoginPath = "/Account/Login";
-        options.AccessDeniedPath = "/Account/AccessDenied";
+        options.AccessDeniedPath = "/Account/AccessDenied"; // Optional
     });
 
 builder.Services.AddTransient<IEmailService, EmailService>();
@@ -33,6 +33,7 @@ builder.Services.AddScoped<IWishlistService, WishlistService>();
 builder.Services.AddScoped<IReservationService, ReservationService>();
 builder.Services.AddScoped<IFineService, FineService>();
 builder.Services.AddHostedService<FineBackgroundService>();
+builder.Services.AddHostedService<LoanBackgroundService>();
 
 builder.Services.AddHostedService<BookingReminderService>();
 

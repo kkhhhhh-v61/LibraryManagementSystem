@@ -1,49 +1,114 @@
-﻿@inject LibraryManagementSystem.Models.LMSDB db
+﻿@model IEnumerable<Book>
+@inject LibraryManagementSystem.Models.LMSDB db
 @{
-    ViewBag.Title = "Home";
+    ViewBag.Title = "Welcome to BookBase";
+    var featuredBooks = ViewBag.FeaturedBooks as List<Book> ?? new List<Book>();
+    var newArrivals = ViewBag.NewArrivals as List<Book> ?? new List<Book>();
+    var topRatedBooks = ViewBag.TopRatedBooks as List<Book> ?? new List<Book>();
+    var recommendedBooks = ViewBag.RecommendedBooks as List<Book> ?? new List<Book>();
+    var ratings = ViewBag.BookRatings as Dictionary<string, double> ?? new Dictionary<string, double>();
 }
 
 @section head {
+    <link rel="stylesheet" href="/css/home.css" asp-append-version="true" />
     <link rel="stylesheet" href="/css/book.css" asp-append-version="true" />
 }
 
-<section class="layout__feed">
-    @if (User.Identity.IsAuthenticated)
-    {
-        <!-- TEMPORARY: Notification Test Feature -->
-        <div style="background-color: var(--color-white); padding: var(--spacing-md); border-radius: var(--spacing-sm); border: 2px dashed var(--color-gray-300); margin-bottom: var(--spacing-md);">
-            <h3 style="margin-bottom: var(--spacing-sm); color: var(--color-gray-700);">🔔 Notification Test</h3>
-            <p style="margin-bottom: var(--spacing-md); color: var(--color-gray-500); font-size: var(--text-sm);">
-                This is a temporary form to test the notification system. Messages will be sent to the currently logged-in user.
-            </p>
-            <form asp-controller="Notification" asp-action="TestCreate" method="post" style="display: flex; flex-direction: column; gap: var(--spacing-sm);">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-sm);">
-                    <select name="userId" class="field__input" style="height: 40px; padding: 0 12px; font-size: 0.9rem;">
-                        <option value="current">Current User (Me)</option>
-                        @foreach (var u in db.Users.OrderBy(u => u.Username))
-                        {
-                            <option value="@u.Id">@u.Username (@u.Role)</option>
-                        }
-                    </select>
-                    <select name="link" class="field__input" style="height: 40px; padding: 0 12px; font-size: 0.9rem;">
-                        <option value="">-- No Link --</option>
-                        <option value="/">Home</option>
-                        <option value="/Book/Catalogue">Catalogue</option>
-                        <option value="/Account/Profile">My Profile</option>
-                        <option value="/Loan/History">Loan History</option>
-                        <option value="/Booking/Index">Room Booking</option>
-                    </select>
-                </div>
-                <div style="display: flex; gap: var(--spacing-sm);">
-                    <input type="text" name="message" placeholder="Type a test message..." required 
-                           class="field__input" style="flex: 1; height: 40px; padding: 0 12px; font-size: 0.9rem;" data-trim />
-                    <button type="submit" class="btn" style="white-space: nowrap; background-color: var(--color-primary-base)">Send</button>
-                </div>
+<div class="home-container">
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">Discover Your Next Great Read</h1>
+            <p class="hero-subtitle">Explore thousands of books, reserve study rooms, and connect with a community of readers.</p>
+            <form asp-controller="Book" asp-action="Catalogue" method="get" class="hero-search-form">
+                <input type="text" name="search" class="hero-search-input" placeholder="Search for a book, author, or ISBN..." autocomplete="off" />
+                <button type="submit" class="hero-search-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
+                        <path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z" />
+                    </svg>
+                </button>
             </form>
         </div>
-    }
-</section>
+    </section>
 
-<aside class="layout__details">
-    
-</aside>
+    <!-- Featured Books Section -->
+    @if (featuredBooks.Any())
+    {
+        <section class="book-carousel-section">
+            <div class="section-header">
+                <h2 class="section-heading">Featured Books</h2>
+            </div>
+            <div class="book-carousel">
+                @foreach (var book in featuredBooks)
+                {
+                    <partial name="_BookCard" model="book" view-data='new ViewDataDictionary(ViewData) { { "Ratings", ratings } }' />
+                }
+            </div>
+        </section>
+    }
+
+    <!-- Recommended Section -->
+    @if (recommendedBooks.Any())
+    {
+        <section class="book-carousel-section">
+            <div class="section-header">
+                <h2 class="section-heading">Recommended for You</h2>
+            </div>
+            <div class="book-carousel">
+                @foreach (var book in recommendedBooks)
+                {
+                    <partial name="_BookCard" model="book" view-data='new ViewDataDictionary(ViewData) { { "Ratings", ratings } }' />
+                }
+            </div>
+        </section>
+    }
+
+    <!-- New Arrivals Section -->
+    @if (newArrivals.Any())
+    {
+        <section class="book-carousel-section">
+            <div class="section-header">
+                <h2 class="section-heading">New Arrivals</h2>
+            </div>
+            <div class="book-carousel">
+                @foreach (var book in newArrivals)
+                {
+                    <partial name="_BookCard" model="book" view-data='new ViewDataDictionary(ViewData) { { "Ratings", ratings } }' />
+                }
+            </div>
+        </section>
+    }
+
+    <!-- Top Rated Section -->
+    @if (topRatedBooks.Any())
+    {
+        <section class="book-carousel-section">
+            <div class="section-header">
+                <h2 class="section-heading">Top Rated</h2>
+            </div>
+            <div class="book-carousel">
+                @foreach (var book in topRatedBooks)
+                {
+                    <partial name="_BookCard" model="book" view-data='new ViewDataDictionary(ViewData) { { "Ratings", ratings } }' />
+                }
+            </div>
+        </section>
+    }
+
+    <!-- Call to Action for Guests -->
+    @if (!User.Identity.IsAuthenticated)
+    {
+        <section class="cta-section">
+            <div class="cta-content">
+                <h2 class="cta-title">Join Our Community</h2>
+                <p class="cta-text">Register for an account to borrow books, make reservations, and access all our library services.</p>
+                <div class="cta-buttons">
+                    <a asp-controller="Account" asp-action="Register" class="btn btn--primary">Register Now</a>
+                    <a asp-controller="Account" asp-action="Login" class="btn btn--secondary">Login</a>
+                </div>
+            </div>
+        </section>
+    }
+
+</div>

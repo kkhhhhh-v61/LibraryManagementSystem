@@ -9,12 +9,13 @@ public interface IFineService
     List<Fine> GetUserFines(string userId);
 }
 
-public class FineService(LMSDB db) : IFineService
+public class FineService(LMSDB db, INotificationService ns) : IFineService
 {
     public async Task GenerateFines()
     {
         var today = DateTime.Now.Date;
         var overdueLoans = await db.Loans
+            .Include(l => l.Copy).ThenInclude(c => c.Book)
             .Where(l => (l.Status == Loan.LoanStatus.IN_LOAN || l.Status == Loan.LoanStatus.OVERDUE) && l.LoanDue < DateOnly.FromDateTime(today))
             .ToListAsync();
 
@@ -25,6 +26,7 @@ public class FineService(LMSDB db) : IFineService
             if (loan.Status != Loan.LoanStatus.OVERDUE)
             {
                 loan.Status = Loan.LoanStatus.OVERDUE;
+                ns.Notify(loan.UserId, $"Alert: Your loan for '{loan.Copy.Book.Title}' is now overdue. Please return it immediately to avoid further fines.", "/Loan/History");
             }
 
             var daysOverdue = (today - loan.LoanDue.ToDateTime(TimeOnly.MinValue)).Days;
@@ -70,6 +72,7 @@ public class FineService(LMSDB db) : IFineService
                         LoanId = loan.Id
                     };
                     db.Fines.Add(fine);
+                    ns.Notify(loan.UserId, $"You have incurred a new fine of RM {fine.Amount:F2} for the overdue book '{loan.Copy.Book.Title}'.", "/Fine/Records");
                 }
             }
         }

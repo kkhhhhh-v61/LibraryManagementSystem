@@ -1,4 +1,4 @@
-﻿﻿﻿﻿using Microsoft.AspNetCore.Mvc;
+﻿﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using LibraryManagementSystem.Extensions;
@@ -7,7 +7,7 @@ using LibraryManagementSystem.Services;
 namespace LibraryManagementSystem.Controllers
 {
     [Authorize]
-    public class LoanController(LMSDB db, IReservationService rs, IFineService fs) : Controller
+    public class LoanController(LMSDB db, IReservationService rs, IFineService fs, INotificationService ns) : Controller
     {
         [Authorize(Roles = "MEMBER")]
         public IActionResult History(string? search, string? status, DateOnly? dateFrom, DateOnly? dateTo, int page = 1, string sort = "LoanDate", string order = "desc")
@@ -548,13 +548,18 @@ namespace LibraryManagementSystem.Controllers
                 return RedirectToAction("ManageLoan");
             }
 
-            var loan = db.Loans.Find(vm.Id);
+            var loan = db.Loans
+                .Include(l => l.Copy).ThenInclude(c => c.Book)
+                .FirstOrDefault(l => l.Id == vm.Id);
+
             if (loan == null)
             {
                 TempData["ToastMessage"] = "Loan record not found.";
                 TempData["ToastType"] = "error";
                 return RedirectToAction("ManageLoan");
             }
+
+            var oldStatus = loan.Status;
 
             loan.LoanDate = vm.LoanDate;
             loan.PickupDue = vm.PickupDue;
@@ -576,6 +581,27 @@ namespace LibraryManagementSystem.Controllers
             else // Not picked up yet
             {
                 loan.Status = (loan.PickupDue < today) ? Loan.LoanStatus.EXPIRED : Loan.LoanStatus.RESERVED;
+            }
+
+            // Check for status change notifications
+            if (oldStatus != loan.Status)
+            {
+                if (loan.Status == Loan.LoanStatus.OVERDUE)
+                {
+                    ns.Notify(loan.UserId, $"Alert: Your loan for '{loan.Copy.Book.Title}' is now overdue. Please return it immediately to avoid further fines.", "/Loan/History");
+                }
+                else if (loan.Status == Loan.LoanStatus.RETURNED)
+                {
+                    ns.Notify(loan.UserId, $"Success: Your loan for '{loan.Copy.Book.Title}' has been marked as returned.", "/Loan/History");
+                }
+            }
+
+            // Check for "Due Soon" notifications if the loan is active
+            if (loan.Status == Loan.LoanStatus.IN_LOAN)
+            {
+                var daysUntilDue = loan.LoanDue.DayNumber - today.DayNumber;
+                if (daysUntilDue == 3) ns.Notify(loan.UserId, $"Reminder: Your loan for '{loan.Copy.Book.Title}' is due in 3 days ({loan.LoanDue:yyyy-MM-dd}).", "/Loan/History");
+                else if (daysUntilDue == 1) ns.Notify(loan.UserId, $"Reminder: Your loan for '{loan.Copy.Book.Title}' is due tomorrow ({loan.LoanDue:yyyy-MM-dd}).", "/Loan/History");
             }
 
             await db.SaveChangesAsync();
@@ -629,6 +655,7 @@ namespace LibraryManagementSystem.Controllers
                 loan.Status = Loan.LoanStatus.IN_LOAN;
                 loan.PickupDate = DateOnly.FromDateTime(DateTime.Now);
                 if (loan.Copy != null) loan.Copy.Status = Copy.CopyStatus.BORROWED;
+                ns.Notify(loan.UserId, $"You have successfully picked up '{loan.Copy.Book.Title}'. It is due on {loan.LoanDue:yyyy-MM-dd}.", "/Loan/History");
             }
 
             db.SaveChanges();
@@ -655,6 +682,8 @@ namespace LibraryManagementSystem.Controllers
             loan.ReturnDate = DateOnly.FromDateTime(DateTime.Now);
             
             db.SaveChanges();
+
+            ns.Notify(loan.UserId, $"Success: '{loan.Copy.Book.Title}' has been returned successfully.", "/Loan/History");
 
             rs.AssignNextReservation(loan.Copy.BookId, loan.CopyId);
 

@@ -1,0 +1,26 @@
+@model Book
+@{
+    var ratings = ViewData["Ratings"] as Dictionary<string, double>;
+}
+
+<a href="@Url.Action("BookDetails", "Book", new { id = Model.Id })" class="book-card">
+    <div class="book-card__cover">
+        <img src="@(string.IsNullOrEmpty(Model.ImageURL) ? "/images/assets/no-cover.jpg" : $"/images/books/{Model.ImageURL}")" alt="@Model.Title" loading="lazy" />
+        <div class="book-card__overlay">
+            <h3 class="book-card__title">@Model.Title</h3>
+            <p class="book-card__author">@string.Join(", ", Model.Authors.Select(a => a.Name))</p>
+            @if (ratings != null && ratings.ContainsKey(Model.Id))
+            {
+                <div class="book-card__rating" style="margin-top: 8px;">
+                    <div style="color: var(--color-warning); font-size: 0.9rem;">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            <i class="fa-solid fa-star @(i <= Math.Round(ratings[Model.Id]) ? "star-filled" : "star-empty")"></i>
+                        }
+                    </div>
+                    <span style="font-size: 0.8rem; margin-left: 4px;">@ratings[Model.Id].ToString("0.0")</span>
+                </div>
+            }
+        </div>
+    </div>
+</a>
