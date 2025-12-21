@@ -12,7 +12,7 @@ namespace LibraryManagementSystem.Controllers;
 
 public class BookController(LMSDB db, IWebHostEnvironment en, INotificationService ns, IReservationService rs) : Controller
 {
-    public IActionResult Catalogue(string? search, string? genreId, string? authorId, int? rating, int? year, int? edition)
+    public IActionResult Catalogue(string? search, string? genreId, string? authorId, int? rating, int? year, int? edition, string? sort, string? order)
     {
         var nonArchivedBooks = db.Books.Where(b => !b.IsArchived);
 
@@ -33,6 +33,8 @@ public class BookController(LMSDB db, IWebHostEnvironment en, INotificationServi
         ViewBag.Authors = authors;
         ViewBag.Years = years;
         ViewBag.Editions = editions;
+        ViewBag.Sort = sort;
+        ViewBag.Order = order;
 
         var query = db.Books
             .Include(b => b.Authors)
@@ -65,7 +67,23 @@ public class BookController(LMSDB db, IWebHostEnvironment en, INotificationServi
             query = query.Where(b => b.Edition == edition.Value);
         }
 
-        var books = query.OrderByDescending(b => b.DateAdded).ToList();
+        if (string.IsNullOrEmpty(sort))
+        {
+            query = query.OrderByDescending(b => b.DateAdded);
+        }
+        else
+        {
+            bool isDesc = order?.ToLower() == "desc";
+            query = sort.ToLower() switch
+            {
+                "title" => isDesc ? query.OrderByDescending(b => b.Title) : query.OrderBy(b => b.Title),
+                "year" => isDesc ? query.OrderByDescending(b => b.PublicationYear) : query.OrderBy(b => b.PublicationYear),
+                "dateadded" => isDesc ? query.OrderByDescending(b => b.DateAdded) : query.OrderBy(b => b.DateAdded),
+                _ => query.OrderByDescending(b => b.DateAdded)
+            };
+        }
+
+        var books = query.ToList();
 
         // Calculate Ratings
         var bookIds = books.Select(b => b.Id).ToList();

@@ -14,8 +14,43 @@
             <h1 class="catalogue-title">Catalogue</h1>
 
             <div class="toolbar-actions">
+                <div class="filter-menu" id="catalogueSortMenu">
+                    <button class="filter-menu__trigger" id="catalogueSortTrigger" type="button">
+                        <svg class="trigger__icon" xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" width="20" fill="currentColor"><path d="M400-240v-80h160v80H400ZM240-440v-80h480v80H240ZM120-640v-80h720v80H120Z"/></svg>
+                        <span>Sort</span>
+                    </button>
+                    <div class="filter-menu__dropdown" id="sortDropdownMenu">
+                        <div class="sort-group">
+                            <label class="sort-label">Title</label>
+                            <div class="sort-options">
+                                <label><input type="radio" name="sort" value="title-asc" @(ViewBag.Sort == "title" && ViewBag.Order == "asc" ? "checked" : "")> A-Z</label>
+                                <label><input type="radio" name="sort" value="title-desc" @(ViewBag.Sort == "title" && ViewBag.Order == "desc" ? "checked" : "")> Z-A</label>
+                            </div>
+                        </div>
+                        <div class="sort-group">
+                            <label class="sort-label">Year</label>
+                            <div class="sort-options">
+                                <label><input type="radio" name="sort" value="year-asc" @(ViewBag.Sort == "year" && ViewBag.Order == "asc" ? "checked" : "")> Oldest</label>
+                                <label><input type="radio" name="sort" value="year-desc" @(ViewBag.Sort == "year" && ViewBag.Order == "desc" ? "checked" : "")> Newest</label>
+                            </div>
+                        </div>
+                        <div class="sort-group">
+                            <label class="sort-label">Date Added</label>
+                            <div class="sort-options">
+                                <label><input type="radio" name="sort" value="dateadded-asc" @(ViewBag.Sort == "dateadded" && ViewBag.Order == "asc" ? "checked" : "")> Oldest</label>
+                                <label><input type="radio" name="sort" value="dateadded-desc" @(ViewBag.Sort == "dateadded" && ViewBag.Order == "desc" ? "checked" : "")> Newest</label>
+                            </div>
+                        </div>
+                        <div class="filter-actions">
+                            <button class="filter-action-clear" id="catalogueResetSort" type="button">
+                                <svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 -960 960 960" width="18" fill="currentColor"><path d="M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 128.5 28.5T720-720v-120h80v280h-280v-80h172q-44-64-110-99.5T480-760q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z"/></svg>
+                                Reset Sorting
+                            </button>
+                        </div>
+                    </div>
+                </div>
                 <div class="filter-menu" id="catalogueFilterMenu">
-                    <button class="filter-menu__trigger" id="catalogueFilterTrigger">
+                    <button class="filter-menu__trigger" id="catalogueFilterTrigger" type="button">
                         <svg class="trigger__icon" xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" width="20" fill="currentColor"><path d="M440-160q-17 0-28.5-11.5T400-200v-240L168-736q-15-20-4.5-42t36.5-22h560q26 0 36.5 22t-4.5 42L560-440v240q0 17-11.5 28.5T520-160h-80Zm40-308 198-252H282l198 252Zm0 0Z"/></svg>
                         <span>Filters</span>
                     </button>

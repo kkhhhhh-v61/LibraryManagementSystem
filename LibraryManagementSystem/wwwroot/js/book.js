@@ -224,16 +224,60 @@ function initializeCatalogue() {
     const filterYear = document.getElementById("filterYear");
     const filterEdition = document.getElementById("filterEdition");
     const searchClear = document.getElementById("catalogueSearchClear");
+    // NEW: Sort Menu
+    const sortMenu = document.getElementById("catalogueSortMenu");
+    const sortTrigger = document.getElementById("catalogueSortTrigger");
+    const sortDropdown = document.getElementById("sortDropdownMenu");
+    const resetSortBtn = document.getElementById("catalogueResetSort");
 
     if (filterMenu && filterTrigger) {
         filterTrigger.addEventListener("click", (e) => {
             e.stopPropagation();
+            if (sortMenu) sortMenu.classList.remove("active");
             filterMenu.classList.toggle("active");
         });
+    }
 
-        document.addEventListener("click", (e) => {
-            if (!filterMenu.contains(e.target)) {
-                filterMenu.classList.remove("active");
+    // NEW: Sort Menu Logic
+    if (sortMenu && sortTrigger) {
+        sortTrigger.addEventListener("click", (e) => {
+            e.stopPropagation();
+            if (filterMenu) filterMenu.classList.remove("active");
+            sortMenu.classList.toggle("active");
+        });
+    }
+
+    // NEW: Combined click-outside-to-close handler
+    document.addEventListener("click", (e) => {
+        if (filterMenu && !filterMenu.contains(e.target)) {
+            filterMenu.classList.remove("active");
+        }
+        if (sortMenu && !sortMenu.contains(e.target)) {
+            sortMenu.classList.remove("active");
+        }
+    });
+
+    if (sortDropdown) {
+        sortDropdown.addEventListener("change", (e) => {
+            if (e.target.name === "sort") {
+                debouncedSearch();
+                sortMenu.classList.remove("active");
+            }
+        });
+    }
+
+    if (resetSortBtn) {
+        resetSortBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const checkedRadio = document.querySelector(
+                'input[name="sort"]:checked'
+            );
+            if (checkedRadio) {
+                checkedRadio.checked = false;
+            }
+            debouncedSearch();
+            if (sortMenu) {
+                sortMenu.classList.remove("active");
             }
         });
     }
@@ -254,6 +298,14 @@ function initializeCatalogue() {
         if (rating) params.set("rating", rating);
         if (year) params.set("year", year);
         if (edition) params.set("edition", edition);
+
+        // Get sort values
+        const sortRadio = document.querySelector('input[name="sort"]:checked');
+        if (sortRadio) {
+            const [sort, order] = sortRadio.value.split("-");
+            params.set("sort", sort);
+            params.set("order", order);
+        }
 
         fetch(`/Book/Catalogue?${params.toString()}`, {
             headers: { "X-Requested-With": "XMLHttpRequest" },
