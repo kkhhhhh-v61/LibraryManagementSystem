@@ -15,16 +15,14 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* --- Layout Container --- */
 .container-fluid {
     width: 100%;
-    padding: 30px; /* Space around the edges */
+    padding: 30px; 
     box-sizing: border-box;
 }
 
-/* --- Main White Card --- */
 .bookbase-card {
-    width: 100%; /* Forces card to fill the container */
+    width: 100%; 
     background: #ffffff;
     border-radius: 8px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
@@ -36,7 +34,6 @@ body {
     margin-bottom: 0;
 }
 
-/* --- Header Section (Title + Search) --- */
 .card-header-custom {
     padding: 20px 30px;
     border-bottom: 1px solid var(--border-color);
@@ -44,7 +41,7 @@ body {
     justify-content: space-between;
     align-items: center;
     background-color: #fff;
-    flex-wrap: wrap; /* Allows wrapping on small screens */
+    flex-wrap: wrap; 
     gap: 20px;
 }
 
@@ -55,7 +52,7 @@ body {
 }
 
 .page-title {
-    font-size: 1.2rem; /* Slightly bigger title */
+    font-size: 1.2rem; 
     font-weight: 700;
     color: var(--text-dark);
     margin: 0;
@@ -70,16 +67,16 @@ body {
     font-weight: 600;
 }
 
-/* --- Search Bar --- */
+
 .search-box {
     position: relative;
-    width: 350px; /* Fixed width for search bar */
+    width: 350px; 
     max-width: 100%;
 }
 
 .search-input {
     width: 100%;
-    padding: 10px 15px 10px 40px; /* Space for icon */
+    padding: 10px 15px 10px 40px; 
     border: 1px solid #e2e8f0;
     border-radius: 6px;
     font-size: 0.95rem;
@@ -103,18 +100,17 @@ body {
     font-size: 1rem;
 }
 
-/* --- Table Styling --- */
+
 .table-responsive {
     width: 100%;
-    overflow-x: auto; /* Scrollbar if screen is too small */
+    overflow-x: auto; 
     margin-bottom: 5px;
 }
 
 .custom-table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 800px; /* Ensures table doesn't squash too much */
-}
+    min-width: 800px; 
 
     .custom-table thead th {
         background-color: #fff;
@@ -123,13 +119,13 @@ body {
         text-transform: uppercase;
         font-weight: 700;
         letter-spacing: 0.5px;
-        padding: 18px 30px; /* More padding for spacious look */
+        padding: 18px 30px; 
         border-bottom: 1px solid var(--border-color);
         text-align: left;
     }
 
     .custom-table tbody td {
-        padding: 18px 30px; /* More padding for spacious look */
+        padding: 18px 30px; 
         vertical-align: middle;
         color: var(--text-dark);
         border-bottom: 1px solid var(--border-color);
@@ -140,7 +136,6 @@ body {
         background-color: #f8fafc;
     }
 
-/* --- Columns Specifics --- */
 .user-profile-flex {
     display: flex;
     align-items: center;
@@ -169,7 +164,7 @@ body {
     color: var(--text-muted);
 }
 
-/* --- Badges --- */
+
 .status-dot {
     height: 8px;
     width: 8px;
@@ -191,7 +186,7 @@ body {
     font-size: 0.85rem;
 }
 
-/* --- Action Buttons --- */
+
 .btn-icon {
     width: 36px;
     height: 36px;
@@ -211,15 +206,15 @@ body {
         color: white;
         border-color: var(--primary-color);
     }
-/* --- Optimized Header --- */
+
 .card-header-custom {
     padding: 20px 30px;
     border-bottom: 1px solid var(--border-color);
     display: flex;
-    justify-content: space-between; /* Keeps Left content on left, Search on right */
+    justify-content: space-between; 
     align-items: center;
     background-color: #fff;
-    flex-wrap: nowrap; /* Prevents jumping to second line */
+    flex-wrap: nowrap; 
     gap: 20px;
 }
 
@@ -227,10 +222,9 @@ body {
     display: flex;
     align-items: center;
     gap: 15px;
-    flex-shrink: 0; /* Prevents the title section from squishing */
+    flex-shrink: 0; 
 }
 
-/* --- New Staff Button Styling --- */
 .btn-new-staff {
     background-color: var(--primary-color);
     color: white;
@@ -243,7 +237,7 @@ body {
     align-items: center;
     transition: all 0.2s ease;
     border: none;
-    white-space: nowrap; /* Keeps text on one line */
+    white-space: nowrap; 
     margin-left: 10px;
 }
 
@@ -254,13 +248,13 @@ body {
         transform: translateY(-1px);
     }
 
-/* --- Search Box Adjustment --- */
+
 .search-box {
     position: relative;
-    width: 300px; /* Adjusted to fit better with the button */
+    width: 300px;
     flex-shrink: 1;
 }
-/* Centered Pagination Styling */
+
 .pagination-wrapper {
     display: flex;
     align-items: center;
@@ -272,7 +266,7 @@ body {
 }
 
 .page-indicator {
-    white-space: nowrap; /* Prevents "Page 1 of 2" from wrapping to a new line */
+    white-space: nowrap; 
     min-width: fit-content;
 }
 .btn-nav {
@@ -318,5 +312,4 @@ body {
 }
 
 .bg-success {
-    background-color: #28a745 !important; /* Standard success green */
-}
+    background-color: #28a745 !important; 

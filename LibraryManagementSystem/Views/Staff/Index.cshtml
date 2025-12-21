@@ -90,12 +90,10 @@
 
 @section Scripts {
     <script>
-        // --- STATE VARIABLES ---
         let currentSortColumn = "";
         let currentSortDirection = "";
         let currentPage = 1;
 
-        // --- 1. MAIN AJAX LOADER ---
         function loadData() {
             var searchValue = $('#userSearchInput').val();
             var sortOrder = currentSortColumn + currentSortDirection;
@@ -132,13 +130,11 @@
             });
         }
 
-        // --- 2. HANDLE PAGE CHANGE ---
         function changePage(direction) {
             currentPage += direction;
             loadData();
         }
 
-        // --- 3. HANDLE SEARCH ---
         function handleSearch(searchValue) {
             var clearBtn = document.getElementById('clearSearchBtn');
             clearBtn.style.display = (searchValue.length > 0) ? 'block' : 'none';
@@ -147,7 +143,6 @@
             loadData();
         }
 
-        // --- 4. HANDLE SORT ---
         function handleSort(column) {
             $('.custom-table th i').removeClass('fa-sort-up fa-sort-down').addClass('fa-sort');
 
@@ -167,7 +162,6 @@
             loadData();
         }
 
-        // --- 5. CLEAR SEARCH ---
         function clearSearch() {
             var input = document.getElementById('userSearchInput');
             input.value = "";
@@ -175,7 +169,6 @@
             handleSearch("");
         }
 
-        // --- 6. ADMIN TOGGLE STATUS (NEW ADDITION) ---
         function toggleStatus(userId, btnElement) {
             if(!confirm("Are you sure you want to change this user's status?")) return;
 
@@ -185,7 +178,6 @@
                 data: { id: userId },
                 success: function (response) {
                     if (response.success) {
-                        // Reload data to reflect the new status color and icon
                         loadData();
                     } else {
                         alert(response.message);
@@ -197,7 +189,6 @@
             });
         }
 
-        // --- 7. INITIAL LOAD ---
         $(document).ready(function() {
             loadData();
         });

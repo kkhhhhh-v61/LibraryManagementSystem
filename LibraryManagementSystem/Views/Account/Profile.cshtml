@@ -43,7 +43,6 @@
 
         <div class="profile-tabs">
             <button class="tab-btn active" onclick="switchTab('profile')">Personal Details</button>
-            <button class="tab-btn" onclick="switchTab('history')">Borrow History</button>
             <button class="tab-btn" onclick="switchTab('security')">Security</button>
         </div>
 
@@ -183,17 +182,25 @@
                 <div class="form-actions">
                     <button type="submit" id="savePasswordBtn" class="btn btn-primary" style="background-color: var(--color-primary-base); border:none;">Update Password</button>
                 </div>
-                <div class="danger-zone-container" style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #fee2e2;">
-                    <h3 class="section-title" style="color: #dc2626;">Danger Zone</h3>
-                    <div style="background-color: #fef2f2; border: 1px solid #fee2e2; padding: 20px; border-radius: 8px;">
-                        <p style="margin-bottom: 15px; color: #991b1b; font-size: 0.9rem;">
-                            <strong>Warning:</strong> Deleting your account is permanent. All your data, including borrowing history and credibility scores, will be lost.
-                        </p>
-                        <button type="button" class="btn btn-danger" onclick="handleDeleteAccount()"
-                                style="background-color: #dc2626; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">
-                            Delete My Account
-                        </button>
+                @* ========================================== *@
+                @* DANGER ZONE: ONLY FOR MEMBERS              *@
+                @* ========================================== *@
+                @if (User.IsInRole("Member"))
+                {
+                    <div class="danger-zone-container" style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #fee2e2;">
+                        <h3 class="section-title" style="color: #dc2626;">Danger Zone</h3>
+                        <div style="background-color: #fef2f2; border: 1px solid #fee2e2; padding: 20px; border-radius: 8px;">
+                            <p style="margin-bottom: 15px; color: #991b1b; font-size: 0.9rem;">
+                                <strong>Warning:</strong> Deleting your account is permanent. All your data, including borrowing history and credibility scores, will be lost.
+                            </p>
+                            <button type="button" class="btn btn-danger" onclick="handleDeleteAccount()"
+                                    style="background-color: #dc2626; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">
+                                Delete My Account
+                            </button>
+                        </div>
                     </div>
+                }
+   
             </form>
         </div>
 
@@ -239,7 +246,7 @@
         // 2. OPEN MODAL (FIXED DUPLICATION BUG)
         // ==========================================
         photoInput.addEventListener('change', function (e) {
-
+            
             // --- STEP 1: NUCLEAR CLEANUP ---
             // We destroy the old cropper IMMEDIATELY before doing anything else.
             // This prevents the "Double Image" bug.
@@ -252,7 +259,7 @@
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
-
+                
                 reader.onload = function (event) {
                     // Set the new source
                     imageToCrop.src = event.target.result;
@@ -260,7 +267,7 @@
                     // Wait for the new image to render in the DOM
                     imageToCrop.onload = function() {
                         cropModal.style.display = 'flex'; // Show modal
-
+                        
                         // Create the new cropper
                         cropper = new Cropper(imageToCrop, {
                             aspectRatio: 1,
@@ -310,7 +317,7 @@
                 imageSmoothingEnabled: true,
                 imageSmoothingQuality: 'high',
             }).toBlob(function (blob) {
-
+                
                 const formData = new FormData();
                 formData.append('file', blob, 'profile.jpg');
 
@@ -325,8 +332,8 @@
                     if (data.success) {
                         // Add timestamp to bypass browser cache
                         const timestamp = new Date().getTime();
-                        profileImageDisplay.src = data.newUrl + '?v=' + timestamp;
-
+                        profileImageDisplay.src = data.newUrl + '?v=' + timestamp; 
+                        
                         closeCropModal();
                     } else {
                         alert("Error: " + data.message);
@@ -376,7 +383,7 @@
             try {
                 const response = await fetch('@Url.Action("DeleteAccount", "Account")', {
                     method: 'POST',
-                    headers: {
+                    headers: { 
                         'RequestVerificationToken': token,
                         'X-Requested-With': 'XMLHttpRequest'
                     }

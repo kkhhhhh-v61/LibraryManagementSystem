@@ -10,7 +10,6 @@
 
         <td>
             <div class="user-profile-flex">
-                @* The ?? operator ensures that if ImageURL is null or empty, it uses the grey avatar *@
                 <img src="/images/profiles/@(string.IsNullOrEmpty(item.ImageURL) ? "default-profile.png" : item.ImageURL)"
                      class="table-avatar"
                      alt="profile"
@@ -50,7 +49,6 @@
 
             @if (User.IsInRole("ADMIN"))
             {
-                /* Determine logic: If Active -> Show Red Ban Icon. If Inactive -> Show Green Check Icon */
                 bool isActive = item.Status.ToString() == "ACTIVE";
                 string btnColor = isActive ? "text-danger" : "text-success";
                 string btnIcon = isActive ? "fa-ban" : "fa-check-circle";

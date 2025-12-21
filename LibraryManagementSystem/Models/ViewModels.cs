@@ -121,9 +121,7 @@ public class LoginVM
         [Range(0, 100, ErrorMessage = "Credibility Score must be between 0 and 100.")]
         public int CredibilityScore { get; set; }
 
-    // --- Validation Rules Synced with RegisterVM ---
-
-    [Display(Name = "First Name")]
+        [Display(Name = "First Name")]
         [Required(ErrorMessage = "{0} is required.")]
         [StringLength(50, MinimumLength = 1, ErrorMessage = "{0} must be between 1 and 50 characters.")]
         [RegularExpression(@"^[a-zA-Z\s\-]+$", ErrorMessage = "{0} can only contain letters.")]
@@ -143,7 +141,6 @@ public class LoginVM
 
         [Display(Name = "Contact No.")]
         [Required(ErrorMessage = "{0} is required.")]
-        // CHANGED: Replaced specific Malaysian regex with the Flexible one from RegisterVM
         [RegularExpression(@"^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$",
             ErrorMessage = "Please enter a valid phone number.")]
         public string ContactNo { get; set; }
@@ -154,7 +151,6 @@ public class LoginVM
         public string? ProfilePhotoUrl { get; set; }
     }
 
-    // 6. CHANGE PASSWORD (Updated to match Register Password Policy)
     public class ChangePasswordVM
     {
         [Required]
@@ -176,7 +172,6 @@ public class LoginVM
         [Compare("NewPassword", ErrorMessage = "Passwords do not match")]
         public string ConfirmNewPassword { get; set; }
     }
-// Models/ViewModels/ActivityLogVM.cs
 
 public class ActivityLogVM
 {
@@ -184,8 +179,6 @@ public class ActivityLogVM
     public List<AdminBookingDTO> Bookings { get; set; } = new();
     public int CurrentPage { get; set; } = 1;
     public int TotalPages { get; set; } = 1;
-
-    // Helpers
     public bool HasPrevious => CurrentPage > 1;
     public bool HasNext => CurrentPage < TotalPages;
 }
@@ -194,17 +187,11 @@ public class AdminLoanDTO
 {
     public string LoanId { get; set; }
     public string BookTitle { get; set; }
-
-    // This already existed, good.
     public string BookImageUrl { get; set; }
-
     public string UserId { get; set; }
     public string UserName { get; set; }
     public string UserEmail { get; set; }
-
-    // ADD THIS NEW PROPERTY
     public string UserProfileUrl { get; set; }
-
     public DateOnly LoanDate { get; set; }
     public DateOnly LoanDue { get; set; }
     public DateOnly? ReturnDate { get; set; }
@@ -215,13 +202,9 @@ public class AdminBookingDTO
 {
     public string BookingId { get; set; }
     public string FacilityName { get; set; }
-
     public string UserId { get; set; }
     public string UserName { get; set; }
-
-    // ADD THIS NEW PROPERTY
     public string UserProfileUrl { get; set; }
-
     public DateTime BookingDate { get; set; }
     public TimeSpan StartTime { get; set; }
     public TimeSpan EndTime { get; set; }

@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using LibraryManagementSystem.Models;
-using static LibraryManagementSystem.Models.User; // For Enum access
+using static LibraryManagementSystem.Models.User; 
 using System.Threading.Tasks;
 using System.Linq;
 using System;
@@ -143,42 +143,29 @@ namespace LibraryManagementSystem.Controllers
         // ==========================================================
         // 5. ACTIVITY LOG (History Dashboard) - SORTING, AJAX & PAGINATION
         // ==========================================================
-
-        // This Single Action handles Page Load, Searching, Sorting, AND Pagination
         [Authorize(Roles = "Admin, Staff")]
         [HttpGet]
         public async Task<IActionResult> ActivityLog(string searchString, string sortOrder, int pageNumber = 1)
         {
-            // 1. Setup Sorting & Filter Params for the View
             ViewData["CurrentFilter"] = searchString;
             ViewData["CurrentSort"] = sortOrder;
-
-            // Sorting Toggles (Logic to switch between asc/desc)
             ViewData["IdSortParam"] = string.IsNullOrEmpty(sortOrder) ? "id_asc" : "";
             ViewData["UserSortParam"] = sortOrder == "user" ? "user_desc" : "user";
             ViewData["DateSortParam"] = sortOrder == "date" ? "date_desc" : "date";
             ViewData["StatusSortParam"] = sortOrder == "status" ? "status_desc" : "status";
-
-            // 2. Fetch Data (passing the page number)
             var model = await GetActivityLogData(searchString, sortOrder, pageNumber);
-
-            // 3. AJAX CHECK: If request is from the fetch() in your script, return only the Partial View
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
             {
                 return PartialView("_ActivityLogTables", model);
             }
-
-            // 4. Normal Page Load
             return View(model);
         }
-
-        // HELPER: Handles Filtering, Sorting, and Pagination
         private async Task<ActivityLogVM> GetActivityLogData(string searchTerm, string sortOrder, int page)
         {
-            int pageSize = 5; // Rows per page
+            int pageSize = 5; 
             var model = new ActivityLogVM();
 
-            // --- A. PREPARE QUERIES ---
+            // PREPARE QUERIES 
             var loansQuery = _db.Loans
                 .Include(l => l.User)
                 .Include(l => l.Copy).ThenInclude(c => c.Book)
@@ -189,7 +176,7 @@ namespace LibraryManagementSystem.Controllers
                 .Include(b => b.Room)
                 .AsQueryable();
 
-            // --- B. APPLY SEARCH ---
+            // APPLY SEARCH 
             if (!string.IsNullOrEmpty(searchTerm))
             {
                 searchTerm = searchTerm.ToLower();
@@ -207,7 +194,7 @@ namespace LibraryManagementSystem.Controllers
                     b.Id.ToString().Contains(searchTerm));
             }
 
-            // --- C. APPLY SORTING ---
+            // APPLY SORTING
             switch (sortOrder)
             {
                 case "id_asc":
@@ -248,25 +235,15 @@ namespace LibraryManagementSystem.Controllers
                     break;
             }
 
-            // --- D. PAGINATION LOGIC ---
-            // 1. Get total counts before cutting the list
+            // PAGINATION LOGIC
             int totalLoans = await loansQuery.CountAsync();
             int totalBookings = await bookingsQuery.CountAsync();
-
-            // 2. Determine Max Pages based on whichever list is longer
-            // This ensures the "Next" button stays active as long as EITHER table has data
             int maxItems = Math.Max(totalLoans, totalBookings);
             model.TotalPages = (int)Math.Ceiling(maxItems / (double)pageSize);
             model.CurrentPage = page;
-
-            // Safety check: Prevent negative pages or pages exceeding max
             if (model.CurrentPage < 1) model.CurrentPage = 1;
             if (model.TotalPages > 0 && model.CurrentPage > model.TotalPages) model.CurrentPage = model.TotalPages;
-
-            // 3. Calculate Skip Amount
             int skipAmount = (model.CurrentPage - 1) * pageSize;
-
-            // --- E. EXECUTE & MAP TO DTOs (WITH SKIP/TAKE) ---
             model.Loans = await loansQuery
                 .Skip(skipAmount)
                 .Take(pageSize)

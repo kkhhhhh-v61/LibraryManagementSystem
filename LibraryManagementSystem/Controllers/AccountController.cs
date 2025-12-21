@@ -40,6 +40,8 @@ namespace LibraryManagementSystem.Controllers
         [HttpGet]
         public IActionResult Login()
         {
+            EnsureAdminExists();
+
             if (User.Identity.IsAuthenticated)
             {
                 return RedirectToAction("AccessDenied", "Account");
@@ -52,14 +54,19 @@ namespace LibraryManagementSystem.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Use .IgnoreQueryFilters() to see if the user exists but is deleted
                 var user = await _db.Users
                     .IgnoreQueryFilters()
                     .FirstOrDefaultAsync(u => u.Username == model.Username);
 
-                if (user == null) { /* Standard invalid login logic */ }
+                // 1. FIX: Check for null and RETURN immediately
+                if (user == null)
+                {
+                    TempData["ToastMessage"] = "Invalid username or password.";
+                    TempData["ToastType"] = "error";
+                    return View(model);
+                }
 
-                // CHECK IF DELETED
+                // 2. Now it is safe to check IsDeleted because user is guaranteed not null
                 if (user.IsDeleted)
                 {
                     TempData["ToastMessage"] = "This account has been deleted.";
@@ -72,7 +79,7 @@ namespace LibraryManagementSystem.Controllers
                     var remainingMins = Math.Ceiling((user.LockoutEnd.Value - DateTime.Now).TotalMinutes);
 
                     TempData["ToastMessage"] = $"Account locked. Try again in {remainingMins} minutes.";
-                    TempData["ToastType"] = "error"; // Red
+                    TempData["ToastType"] = "error"; 
                     return View(model);
                 }
 
@@ -135,7 +142,7 @@ namespace LibraryManagementSystem.Controllers
                         await _db.SaveChangesAsync();
 
                         TempData["ToastMessage"] = $"Invalid password. You have {attemptsLeft} attempt(s) remaining.";
-                        TempData["ToastType"] = "warning"; // Yellow/Orange
+                        TempData["ToastType"] = "warning"; 
                     }
 
                     return View(model);
@@ -176,10 +183,7 @@ namespace LibraryManagementSystem.Controllers
             {
                 // ==================================================
                 // DUPLICATE DATA CHECKS (SOFT-DELETE AWARE)
-                // ==================================================
-
-                // 1. Check for ANY user (active or deleted) with this Username/Email
-                // We use IgnoreQueryFilters so we don't crash the unique index
+                // ==================================================dex
                 var existingUser = await _db.Users
                     .IgnoreQueryFilters()
                     .FirstOrDefaultAsync(u => u.Username == model.Username || u.Email == model.Email || u.ContactNo == model.ContactNo);
@@ -199,14 +203,10 @@ namespace LibraryManagementSystem.Controllers
                     }
                     else
                     {
-                        // OPTIONAL: If the record exists but IS DELETED, we "Hard Delete" it 
-                        // so the new registration can re-use the Username/Email/ID logic.
                         _db.Users.Remove(existingUser);
                         await _db.SaveChangesAsync();
                     }
                 }
-
-                // Generate User ID (Already uses IgnoreQueryFilters in your code, which is correct!)
                 string newUserId = "U00001";
                 var lastUser = await _db.Users.IgnoreQueryFilters()
                     .Where(u => u.Id.StartsWith("U"))
@@ -217,7 +217,6 @@ namespace LibraryManagementSystem.Controllers
                 {
                     newUserId = "U" + (lastIdNum + 1).ToString("D5");
                 }
-
                 // Handle Image
                 string stringFileName = "default-profile.png";
                 if (model.ProfilePhoto != null)
@@ -245,7 +244,7 @@ namespace LibraryManagementSystem.Controllers
                     Role = LMSUser.UserRole.MEMBER,
                     Status = LMSUser.UserStatus.ACTIVE,
                     ImageURL = stringFileName,
-                    IsDeleted = false // Explicitly set to false
+                    IsDeleted = false 
                 };
 
                 _db.Users.Add(user);
@@ -279,7 +278,7 @@ namespace LibraryManagementSystem.Controllers
             if (ModelState.IsValid)
             {
                 // =========================================================
-                // 1. RATE LIMIT CHECK (Max 3 attempts per 20 mins)
+                // RATE LIMIT CHECK (Max 3 attempts per 60 mins)
                 // =========================================================
                 string cacheKey = $"ResetLimit_{model.Email}";
 
@@ -294,7 +293,7 @@ namespace LibraryManagementSystem.Controllers
                 }
 
                 // =========================================================
-                // 2. NORMAL PASSWORD RESET LOGIC
+                // NORMAL PASSWORD RESET LOGIC
                 // =========================================================
                 var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
 
@@ -315,7 +314,7 @@ namespace LibraryManagementSystem.Controllers
                     _db.PasswordResetTokens.Add(resetToken);
                     await _db.SaveChangesAsync();
 
-                    // C. Send Email
+                    //Send Email
                     string resetLink = Url.Action("ResetPassword", "Account",
                         new { token = tokenString, email = model.Email }, Request.Scheme) ?? "";
 
@@ -453,10 +452,9 @@ namespace LibraryManagementSystem.Controllers
                 authProperties);
         }
         [HttpGet]
-        [Authorize] // Ensures only logged-in users can see this
+        [Authorize] 
         public async Task<IActionResult> Profile()
         {
-            // Get current user ID
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             if (userId == null) return RedirectToAction("Login");
 
@@ -479,7 +477,7 @@ namespace LibraryManagementSystem.Controllers
             return View(model);
         }
         // =======================================================
-        // 1. UPDATE PROFILE (Fixed for Custom Auth / LMSDB)
+        // UPDATE PROFILE 
         // =======================================================
         [HttpPost]
         [Authorize]
@@ -491,20 +489,13 @@ namespace LibraryManagementSystem.Controllers
                 var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
                 return Json(new { success = false, message = "Validation failed.", errors = errors });
             }
-
-            // 1. Get the current user ID from Claims
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userId)) return Json(new { success = false, message = "User not logged in." });
-
-            // 2. Fetch User from DB
             var user = await _db.Users.FindAsync(userId);
             if (user == null) return Json(new { success = false, message = "User not found." });
-
             // ==========================================
-            // CHECK FOR DUPLICATES (Only if changed)
+            // CHECK FOR DUPLICATES 
             // ==========================================
-
-            // 3. Check Email (Only if the user changed it)
             if (model.Email.ToLower() != user.Email.ToLower())
             {
                 bool emailExists = await _db.Users.AnyAsync(u => u.Email == model.Email && u.Id != user.Id);
@@ -513,8 +504,6 @@ namespace LibraryManagementSystem.Controllers
                     return Json(new { success = false, message = "Email already in use by another account." });
                 }
             }
-
-            // 4. Check Phone (Only if the user changed it)
             if (model.ContactNo != user.ContactNo)
             {
                 bool phoneExists = await _db.Users.AnyAsync(u => u.ContactNo == model.ContactNo && u.Id != user.Id);
@@ -523,7 +512,6 @@ namespace LibraryManagementSystem.Controllers
                     return Json(new { success = false, message = "Phone number already in use by another account." });
                 }
             }
-
             // ==========================================
             // UPDATE FIELDS
             // ==========================================
@@ -531,13 +519,9 @@ namespace LibraryManagementSystem.Controllers
             user.LastName = model.LastName;
             user.ContactNo = model.ContactNo;
             user.IsProfilePublic = model.IsProfilePublic;
-
-            // Handle Email Update specifically
             if (model.Email != user.Email)
             {
                 user.Email = model.Email;
-                // If you use Email as Username, update it here too:
-                // user.Username = model.Email; 
             }
 
             // ==========================================
@@ -547,10 +531,6 @@ namespace LibraryManagementSystem.Controllers
             {
                 _db.Users.Update(user);
                 await _db.SaveChangesAsync();
-
-                // OPTIONAL: Refresh the cookie claims if specific details (like Name/Role) changed
-                // await SignInUser(user); 
-
                 return Json(new { success = true, message = "Profile updated successfully!" });
             }
             catch (Exception ex)
@@ -610,8 +590,6 @@ namespace LibraryManagementSystem.Controllers
                 var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
                 return Json(new { success = false, message = "Validation failed.", errors = errors });
             }
-
-            // 1. Get Current User
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var user = await _db.Users.FindAsync(userId);
 
@@ -619,8 +597,6 @@ namespace LibraryManagementSystem.Controllers
             {
                 return Json(new { success = false, message = "User session invalid. Please re-login." });
             }
-
-            // 2. Verify Old Password
             bool isOldPasswordCorrect = BCrypt.Net.BCrypt.Verify(model.CurrentPassword, user.PasswordHash);
             if (!isOldPasswordCorrect)
             {
@@ -628,14 +604,12 @@ namespace LibraryManagementSystem.Controllers
             }
 
             // =========================================================================
-            // NEW CHECK: Prevent New Password from being the same as Current Password
+            // Prevent New Password from being the same as Current Password
             // =========================================================================
             if (model.CurrentPassword == model.NewPassword)
             {
                 return Json(new { success = false, message = "New password cannot be the same as your current password." });
             }
-
-            // 3. Update to New Password
             user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.NewPassword);
 
             _db.Users.Update(user);
@@ -644,7 +618,7 @@ namespace LibraryManagementSystem.Controllers
             return Json(new { success = true, message = "Password changed successfully!" });
         }
         // =======================================================
-        // DELETE ACCOUNT (SOFT DELETE)
+        // DELETE ACCOUNT (SOFT DELETE) - Member Only
         // =======================================================
         [HttpPost]
         [Authorize]
@@ -653,16 +627,22 @@ namespace LibraryManagementSystem.Controllers
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userId)) return Json(new { success = false });
-
             var user = await _db.Users.FindAsync(userId);
             if (user == null) return Json(new { success = false });
+            if (user.Role == LMSUser.UserRole.ADMIN || user.Role == LMSUser.UserRole.STAFF)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Administrators and Staff cannot delete their own accounts."
+                });
+            }
 
             try
             {
-                // --- THE SOFT DELETE SWITCH ---
                 user.IsDeleted = true;
                 user.DeletedAt = DateTime.Now;
-                user.Status = LMSUser.UserStatus.INACTIVE; // Optional: keep as INACTIVE too
+                user.Status = LMSUser.UserStatus.INACTIVE;
 
                 _db.Users.Update(user);
                 await _db.SaveChangesAsync();
@@ -675,5 +655,37 @@ namespace LibraryManagementSystem.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
+    
+    private void EnsureAdminExists()
+        {
+            try
+            {
+                var adminUsername = "admin";
+                var adminExists = _db.Users.Any(u => u.Username == adminUsername);
+                if (!adminExists)
+                {
+                    var defaultAdmin = new User
+                    {
+                        Username = adminUsername,
+                        Email = "admin@library.com",
+                        FirstName = "System",
+                        LastName = "Admin",
+                        Role = LMSUser.UserRole.ADMIN,
+                        PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@123"),
+                        Status = LMSUser.UserStatus.ACTIVE,
+                        IsDeleted = false,
+                        CredibilityScore = 100
+                    };
+
+                    _db.Users.Add(defaultAdmin);
+                    _db.SaveChanges();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Seeding Error: " + ex.Message);
+            }
+        }
     }
-    }
+}
+    

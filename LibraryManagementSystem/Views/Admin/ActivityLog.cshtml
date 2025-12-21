@@ -3,7 +3,6 @@
     ViewData["Title"] = "Activity Log";
 }
 
-@* --- 1. ANTI-FLASH LOGIC --- *@
 <script>
     if (localStorage.getItem('activityLogActiveTab') === 'bookings') {
         document.documentElement.classList.add('show-bookings-mode');
@@ -46,18 +45,15 @@
 
 @section Scripts {
     <script>
-        // GLOBAL VARIABLES
         let currentSort = "";
         let currentSearch = "";
-        let currentPage = 1; // <--- NEW VARIABLE
+        let currentPage = 1;
         let searchTimer;
 
-        // 1. AJAX ENGINE
         function fetchData() {
             const overlay = document.getElementById('loadingOverlay');
             overlay.style.display = 'flex';
 
-            // Include pageNumber in URL
             const url = `@Url.Action("ActivityLog")?searchString=${encodeURIComponent(currentSearch)}&sortOrder=${encodeURIComponent(currentSort)}&pageNumber=${currentPage}`;
 
             fetch(url, {
@@ -74,21 +70,18 @@
             });
         }
 
-        // 2. PAGINATION TRIGGER (Called by Next/Prev buttons)
         function changePage(newPage) {
             if(newPage < 1) return;
             currentPage = newPage;
             fetchData();
         }
 
-        // 3. SORTING (Reset page to 1)
         function ajaxSort(sortOrder) {
             currentSort = sortOrder;
-            currentPage = 1; // Always reset to page 1 when sorting
+            currentPage = 1;
             fetchData();
         }
 
-        // 4. TAB LOGIC (Visual Only)
         function switchTab(tabName) {
             if (tabName === 'bookings') {
                 document.documentElement.classList.add('show-bookings-mode');
@@ -100,7 +93,6 @@
             localStorage.setItem('activityLogActiveTab', tabName);
         }
 
-        // 5. SEARCH LOGIC (Reset page to 1)
         document.addEventListener("DOMContentLoaded", function() {
             const searchInput = document.getElementById('searchInput');
             const clearBtn = document.getElementById('clearBtn');
@@ -111,7 +103,7 @@
 
                 clearTimeout(searchTimer);
                 searchTimer = setTimeout(() => {
-                    currentPage = 1; // Always reset to page 1 when searching
+                    currentPage = 1; 
                     fetchData();
                 }, 500);
             });
