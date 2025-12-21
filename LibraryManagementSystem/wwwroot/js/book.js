@@ -481,4 +481,75 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Initialize Book Cropper
     initializeBookCropper();
+
+    // Initialize Review Filter
+    initializeReviewFilter();
 });
+
+/* ===========================================================================
+   REVIEW FILTERING & PAGINATION
+   =========================================================================== */
+
+function initializeReviewFilter() {
+    const dropdown = document.getElementById("reviewRatingDropdown");
+    if (!dropdown) return;
+
+    const trigger = dropdown.querySelector(".filter-dropdown__trigger");
+    const items = dropdown.querySelectorAll(".filter-dropdown__item");
+    const triggerText = dropdown.querySelector(".trigger__text");
+    const bookId = dropdown.dataset.bookId;
+
+    trigger.addEventListener("click", (e) => {
+        e.stopPropagation();
+        dropdown.classList.toggle("active");
+    });
+
+    document.addEventListener("click", (e) => {
+        if (!dropdown.contains(e.target)) {
+            dropdown.classList.remove("active");
+        }
+    });
+
+    items.forEach((item) => {
+        item.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const value = item.dataset.value;
+            const text = item.textContent;
+
+            // Update UI
+            triggerText.textContent = text;
+            items.forEach((i) => i.classList.remove("selected"));
+            item.classList.add("selected");
+            dropdown.classList.remove("active");
+
+            // Trigger Load
+            loadReviews(bookId, value, 1);
+        });
+    });
+}
+
+window.loadReviews = function (bookId, rating, page) {
+    const container = document.getElementById("reviewsContainer");
+    if (!container) return;
+
+    // Show loading state
+    container.style.opacity = "0.5";
+
+    let url = `/Book/BookDetails?id=${bookId}&page=${page}`;
+    if (rating) {
+        url += `&rating=${rating}`;
+    }
+
+    fetch(url, {
+        headers: { "X-Requested-With": "XMLHttpRequest" },
+    })
+        .then((res) => res.text())
+        .then((html) => {
+            container.innerHTML = html;
+            container.style.opacity = "1";
+        })
+        .catch((err) => {
+            console.error(err);
+            container.style.opacity = "1";
+        });
+};
