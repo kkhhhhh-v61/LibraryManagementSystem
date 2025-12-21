@@ -13,28 +13,47 @@ namespace LibraryManagementSystem.Controllers
     public class PaymentController(LMSDB db) : Controller
     {
         [HttpGet]
-        public IActionResult Index(string bookingId)
+        public IActionResult Index(string? bookingId, string? fineId)
         {
-            if (string.IsNullOrEmpty(bookingId)) return RedirectToAction("Index", "Booking");
+            if (string.IsNullOrEmpty(bookingId) && string.IsNullOrEmpty(fineId)) 
+                return RedirectToAction("Index", "Home");
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var vm = new PaymentVM();
 
-            var booking = db.Bookings
-                .Include(b => b.Room)
-                .ThenInclude(r => r.RoomCategory)
-                .FirstOrDefault(b => b.Id == bookingId && b.UserId == userId);
-
-            if (booking == null || booking.Status != BookingStatus.PENDING)
+            if (!string.IsNullOrEmpty(bookingId))
             {
-                TempData["Error"] = "Invalid booking or already paid.";
-                return RedirectToAction("BookingHistory", "Booking");
+                var booking = db.Bookings
+                    .Include(b => b.Room)
+                    .ThenInclude(r => r.RoomCategory)
+                    .FirstOrDefault(b => b.Id == bookingId && b.UserId == userId);
+
+                if (booking == null || booking.Status != BookingStatus.PENDING)
+                {
+                    TempData["Error"] = "Invalid booking or already paid.";
+                    return RedirectToAction("BookingHistory", "Booking");
+                }
+                
+                vm.BookingId = booking.Id;
+                vm.Booking = booking;
             }
-
-            var vm = new PaymentVM
+            else if (!string.IsNullOrEmpty(fineId))
             {
-                BookingId = booking.Id,
-                Booking = booking
-            };
+                var fine = db.Fines
+                    .Include(f => f.Loan)
+                    .ThenInclude(l => l.Copy)
+                    .ThenInclude(c => c.Book)
+                    .FirstOrDefault(f => f.Id == fineId && f.Loan.UserId == userId);
+
+                if (fine == null || fine.IsPaid)
+                {
+                    TempData["Error"] = "Invalid fine or already paid.";
+                    return RedirectToAction("Records", "Fine");
+                }
+
+                vm.FineId = fine.Id;
+                vm.Fine = fine;
+            }
 
             return View(vm);
         }
@@ -47,12 +66,26 @@ namespace LibraryManagementSystem.Controllers
 
             if (!ModelState.IsValid)
             {
-                vm.Booking = db.Bookings
-                    .Include(b => b.Room)
-                    .ThenInclude(r => r.RoomCategory)
-                    .FirstOrDefault(b => b.Id == vm.BookingId && b.UserId == userId);
+                if (!string.IsNullOrEmpty(vm.BookingId))
+                {
+                    vm.Booking = db.Bookings
+                        .Include(b => b.Room)
+                        .ThenInclude(r => r.RoomCategory)
+                        .FirstOrDefault(b => b.Id == vm.BookingId && b.UserId == userId);
 
-                if (vm.Booking == null) return RedirectToAction("BookingHistory", "Booking");
+                    if (vm.Booking == null) return RedirectToAction("BookingHistory", "Booking");
+                }
+                else if (!string.IsNullOrEmpty(vm.FineId))
+                {
+                    vm.Fine = db.Fines
+                        .Include(f => f.Loan)
+                        .ThenInclude(l => l.Copy)
+                        .ThenInclude(c => c.Book)
+                        .FirstOrDefault(f => f.Id == vm.FineId && f.Loan.UserId == userId);
+
+                    if (vm.Fine == null) return RedirectToAction("Records", "Fine");
+                }
+                else return RedirectToAction("Index", "Home");
 
                 return View("Index", vm);
             }
@@ -64,46 +97,79 @@ namespace LibraryManagementSystem.Controllers
                 using var transaction = db.Database.BeginTransaction();
                 try
                 {
-                    var booking = db.Bookings.FirstOrDefault(b => b.Id == vm.BookingId && b.UserId == userId);
-
-                    if (booking == null || booking.Status != BookingStatus.PENDING)
+                    if (!string.IsNullOrEmpty(vm.BookingId))
                     {
-                        TempData["Error"] = "Booking unavailable or already paid.";
+                        var booking = db.Bookings.FirstOrDefault(b => b.Id == vm.BookingId && b.UserId == userId);
+
+                        if (booking == null || booking.Status != BookingStatus.PENDING)
+                        {
+                            TempData["Error"] = "Booking unavailable or already paid.";
+                            return RedirectToAction("BookingHistory", "Booking");
+                        }
+
+                        var newPayment = new Payment
+                        {
+                            Id = GeneratePaymentId(),
+                            Type = PaymentType.BOOKING,
+                            Method = PaymentMethod.CREDIT_CARD,
+                            Status = PaymentStatus.SUCCESS,
+                            Date = DateTime.Now,
+                            BookingId = booking.Id,
+                            FineId = null
+                        };
+
+                        db.Payments.Add(newPayment);
+
+                        booking.Status = BookingStatus.CONFIRMED;
+
+                        var room = db.Rooms.FirstOrDefault(r => r.Id == booking.RoomId);
+                        if (room != null)
+                        {
+                            room.Status = RoomStatus.UNAVAILABLE;
+                        }
+
+                        db.SaveChanges();
+                        transaction.Commit();
+
+                        TempData["Success"] = "Payment successful! Booking confirmed.";
                         return RedirectToAction("BookingHistory", "Booking");
                     }
-
-                    var newPayment = new Payment
+                    else if (!string.IsNullOrEmpty(vm.FineId))
                     {
-                        Id = GeneratePaymentId(),
-                        Type = PaymentType.BOOKING,
-                        Method = PaymentMethod.CREDIT_CARD,
-                        Status = PaymentStatus.SUCCESS,
-                        Date = DateTime.Now,
-                        BookingId = booking.Id,
-                        FineId = null
-                    };
+                        var fine = db.Fines.FirstOrDefault(f => f.Id == vm.FineId && f.Loan.UserId == userId);
+                        if (fine == null || fine.IsPaid)
+                        {
+                            TempData["Error"] = "Fine unavailable or already paid.";
+                            return RedirectToAction("Records", "Fine");
+                        }
 
-                    db.Payments.Add(newPayment);
+                        var newPayment = new Payment
+                        {
+                            Id = GeneratePaymentId(),
+                            Type = PaymentType.FINE,
+                            Method = PaymentMethod.CREDIT_CARD,
+                            Status = PaymentStatus.SUCCESS,
+                            Date = DateTime.Now,
+                            BookingId = null,
+                            FineId = fine.Id
+                        };
 
-                    booking.Status = BookingStatus.CONFIRMED;
+                        db.Payments.Add(newPayment);
+                        fine.IsPaid = true;
+                        db.SaveChanges();
+                        transaction.Commit();
 
-                    var room = db.Rooms.FirstOrDefault(r => r.Id == booking.RoomId);
-                    if (room != null)
-                    {
-                        room.Status = RoomStatus.UNAVAILABLE;
+                        TempData["Success"] = "Payment successful! Fine settled.";
+                        return RedirectToAction("Records", "Fine");
                     }
 
-                    db.SaveChanges();
-                    transaction.Commit();
-
-                    TempData["Success"] = "Payment successful! Booking confirmed.";
-                    return RedirectToAction("BookingHistory", "Booking");
+                    return RedirectToAction("Index", "Home");
                 }
                 catch (Exception ex)
                 {
                     transaction.Rollback();
                     TempData["Error"] = "System Error: " + ex.Message;
-                    return RedirectToAction("Index", new { bookingId = vm.BookingId });
+                    return RedirectToAction("Index", new { bookingId = vm.BookingId, fineId = vm.FineId });
                 }
             });
         }
@@ -111,8 +177,8 @@ namespace LibraryManagementSystem.Controllers
         [HttpPost]
         public IActionResult Cancel()
         {
-            TempData["Error"] = "Payment cancelled. You can pay later from Booking History.";
-            return RedirectToAction("BookingHistory", "Booking");
+            TempData["Error"] = "Payment cancelled.";
+            return RedirectToAction("Index", "Home");
         }
 
         private string GeneratePaymentId()

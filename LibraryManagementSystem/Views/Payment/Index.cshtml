@@ -3,13 +3,24 @@
     ViewBag.Title = "Secure Checkout";
 
     var b = Model.Booking;
-    var duration = (b.EndTime - b.StartTime).TotalHours;
-    var finalTotal = b.TotalPrice;
+    var f = Model.Fine;
+    
+    decimal finalTotal = 0;
+    string imgSrc = "";
+    string title = "";
+    string subtitle = "";
 
-    var imgName = b.Room.RoomCategory.ImageURL;
-    var imgSrc = string.IsNullOrEmpty(imgName)
-        ? ""
-        : $"/images/categories/{imgName}";
+    if (b != null) {
+        finalTotal = b.TotalPrice;
+        title = b.Room.Name;
+        subtitle = b.Room.RoomCategory.Name;
+        imgSrc = string.IsNullOrEmpty(b.Room.RoomCategory.ImageURL) ? "" : $"/images/categories/{b.Room.RoomCategory.ImageURL}";
+    } else if (f != null) {
+        finalTotal = f.Amount;
+        title = "Overdue Fine";
+        subtitle = f.Loan.Copy.Book.Title;
+        imgSrc = string.IsNullOrEmpty(f.Loan.Copy.Book.ImageURL) ? "/images/assets/no-cover.jpg" : $"/images/books/{f.Loan.Copy.Book.ImageURL}";
+    }
 }
 
 @section head {
@@ -53,6 +64,7 @@
         <form asp-controller="Payment" asp-action="Process" method="post" id="payForm">
 
             <input type="hidden" asp-for="BookingId" />
+            <input type="hidden" asp-for="FineId" />
 
             <div class="form-group">
                 <label class="form-label" asp-for="CardName"></label>
@@ -111,24 +123,39 @@
                     }
                 </div>
                 <div class="room-details">
-                    <h4>@b.Room.Name</h4>
-                    <span class="badge-cat">@b.Room.RoomCategory.Name</span>
+                    <h4>@title</h4>
+                    <span class="badge-cat">@subtitle</span>
                 </div>
             </div>
 
             <div class="info-list">
-                <div class="info-item">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                    <span>@b.StartTime.ToString("MMM dd, yyyy")</span>
-                </div>
-                <div class="info-item">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                    <span>@b.StartTime.ToString("hh:mm tt") - @b.EndTime.ToString("hh:mm tt")</span>
-                </div>
-                <div class="info-item">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                    <span>@duration.ToString("0.#") Hours</span>
-                </div>
+                @if (b != null)
+                {
+                    var duration = (b.EndTime - b.StartTime).TotalHours;
+                    <div class="info-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                        <span>@b.StartTime.ToString("MMM dd, yyyy")</span>
+                    </div>
+                    <div class="info-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        <span>@b.StartTime.ToString("hh:mm tt") - @b.EndTime.ToString("hh:mm tt")</span>
+                    </div>
+                    <div class="info-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        <span>@duration.ToString("0.#") Hours</span>
+                    </div>
+                }
+                else if (f != null)
+                {
+                    <div class="info-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                        <span>Issued: @f.IssuedDate.ToString("MMM dd, yyyy")</span>
+                    </div>
+                    <div class="info-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                        <span>Rate: RM @f.OverdueRate.ToString("F2") / day</span>
+                    </div>
+                }
             </div>
 
             <div class="total-section">

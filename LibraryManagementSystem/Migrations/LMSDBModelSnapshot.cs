@@ -542,6 +542,9 @@ namespace LibraryManagementSystem.Migrations
                     b.Property<int>("CredibilityScore")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -558,6 +561,9 @@ namespace LibraryManagementSystem.Migrations
                     b.Property<string>("ImageURL")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsProfilePublic")
                         .HasColumnType("bit");

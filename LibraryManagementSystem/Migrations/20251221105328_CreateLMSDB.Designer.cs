@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LibraryManagementSystem.Migrations
 {
     [DbContext(typeof(LMSDB))]
-    [Migration("20251221044441_CreateLMSDB")]
+    [Migration("20251221105328_CreateLMSDB")]
     partial class CreateLMSDB
     {
         /// <inheritdoc />
@@ -545,6 +545,9 @@ namespace LibraryManagementSystem.Migrations
                     b.Property<int>("CredibilityScore")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -561,6 +564,9 @@ namespace LibraryManagementSystem.Migrations
                     b.Property<string>("ImageURL")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsProfilePublic")
                         .HasColumnType("bit");

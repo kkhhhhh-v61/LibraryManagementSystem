@@ -87,7 +87,9 @@ namespace LibraryManagementSystem.Migrations
                     CredibilityScore = table.Column<int>(type: "int", nullable: false),
                     FailedLoginAttempts = table.Column<int>(type: "int", nullable: false),
                     LockoutEnd = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsProfilePublic = table.Column<bool>(type: "bit", nullable: false)
+                    IsProfilePublic = table.Column<bool>(type: "bit", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {

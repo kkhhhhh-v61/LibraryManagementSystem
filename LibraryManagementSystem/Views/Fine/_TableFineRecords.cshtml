@@ -1,0 +1,89 @@
+@model FineManagementVM
+
+<table class="table">
+    <thead>
+        <tr class="table__header">
+            <th class="table__cell sortable-header @(Model.SortColumn == "Book" ? "active" : "")" data-sort="Book" data-order="@(Model.SortColumn == "Book" ? Model.SortOrder : "asc")">
+                Book
+                @if (Model.SortColumn == "Book")
+                {
+                    <span class="sort-icon">@(Model.SortOrder == "asc" ? "▲" : "▼")</span>
+                }
+            </th>
+            <th class="table__cell sortable-header @(Model.SortColumn == "IssuedDate" ? "active" : "")" data-sort="IssuedDate" data-order="@(Model.SortColumn == "IssuedDate" ? Model.SortOrder : "asc")" style="width: 180px;">
+                Issued Date
+                @if (Model.SortColumn == "IssuedDate")
+                {
+                    <span class="sort-icon">@(Model.SortOrder == "asc" ? "▲" : "▼")</span>
+                }
+            </th>
+            <th class="table__cell sortable-header @(Model.SortColumn == "Amount" ? "active" : "")" data-sort="Amount" data-order="@(Model.SortColumn == "Amount" ? Model.SortOrder : "asc")" style="width: 150px;">
+                Amount
+                @if (Model.SortColumn == "Amount")
+                {
+                    <span class="sort-icon">@(Model.SortOrder == "asc" ? "▲" : "▼")</span>
+                }
+            </th>
+            <th class="table__cell sortable-header @(Model.SortColumn == "Status" ? "active" : "")" data-sort="Status" data-order="@(Model.SortColumn == "Status" ? Model.SortOrder : "asc")" style="width: 150px;">
+                Status
+                @if (Model.SortColumn == "Status")
+                {
+                    <span class="sort-icon">@(Model.SortOrder == "asc" ? "▲" : "▼")</span>
+                }
+            </th>
+            <th class="table__cell table__cell--actions" style="width: 100px; text-align: center;">Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (!Model.Fines.Any())
+        {
+            <tr class="table__row">
+                <td class="table__cell" colspan="5" style="text-align:center; color: var(--color-gray-500);">
+                    No fine records found.
+                </td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var fine in Model.Fines)
+            {
+                <tr class="table__row">
+                    <td class="table__cell">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <img src="@(string.IsNullOrEmpty(fine.Loan.Copy.Book.ImageURL) ? "/images/assets/no-cover.jpg" : $"/images/books/{fine.Loan.Copy.Book.ImageURL}")" 
+                                 class="book-thumbnail" 
+                                 alt="@fine.Loan.Copy.Book.Title" />
+                            <div class="book-info">
+                                <span class="book-title">@fine.Loan.Copy.Book.Title</span>
+                                <span class="book-isbn">Loan ID: @fine.LoanId</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="table__cell">@fine.IssuedDate.ToString("yyyy-MM-dd")</td>
+                    <td class="table__cell" style="font-weight: 600;">RM @fine.Amount.ToString("F2")</td>
+                    <td class="table__cell">
+                        @if (fine.IsPaid) { <span class="status-badge status-available">Paid</span> }
+                        else { <span class="status-badge status-unavailable">Unpaid</span> }
+                    </td>
+                    <td class="table__cell table__cell--actions">
+                        @if (!fine.IsPaid)
+                        {
+                            <a href="@Url.Action("Index", "Payment", new { fineId = fine.Id })" class="form__button form__button--submit" style="height: 32px; padding: 0 12px; font-size: 0.85rem;">
+                                Pay Now
+                            </a>
+                        }
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+@if (Model.TotalPages > 1)
+{
+    <div class="pagination">
+        @if (Model.CurrentPage > 1) { <button class="pagination__link" type="button" data-page="@(Model.CurrentPage - 1)">Previous</button> }
+        @for (int i = 1; i <= Model.TotalPages; i++) { <button class="pagination__link @(i == Model.CurrentPage ? "pagination__link--active" : "")" type="button" data-page="@i">@i</button> }
+        @if (Model.CurrentPage < Model.TotalPages) { <button class="pagination__link" type="button" data-page="@(Model.CurrentPage + 1)">Next</button> }
+    </div>
+}

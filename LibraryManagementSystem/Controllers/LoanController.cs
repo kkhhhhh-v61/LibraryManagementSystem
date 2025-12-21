@@ -7,7 +7,7 @@ using LibraryManagementSystem.Services;
 namespace LibraryManagementSystem.Controllers
 {
     [Authorize]
-    public class LoanController(LMSDB db, IReservationService rs) : Controller
+    public class LoanController(LMSDB db, IReservationService rs, IFineService fs) : Controller
     {
         [Authorize(Roles = "MEMBER")]
         public IActionResult History(string? search, string? status, DateOnly? dateFrom, DateOnly? dateTo, int page = 1, string sort = "LoanDate", string order = "desc")
@@ -524,7 +524,7 @@ namespace LibraryManagementSystem.Controllers
 
         [HttpPost]
         [Authorize(Roles = "ADMIN")]
-        public IActionResult EditLoan([Bind(Prefix = "EditForm")] LoanEditVM vm)
+        public async Task<IActionResult> EditLoan([Bind(Prefix = "EditForm")] LoanEditVM vm)
         {
             if (!ModelState.IsValid)
             {
@@ -578,7 +578,11 @@ namespace LibraryManagementSystem.Controllers
                 loan.Status = (loan.PickupDue < today) ? Loan.LoanStatus.EXPIRED : Loan.LoanStatus.RESERVED;
             }
 
-            db.SaveChanges();
+            await db.SaveChangesAsync();
+
+            // Check for fines immediately after update
+            await fs.GenerateFines();
+
             TempData["ToastMessage"] = "Loan updated successfully.";
             TempData["ToastType"] = "success";
             return RedirectToAction("ManageLoan");

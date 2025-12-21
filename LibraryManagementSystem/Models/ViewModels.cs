@@ -503,8 +503,8 @@ public class ReservationListVM
 
 public class PaymentVM : IValidatableObject
 {
-    [Required]
-    public string BookingId { get; set; }
+    public string? BookingId { get; set; }
+    public string? FineId { get; set; }
 
     [Required(ErrorMessage = "Cardholder Name is required.")]
     [Display(Name = "Cardholder Name")]
@@ -525,6 +525,7 @@ public class PaymentVM : IValidatableObject
     public string Cvc { get; set; }
 
     public Booking? Booking { get; set; }
+    public Fine? Fine { get; set; }
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
@@ -542,6 +543,11 @@ public class PaymentVM : IValidatableObject
                     yield return new ValidationResult("Card has expired.", new[] { nameof(ExpiryDate) });
                 }
             }
+        }
+
+        if (string.IsNullOrEmpty(BookingId) && string.IsNullOrEmpty(FineId))
+        {
+            yield return new ValidationResult("System Error: No transaction ID provided.", new[] { nameof(BookingId) });
         }
     }
 }
@@ -793,4 +799,18 @@ public class ReviewManagementVM
     public int? FilterRating { get; set; }
     public DateOnly? DateFrom { get; set; }
     public DateOnly? DateTo { get; set; }
+}
+
+public class FineManagementVM
+{
+    public List<Fine> Fines { get; set; } = new();
+    public int CurrentPage { get; set; }
+    public int TotalPages { get; set; }
+    public string? SearchTerm { get; set; }
+    public string SortColumn { get; set; } = "IssuedDate";
+    public string SortOrder { get; set; } = "desc";
+    public string? FilterStatus { get; set; }
+    public DateOnly? DateFrom { get; set; }
+    public DateOnly? DateTo { get; set; }
+    public Dictionary<string, bool> CanDelete { get; set; } = new();
 }
