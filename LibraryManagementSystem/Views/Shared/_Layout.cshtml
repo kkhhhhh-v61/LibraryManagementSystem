@@ -54,7 +54,7 @@
                 }
 
                 <div class="sidebar-nav__item">
-                    @if (!User.IsInRole("STAFF") || !User.IsInRole("ADMIN"))
+                    @if (!User.IsInRole("STAFF") && !User.IsInRole("ADMIN"))
                     {
                         <a asp-controller="Book" asp-action="Catalogue" class="sidebar-nav__link @Html.IsActive("Book", null, "sidebar-nav__link--active")">
                             <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000" class="sidebar-nav__icon">
