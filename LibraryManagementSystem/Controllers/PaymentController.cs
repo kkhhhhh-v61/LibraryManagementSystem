@@ -122,12 +122,6 @@ namespace LibraryManagementSystem.Controllers
 
                         booking.Status = BookingStatus.CONFIRMED;
 
-                        var room = db.Rooms.FirstOrDefault(r => r.Id == booking.RoomId);
-                        if (room != null)
-                        {
-                            room.Status = RoomStatus.UNAVAILABLE;
-                        }
-
                         db.SaveChanges();
                         transaction.Commit();
 
