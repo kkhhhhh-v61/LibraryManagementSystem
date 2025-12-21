@@ -386,6 +386,48 @@ function initializeBookDetails() {
     }
 }
 
+function initializeCancelTrigger() {
+    const cancelModal = document.getElementById("modal-cancel-item");
+    if (!cancelModal) return;
+
+    const cancelForm = document.getElementById("cancelItemForm");
+    const cancelTypeSpan = document.getElementById("cancelItemType");
+    const cancelNameSpan = document.getElementById("cancelItemName");
+    const cancelIdInput = document.getElementById("cancelItemId");
+
+    document.body.addEventListener("click", function (e) {
+        const btn = e.target.closest(".js-cancel-trigger");
+        if (btn) {
+            const type = btn.dataset.type; // "loan" or "reservation"
+            const id = btn.dataset.id;
+            const bookTitle = btn.dataset.bookTitle;
+
+            if (type === "loan") {
+                cancelForm.action = "/Loan/CancelLoan";
+                cancelTypeSpan.textContent = "loan";
+            } else {
+                cancelForm.action = "/Reservation/Cancel";
+                cancelTypeSpan.textContent = "reservation";
+            }
+
+            cancelIdInput.value = id;
+            cancelNameSpan.textContent = bookTitle;
+
+            cancelModal.classList.add("active");
+        }
+    });
+
+    cancelModal.querySelectorAll(".js-close-modal").forEach((btn) => {
+        btn.addEventListener("click", () =>
+            cancelModal.classList.remove("active")
+        );
+    });
+
+    cancelModal.addEventListener("click", (e) => {
+        if (e.target === cancelModal) cancelModal.classList.remove("active");
+    });
+}
+
 /* ===========================================================================
    BOOK COVER CROPPER
    =========================================================================== */
@@ -485,6 +527,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Initialize Book Details Page
     initializeBookDetails();
+
+    // Initialize Cancel Trigger for Loan/Reservation
+    initializeCancelTrigger();
 
     // Initialize Book Cropper
     initializeBookCropper();

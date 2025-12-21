@@ -291,11 +291,6 @@ public class Notification
 
     public User User { get; set; }
 }
-
-
-
-/* ------------------------------ JASON TYE HONG YI ------------------------------ */
-
 public class Reservation
 {
     public enum ReservationStatus
@@ -329,51 +324,6 @@ public class Reservation
     public User User { get; set; }
     public Book Book { get; set; }
     public Copy? Copy { get; set; }
-}
-
-public class Payment
-{
-    public enum PaymentStatus
-    {
-        SUCCESS,
-        PENDING,
-        CANCELLED
-    }
-
-    public enum PaymentType
-    {
-        FINE,
-        BOOKING
-    }
-
-    public enum PaymentMethod
-    {
-        E_WALLET,
-        CREDIT_CARD,
-        BANKING
-    }
-
-    [Key]
-    [MaxLength(6)]
-    public string Id { get; set; }
-
-    public PaymentType Type { get; set; }
-
-    public PaymentMethod Method { get; set; }
-
-    public PaymentStatus Status { get; set; }
-
-    public DateTime Date { get; set; }
-
-    [MaxLength(6)]
-    public string? FineId { get; set; }
-
-    [MaxLength(6)]
-    public string? BookingId { get; set; }
-
-    public Fine? Fine { get; set; }
-
-    public Booking? Booking { get; set; }
 }
 
 public class Fine
@@ -492,7 +442,7 @@ public class Booking
     public decimal TotalPrice { get; set; }
 
     public BookingStatus Status { get; set; }
-        
+
     [MaxLength(500)]
     public string? Description { get; set; }
 
@@ -502,4 +452,49 @@ public class Booking
     public DateTime? CancelledAt { get; set; }
 
     public bool IsReminderSent { get; set; } = false;
+}
+
+public class Payment
+{
+    public enum PaymentStatus
+    {
+        SUCCESS,
+        PENDING,
+        CANCELLED
+    }
+
+    public enum PaymentType
+    {
+        FINE,
+        BOOKING
+    }
+
+    public enum PaymentMethod
+    {
+        E_WALLET,
+        CREDIT_CARD,
+        BANKING
+    }
+
+    [Key]
+    [MaxLength(6)]
+    public string Id { get; set; }
+
+    public PaymentType Type { get; set; }
+
+    public PaymentMethod Method { get; set; }
+
+    public PaymentStatus Status { get; set; }
+
+    public DateTime Date { get; set; }
+
+    [MaxLength(6)]
+    public string? FineId { get; set; }
+
+    [MaxLength(6)]
+    public string? BookingId { get; set; }
+
+    public Fine? Fine { get; set; }
+
+    public Booking? Booking { get; set; }
 }

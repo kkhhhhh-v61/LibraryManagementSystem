@@ -45,6 +45,18 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="filter-group">
+                                <label class="filter-label">Review Date</label>
+                                <div class="filter-date-range" style="display: flex; gap: 0.5rem; align-items: center;">
+                                    <input type="date" id="filterDateFrom" class="filter-input" 
+                                           value="@(Model.DateFrom?.ToString("yyyy-MM-dd"))" 
+                                           style="width: 100%; padding: 8px; border: 1px solid var(--color-gray-300); border-radius: var(--spacing-sm); font-family: var(--font-main);" />
+                                    <span style="color: var(--color-gray-500);">-</span>
+                                    <input type="date" id="filterDateTo" class="filter-input" 
+                                           value="@(Model.DateTo?.ToString("yyyy-MM-dd"))"
+                                           style="width: 100%; padding: 8px; border: 1px solid var(--color-gray-300); border-radius: var(--spacing-sm); font-family: var(--font-main);" />
+                                </div>
+                            </div>
                             <div class="filter-actions">
                                 <button type="button" id="clearFilters" class="filter-action-clear">
                                     <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="currentColor"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg>
@@ -58,7 +70,7 @@
                     <svg class="search__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#999">
                         <path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z" />
                     </svg>
-                    <input class="search__input--header" id="nameSearchInput" type="text" placeholder="Search reviews..." autocomplete="off" />
+                    <input class="search__input--header" id="nameSearchInput" type="text" placeholder="Search reviews..." autocomplete="off" data-trim />
                     <svg class="search__clear" id="searchClearButton" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
                         <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
                     </svg>
@@ -92,7 +104,7 @@
                 
                 <div class="form__field">
                     <label class="field__label field__label--required">Reason for Deletion</label>
-                    <textarea class="field__input input--textarea" name="reason" id="deleteReason" placeholder="e.g. Inappropriate language, Spam, Irrelevant content..." required style="height: 100px;"></textarea>
+                    <textarea class="field__input input--textarea" name="reason" id="deleteReason" placeholder="e.g. Inappropriate language, Spam, Irrelevant content..." required data-trim style="height: 100px;"></textarea>
                     <p style="font-size: 0.85rem; color: var(--color-gray-500); margin-top: 0.5rem;">
                         This reason will be sent to the user via notification.
                     </p>

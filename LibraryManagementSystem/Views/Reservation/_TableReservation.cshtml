@@ -1,0 +1,143 @@
+@model ReservationListVM
+
+<table class="table">
+    <thead>
+        <tr class="table__header">
+            <th class="table__cell table__cell--checkbox">
+                <input class="checkbox-styled" id="selectAll" type="checkbox" />
+            </th>
+            <th class="table__cell sortable-header @(Model.SortColumn == "Book" ? "active" : "")" data-sort="Book" data-order="@(Model.SortColumn == "Book" ? Model.SortOrder : "asc")">
+                Book
+                @if (Model.SortColumn == "Book")
+                {
+                    <span class="sort-icon">@(Model.SortOrder == "asc" ? "▲" : "▼")</span>
+                }
+            </th>
+            <th class="table__cell sortable-header @(Model.SortColumn == "ReservationDate" ? "active" : "")" data-sort="ReservationDate" data-order="@(Model.SortColumn == "ReservationDate" ? Model.SortOrder : "asc")" style="width: 180px;">
+                Reserved On
+                @if (Model.SortColumn == "ReservationDate")
+                {
+                    <span class="sort-icon">@(Model.SortOrder == "asc" ? "▲" : "▼")</span>
+                }
+            </th>
+            <th class="table__cell sortable-header @(Model.SortColumn == "Status" ? "active" : "")" data-sort="Status" data-order="@(Model.SortColumn == "Status" ? Model.SortOrder : "asc")" style="width: 180px;">
+                Status
+                @if (Model.SortColumn == "Status")
+                {
+                    <span class="sort-icon">@(Model.SortOrder == "asc" ? "▲" : "▼")</span>
+                }
+            </th>
+            <th class="table__cell" style="width: 150px; text-align: center;">Queue Pos.</th>
+            <th class="table__cell table__cell--actions" style="width: 100px; text-align: center;">Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (!Model.Reservations.Any())
+        {
+            <tr class="table__row">
+                <td class="table__cell" colspan="6" style="text-align:center; color: var(--color-gray-500);">
+                    No reservations found.
+                </td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var item in Model.Reservations)
+            {
+                <tr class="table__row">
+                    <td class="table__cell table__cell--checkbox">
+                        @if (item.Status == Reservation.ReservationStatus.PENDING || item.Status == Reservation.ReservationStatus.READY)
+                        {
+                            <input class="row-checkbox checkbox-styled" type="checkbox" name="ids" value="@item.Id" data-name="@item.BookTitle" data-status="@item.Status" />
+                        }
+                        else
+                        {
+                            <input class="checkbox-styled" type="checkbox" disabled style="opacity: 0.3; cursor: default;" />
+                        }
+                    </td>
+                    <td class="table__cell">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <img src="@(string.IsNullOrEmpty(item.BookImageURL) ? "/images/assets/no-cover.jpg" : $"/images/books/{item.BookImageURL}")" 
+                                 class="book-thumbnail" 
+                                 alt="@item.BookTitle" />
+                            <div class="book-info">
+                                <a href="@Url.Action("BookDetails", "Book", new { id = item.BookId })" class="book-title" style="text-decoration: none; color: inherit;">@item.BookTitle</a>
+                                <span class="book-author" style="font-size: 0.85rem; color: var(--color-gray-500);">@item.BookAuthors</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="table__cell">@item.ReservationDate?.ToString("yyyy-MM-dd")</td>
+                    <td class="table__cell">
+                        @if (item.Status == Reservation.ReservationStatus.READY)
+                        {
+                            <span style="color: var(--color-success); font-weight: 600;">Ready for Pickup</span>
+                            <div style="font-size: 0.8rem; color: var(--color-gray-500);">Expires: @item.ReservationDue?.ToString("yyyy-MM-dd")</div>
+                        }
+                        else if (item.Status == Reservation.ReservationStatus.PENDING)
+                        {
+                            <span style="color: var(--color-warning); font-weight: 600;">Pending</span>
+                        }
+                        else
+                        {
+                            <span style="color: var(--color-gray-500);">@System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(item.Status.ToString().ToLower())</span>
+                        }
+                    </td>
+                    <td class="table__cell" style="text-align: center;">
+                        @if (item.QueuePosition.HasValue)
+                        {
+                            <span class="count-badge count-badge--active" style="min-width: 40px;">#@item.QueuePosition</span>
+                        }
+                        else
+                        {
+                            <span style="color: var(--color-gray-400);">-</span>
+                        }
+                    </td>
+                    <td class="table__cell table__cell--actions">
+                        <div class="table__actions">
+                            @if (item.Status == Reservation.ReservationStatus.READY)
+                            {
+                                <form asp-action="Confirm" method="post" style="display:inline;">
+                                    <input type="hidden" name="id" value="@item.Id" />
+                                    <button class="action__button action__button--add" title="Confirm & Loan" type="submit">
+                                        <svg class="button__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000"><path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z"/></svg>
+                                    </button>
+                                </form>
+                            }
+                            
+                            @if (item.Status == Reservation.ReservationStatus.PENDING || item.Status == Reservation.ReservationStatus.READY)
+                            {
+                                <button class="action__button action__button--delete js-delete-trigger"
+                                        data-id="@item.Id"
+                                        data-name="@item.BookTitle"
+                                        title="Cancel Reservation"
+                                        type="button">
+                                    <svg class="button__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000"><path d="M480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q54 0 104-17.5t92-50.5L228-676q-33 42-50.5 92T160-480q0 134 93 227t227 93Zm252-124q33-42 50.5-92T800-480q0-134-93-227t-227-93q-54 0-104 17.5T284-732l448 448Z"/></svg>
+                                </button>
+                            }
+                        </div>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+@if (Model.TotalPages > 1)
+{
+    <div class="pagination">
+        @if (Model.CurrentPage > 1)
+        {
+            <button class="pagination__link" type="button" data-page="@(Model.CurrentPage - 1)">Previous</button>
+        }
+
+        @for (int i = 1; i <= Model.TotalPages; i++)
+        {
+            <button class="pagination__link @(i == Model.CurrentPage ? "pagination__link--active" : "")" type="button" data-page="@i">@i</button>
+        }
+
+        @if (Model.CurrentPage < Model.TotalPages)
+        {
+            <button class="pagination__link" type="button" data-page="@(Model.CurrentPage + 1)">Next</button>
+        }
+    </div>
+}

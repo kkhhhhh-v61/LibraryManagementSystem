@@ -15,14 +15,52 @@
             <div class="header__start">
                 <h2 class="panel__title">Genres (@ViewBag.TotalItems)</h2>
             </div>
+            <div class="header__controls">
+                <div class="header__filters">
+                    <div class="filter-menu" id="filterMenu">
+                        <button class="filter-menu__trigger" type="button" id="filterMenuTrigger">
+                            <svg class="trigger__icon" xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#666">
+                                <path d="M440-160q-17 0-28.5-11.5T400-200v-240L168-736q-15-20-4.5-42t36.5-22h560q26 0 36.5 22t-4.5 42L560-440v240q0 17-11.5 28.5T520-160h-80Zm40-308 198-252H282l198 252Zm0 0Z"/>
+                            </svg>
+                            <span class="trigger__text">Filters</span>
+                        </button>
+                        <div class="filter-menu__dropdown">
+                            <div class="filter-group">
+                                <label class="filter-label">Usage</label>
+                                <div class="filter-dropdown" id="hasBooksFilterWrapper" style="width: 100%;">
+                                    <input type="hidden" id="filterHasBooks" value="@(Model.FilterHasBooks.HasValue ? Model.FilterHasBooks.Value.ToString().ToLower() : "")" />
+                                    <button class="filter-dropdown__trigger" type="button">
+                                        <span class="trigger__text">
+                                            @(Model.FilterHasBooks.HasValue ? (Model.FilterHasBooks.Value ? "Used (Has Books)" : "Unused (No Books)") : "All Genres")
+                                        </span>
+                                        <svg class="trigger__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="M480-360 280-560h400L480-360Z"/></svg>
+                                    </button>
+                                    <button class="filter-clear" type="button" title="Clear Filter"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg></button>
+                                    <div class="filter-dropdown__menu">
+                                        <div class="filter-dropdown__item @(!Model.FilterHasBooks.HasValue ? "selected" : "")" data-value="">All Genres</div>
+                                        <div class="filter-dropdown__item @(Model.FilterHasBooks == true ? "selected" : "")" data-value="true">Used (Has Books)</div>
+                                        <div class="filter-dropdown__item @(Model.FilterHasBooks == false ? "selected" : "")" data-value="false">Unused (No Books)</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="filter-actions">
+                                <button type="button" id="clearFilters" class="filter-action-clear">
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="currentColor"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg>
+                                    Clear All Filters
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             <div class="search__wrapper">
                 <svg class="search__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#999">
                     <path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z" />
                 </svg>
-                <input class="search__input--header" id="nameSearchInput" type="text" placeholder="Search genres..." autocomplete="off" />
+                <input class="search__input--header" id="nameSearchInput" type="text" placeholder="Search genres..." autocomplete="off" data-trim />
                 <svg class="search__clear" id="searchClearButton" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
                     <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
                 </svg>
+            </div>
             </div>
         </div>
 
@@ -36,9 +74,12 @@
                 <button class="form__button form__button--cancel button--deselect-all" id="deselectAllButton" type="button">
                     Deselect All
                 </button>
-                <button class="form__button form__button--danger button--batch-delete" id="batchDeleteButton" type="button">
-                    Delete Selected
-                </button>
+                @if (User.IsInRole("ADMIN"))
+                {
+                    <button class="form__button form__button--danger button--batch-delete" id="batchDeleteButton" type="button">
+                        Delete Selected
+                    </button>
+                }
             </div>
             <button class="form__button form__button--submit js-open-modal" data-type="Genre" type="button">
                 + Add Genre

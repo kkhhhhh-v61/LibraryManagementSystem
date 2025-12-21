@@ -1,4 +1,4 @@
-﻿﻿using System.ComponentModel.DataAnnotations;
+﻿﻿﻿﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +10,7 @@ using LibraryManagementSystem.Services;
 
 namespace LibraryManagementSystem.Controllers;
 
-public class BookController(LMSDB db, IWebHostEnvironment en, INotificationService ns) : Controller
+public class BookController(LMSDB db, IWebHostEnvironment en, INotificationService ns, IReservationService rs) : Controller
 {
     public IActionResult Catalogue(string? search, string? genreId, string? authorId, int? rating)
     {
@@ -104,6 +104,9 @@ public class BookController(LMSDB db, IWebHostEnvironment en, INotificationServi
         Review? userReview = null;
         string? currentUserId = null;
         ViewBag.HasActiveLoan = false;
+        ViewBag.ActiveLoanId = null;
+        ViewBag.HasActiveReservation = false;
+        ViewBag.ActiveReservationId = null;
 
         if (User.Identity!.IsAuthenticated)
         {
@@ -112,14 +115,27 @@ public class BookController(LMSDB db, IWebHostEnvironment en, INotificationServi
             if (user != null)
             {
                 currentUserId = user.Id;
-                var hasActiveLoan = db.Loans
+                var activeLoan = db.Loans
                     .Include(l => l.Copy)
-                    .Any(l => l.UserId == user.Id &&
+                    .FirstOrDefault(l => l.UserId == user.Id &&
                               l.Copy.BookId == id &&
                               (l.Status == Loan.LoanStatus.RESERVED ||
                                l.Status == Loan.LoanStatus.IN_LOAN ||
                                l.Status == Loan.LoanStatus.OVERDUE));
-                ViewBag.HasActiveLoan = hasActiveLoan;
+                
+                if (activeLoan != null)
+                {
+                    ViewBag.HasActiveLoan = true;
+                    ViewBag.ActiveLoanId = activeLoan.Id;
+                }
+
+                var activeReservation = db.Reservations.FirstOrDefault(r => r.UserId == user.Id && r.BookId == id && (r.Status == Reservation.ReservationStatus.PENDING || r.Status == Reservation.ReservationStatus.READY));
+
+                if (activeReservation != null)
+                {
+                    ViewBag.HasActiveReservation = true;
+                    ViewBag.ActiveReservationId = activeReservation.Id;
+                }
 
                 // Find user's review for this book
                 userReview = reviewsQuery.FirstOrDefault(r => r.Loan.UserId == user.Id);
@@ -240,6 +256,13 @@ public class BookController(LMSDB db, IWebHostEnvironment en, INotificationServi
 
         var items = query.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
+        var bookIds = items.Select(b => b.Id).ToList();
+        var activeCopiesBookIds = db.Copies
+            .Where(c => bookIds.Contains(c.BookId) && (c.Status == Copy.CopyStatus.RESERVED || c.Status == Copy.CopyStatus.BORROWED))
+            .Select(c => c.BookId)
+            .Distinct()
+            .ToHashSet();
+
         var vm = new BookManagementVM
         {
             ExistingBooks = items,
@@ -253,7 +276,8 @@ public class BookController(LMSDB db, IWebHostEnvironment en, INotificationServi
             FilterFeatured = featured,
             FilterArchived = archived,
             AuthorList = db.Authors.OrderBy(a => a.Name).Select(a => new SelectListItem(a.Name, a.Id)).ToList(),
-            GenreList = db.Genres.OrderBy(g => g.Name).Select(g => new SelectListItem(g.Name, g.Id)).ToList()
+            GenreList = db.Genres.OrderBy(g => g.Name).Select(g => new SelectListItem(g.Name, g.Id)).ToList(),
+            CanDelete = items.ToDictionary(b => b.Id, b => !activeCopiesBookIds.Contains(b.Id))
         };
 
         var allDates = db.Books.Select(b => b.DateAdded);
@@ -589,6 +613,12 @@ public class BookController(LMSDB db, IWebHostEnvironment en, INotificationServi
 
         db.SaveChanges();
 
+        foreach (var obj in addedCopies)
+        {
+            var copyId = obj.GetType().GetProperty("Id")?.GetValue(obj, null) as string;
+            if (copyId != null) rs.AssignNextReservation(bookId, copyId);
+        }
+
         TempData["ToastMessage"] = $"{quantity} copies added successfully.";
         TempData["ToastType"] = "success";
         TempData["AddedCopies"] = System.Text.Json.JsonSerializer.Serialize(addedCopies);
@@ -754,7 +784,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en, INotificationServi
     }
 
     [Authorize(Roles = "ADMIN, STAFF")]
-    public IActionResult ManageGenre(string? search, int page = 1, string sort = "Name", string order = "asc")
+    public IActionResult ManageGenre(string? search, bool? hasBooks, int page = 1, string sort = "Name", string order = "asc")
     {
         var query = db.Genres.Include(g => g.Books).AsQueryable();
 
@@ -762,6 +792,12 @@ public class BookController(LMSDB db, IWebHostEnvironment en, INotificationServi
         {
             search = search.Trim();
             query = query.Where(g => g.Name.Contains(search));
+        }
+
+        if (hasBooks.HasValue)
+        {
+            if (hasBooks.Value) query = query.Where(g => g.Books.Any());
+            else query = query.Where(g => !g.Books.Any());
         }
 
         bool isDesc = order == "desc";
@@ -789,7 +825,8 @@ public class BookController(LMSDB db, IWebHostEnvironment en, INotificationServi
             TotalPages = totalPages,
             SearchTerm = search,
             SortColumn = sort,
-            SortOrder = order
+            SortOrder = order,
+            FilterHasBooks = hasBooks
         };
 
         if (Request.IsAjax())
@@ -929,7 +966,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en, INotificationServi
     }
 
     [Authorize(Roles = "ADMIN, STAFF")]
-    public IActionResult ManageAuthor(string? search, int page = 1, string sort = "Name", string order = "asc")
+    public IActionResult ManageAuthor(string? search, bool? hasBooks, int page = 1, string sort = "Name", string order = "asc")
     {
         var query = db.Authors.Include(a => a.Books).AsQueryable();
 
@@ -937,6 +974,12 @@ public class BookController(LMSDB db, IWebHostEnvironment en, INotificationServi
         {
             search = search.Trim();
             query = query.Where(a => a.Name.Contains(search));
+        }
+
+        if (hasBooks.HasValue)
+        {
+            if (hasBooks.Value) query = query.Where(a => a.Books.Any());
+            else query = query.Where(a => !a.Books.Any());
         }
 
         bool isDesc = order == "desc";
@@ -964,7 +1007,8 @@ public class BookController(LMSDB db, IWebHostEnvironment en, INotificationServi
             TotalPages = totalPages,
             SearchTerm = search,
             SortColumn = sort,
-            SortOrder = order
+            SortOrder = order,
+            FilterHasBooks = hasBooks
         };
 
         if (Request.IsAjax())
@@ -1205,7 +1249,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en, INotificationServi
     }
 
     [Authorize(Roles = "ADMIN, STAFF")]
-    public IActionResult ManageReviews(string? search, int? rating, int page = 1, string sort = "Date", string order = "desc")
+    public IActionResult ManageReviews(string? search, int? rating, DateOnly? dateFrom, DateOnly? dateTo, int page = 1, string sort = "Date", string order = "desc")
     {
         var query = db.Reviews
             .Include(r => r.Loan)
@@ -1226,6 +1270,16 @@ public class BookController(LMSDB db, IWebHostEnvironment en, INotificationServi
         if (rating.HasValue)
         {
             query = query.Where(r => r.Rating == rating.Value);
+        }
+
+        if (dateFrom.HasValue)
+        {
+            query = query.Where(r => DateOnly.FromDateTime(r.ReviewDate) >= dateFrom.Value);
+        }
+
+        if (dateTo.HasValue)
+        {
+            query = query.Where(r => DateOnly.FromDateTime(r.ReviewDate) <= dateTo.Value);
         }
 
         bool isDesc = order == "desc";
@@ -1255,7 +1309,9 @@ public class BookController(LMSDB db, IWebHostEnvironment en, INotificationServi
             SearchTerm = search,
             SortColumn = sort,
             SortOrder = order,
-            FilterRating = rating
+            FilterRating = rating,
+            DateFrom = dateFrom,
+            DateTo = dateTo
         };
 
         if (Request.IsAjax())

@@ -2,14 +2,15 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using LibraryManagementSystem.Extensions;
+using LibraryManagementSystem.Services;
 
 namespace LibraryManagementSystem.Controllers
 {
     [Authorize]
-    public class LoanController(LMSDB db) : Controller
+    public class LoanController(LMSDB db, IReservationService rs) : Controller
     {
         [Authorize(Roles = "MEMBER")]
-        public IActionResult History(string? search, string? status, int page = 1, string sort = "LoanDate", string order = "desc")
+        public IActionResult History(string? search, string? status, DateOnly? dateFrom, DateOnly? dateTo, int page = 1, string sort = "LoanDate", string order = "desc")
         {
             var username = User.Identity?.Name;
             var user = db.Users.FirstOrDefault(u => u.Username == username);
@@ -18,6 +19,7 @@ namespace LibraryManagementSystem.Controllers
             var query = db.Loans
                 .Include(l => l.Copy)
                 .ThenInclude(c => c.Book)
+                .ThenInclude(b => b.Authors)
                 .Include(l => l.Review)
                 .Where(l => l.UserId == user.Id)
                 .AsQueryable();
@@ -33,6 +35,16 @@ namespace LibraryManagementSystem.Controllers
             if (!string.IsNullOrWhiteSpace(status) && Enum.TryParse<Loan.LoanStatus>(status, true, out var statusEnum))
             {
                 query = query.Where(l => l.Status == statusEnum);
+            }
+
+            // Filter Date (LoanDate)
+            if (dateFrom.HasValue)
+            {
+                query = query.Where(l => l.LoanDate >= dateFrom.Value);
+            }
+            if (dateTo.HasValue)
+            {
+                query = query.Where(l => l.LoanDate <= dateTo.Value);
             }
 
             // Sorting
@@ -65,7 +77,9 @@ namespace LibraryManagementSystem.Controllers
                 SearchTerm = search,
                 SortColumn = sort,
                 SortOrder = order,
-                FilterStatus = status
+                FilterStatus = status,
+                DateFrom = dateFrom,
+                DateTo = dateTo
             };
 
             if (Request.IsAjax())
@@ -77,7 +91,7 @@ namespace LibraryManagementSystem.Controllers
         }
 
         [Authorize(Roles = "MEMBER")]
-        public IActionResult Reviews(int page = 1)
+        public IActionResult Reviews(string? search, int? rating, DateOnly? dateFrom, DateOnly? dateTo, int page = 1, string sort = "Date", string order = "desc")
         {
             var username = User.Identity?.Name;
             var user = db.Users.FirstOrDefault(u => u.Username == username);
@@ -87,8 +101,8 @@ namespace LibraryManagementSystem.Controllers
                 .Include(l => l.Review)
                 .Include(l => l.Copy)
                 .ThenInclude(c => c.Book)
+                .ThenInclude(b => b.Authors)
                 .Where(l => l.UserId == user.Id && l.Status == Loan.LoanStatus.RETURNED)
-                .OrderByDescending(l => l.ReturnDate)
                 .ToList();
 
             var uniqueLoans = allLoans
@@ -100,12 +114,48 @@ namespace LibraryManagementSystem.Controllers
 
                     return g.First();
                 })
-                .OrderByDescending(l => l.Review != null ? l.Review.ReviewDate : l.ReturnDate.GetValueOrDefault().ToDateTime(TimeOnly.MinValue))
-                .ToList();
+                .AsQueryable();
+
+            // Search
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                search = search.Trim();
+                uniqueLoans = uniqueLoans.Where(l => l.Copy.Book.Title.Contains(search, StringComparison.OrdinalIgnoreCase) || 
+                                                     (l.Review != null && l.Review.Comment != null && l.Review.Comment.Contains(search, StringComparison.OrdinalIgnoreCase)));
+            }
+
+            // Filter Rating
+            if (rating.HasValue)
+            {
+                uniqueLoans = uniqueLoans.Where(l => l.Review != null && l.Review.Rating == rating.Value);
+            }
+
+            if (dateFrom.HasValue)
+            {
+                uniqueLoans = uniqueLoans.Where(l => l.Review != null && DateOnly.FromDateTime(l.Review.ReviewDate) >= dateFrom.Value);
+            }
+
+            if (dateTo.HasValue)
+            {
+                uniqueLoans = uniqueLoans.Where(l => l.Review != null && DateOnly.FromDateTime(l.Review.ReviewDate) <= dateTo.Value);
+            }
+
+            // Sorting
+            bool isDesc = order == "desc";
+            uniqueLoans = sort switch
+            {
+                "Book" => isDesc ? uniqueLoans.OrderByDescending(l => l.Copy.Book.Title) : uniqueLoans.OrderBy(l => l.Copy.Book.Title),
+                "Rating" => isDesc ? uniqueLoans.OrderByDescending(l => l.Review != null ? l.Review.Rating : -1) : uniqueLoans.OrderBy(l => l.Review != null ? l.Review.Rating : -1),
+                "Date" => isDesc ? uniqueLoans.OrderByDescending(l => l.Review != null ? l.Review.ReviewDate : l.ReturnDate.GetValueOrDefault().ToDateTime(TimeOnly.MinValue)) 
+                                 : uniqueLoans.OrderBy(l => l.Review != null ? l.Review.ReviewDate : l.ReturnDate.GetValueOrDefault().ToDateTime(TimeOnly.MinValue)),
+                _ => isDesc ? uniqueLoans.OrderByDescending(l => l.Review != null ? l.Review.ReviewDate : l.ReturnDate.GetValueOrDefault().ToDateTime(TimeOnly.MinValue)) 
+                            : uniqueLoans.OrderBy(l => l.Review != null ? l.Review.ReviewDate : l.ReturnDate.GetValueOrDefault().ToDateTime(TimeOnly.MinValue))
+            };
 
             int pageSize = 10;
-            int totalItems = uniqueLoans.Count;
+            int totalItems = uniqueLoans.Count();
             int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+            ViewBag.TotalItems = totalItems;
             if (page < 1) page = 1;
             if (page > totalPages && totalPages > 0) page = totalPages;
 
@@ -115,8 +165,19 @@ namespace LibraryManagementSystem.Controllers
             {
                 Loans = loans,
                 CurrentPage = page,
-                TotalPages = totalPages
+                TotalPages = totalPages,
+                SearchTerm = search,
+                SortColumn = sort,
+                SortOrder = order,
+                FilterRating = rating,
+                DateFrom = dateFrom,
+                DateTo = dateTo
             };
+
+            if (Request.IsAjax())
+            {
+                return PartialView("_TableReviewHistory", vm);
+            }
 
             return View(vm);
         }
@@ -204,13 +265,14 @@ namespace LibraryManagementSystem.Controllers
                 return RedirectToAction("History");
             }
 
-            foreach (var loan in loans)
-            {
-                if (loan.Copy != null) loan.Copy.Status = Copy.CopyStatus.AVAILABLE;
-            }
-
             db.Loans.RemoveRange(loans);
             db.SaveChanges();
+
+            // Check reservations for each released copy
+            foreach (var loan in loans)
+            {
+                rs.AssignNextReservation(loan.Copy.BookId, loan.CopyId);
+            }
 
             TempData["ToastMessage"] = $"Successfully cancelled {loans.Count} loan(s).";
             TempData["ToastType"] = "success";
@@ -220,7 +282,7 @@ namespace LibraryManagementSystem.Controllers
 
         [HttpPost]
         [Authorize(Roles = "MEMBER")]
-        public IActionResult CancelLoan(string id)
+        public IActionResult CancelLoan(string id, string? returnUrl)
         {
             var username = User.Identity?.Name;
             var user = db.Users.FirstOrDefault(u => u.Username == username);
@@ -232,11 +294,18 @@ namespace LibraryManagementSystem.Controllers
 
             if (loan != null)
             {
-                if (loan.Copy != null) loan.Copy.Status = Copy.CopyStatus.AVAILABLE;
                 db.Loans.Remove(loan);
                 db.SaveChanges();
+                
+                rs.AssignNextReservation(loan.Copy.BookId, loan.CopyId);
+
                 TempData["ToastMessage"] = "Loan cancelled successfully.";
                 TempData["ToastType"] = "success";
+            }
+
+            if (Url.IsLocalUrl(returnUrl))
+            {
+                return Redirect(returnUrl);
             }
 
             return RedirectToAction("History");
@@ -551,9 +620,10 @@ namespace LibraryManagementSystem.Controllers
 
             loan.Status = Loan.LoanStatus.RETURNED;
             loan.ReturnDate = DateOnly.FromDateTime(DateTime.Now);
-            copy.Status = Copy.CopyStatus.AVAILABLE;
-
+            
             db.SaveChanges();
+
+            rs.AssignNextReservation(loan.Copy.BookId, loan.CopyId);
 
             return Json(new { 
                 success = true, 

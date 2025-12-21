@@ -30,6 +30,7 @@ builder.Services.AddTransient<IEmailService, EmailService>();
 
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IWishlistService, WishlistService>();
+builder.Services.AddScoped<IReservationService, ReservationService>();
 
 builder.Services.AddHostedService<BookingReminderService>();
 
