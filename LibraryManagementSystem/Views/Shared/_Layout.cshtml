@@ -54,115 +54,160 @@
                 }
 
                 <div class="sidebar-nav__item">
-                    <a asp-controller="Book" asp-action="Catalogue" class="sidebar-nav__link @Html.IsActive("Book", null, "sidebar-nav__link--active")">
-                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000" class="sidebar-nav__icon">
-                            <path d="M560-564v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-600q-38 0-73 9.5T560-564Zm0 220v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-380q-38 0-73 9t-67 27Zm0-110v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-490q-38 0-73 9.5T560-454ZM260-320q47 0 91.5 10.5T440-278v-394q-41-24-87-36t-93-12q-36 0-71.5 7T120-692v396q35-12 69.5-18t70.5-6Zm260 42q44-21 88.5-31.5T700-320q36 0 70.5 6t69.5 18v-396q-33-14-68.5-21t-71.5-7q-47 0-93 12t-87 36v394Zm-40 118q-48-38-104-59t-116-21q-42 0-82.5 11T100-198q-21 11-40.5-1T40-234v-482q0-11 5.5-21T62-752q46-24 96-36t102-12q58 0 113.5 15T480-740q51-30 106.5-45T700-800q52 0 102 12t96 36q11 5 16.5 15t5.5 21v482q0 23-19.5 35t-40.5 1q-37-20-77.5-31T700-240q-60 0-116 21t-104 59ZM280-494Z" />
-                        </svg>
-                        <span class="sidebar-nav__text">Catalogue</span>
-                        <svg class="sidebar-nav__arrow" xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#999">
-                            <path d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z" />
-                        </svg>
-                    </a>
+                    @if (!User.IsInRole("STAFF") || !User.IsInRole("ADMIN"))
+                    {
+                        <a asp-controller="Book" asp-action="Catalogue" class="sidebar-nav__link @Html.IsActive("Book", null, "sidebar-nav__link--active")">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000" class="sidebar-nav__icon">
+                                <path d="M560-564v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-600q-38 0-73 9.5T560-564Zm0 220v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-380q-38 0-73 9t-67 27Zm0-110v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-490q-38 0-73 9.5T560-454ZM260-320q47 0 91.5 10.5T440-278v-394q-41-24-87-36t-93-12q-36 0-71.5 7T120-692v396q35-12 69.5-18t70.5-6Zm260 42q44-21 88.5-31.5T700-320q36 0 70.5 6t69.5 18v-396q-33-14-68.5-21t-71.5-7q-47 0-93 12t-87 36v394Zm-40 118q-48-38-104-59t-116-21q-42 0-82.5 11T100-198q-21 11-40.5-1T40-234v-482q0-11 5.5-21T62-752q46-24 96-36t102-12q58 0 113.5 15T480-740q51-30 106.5-45T700-800q52 0 102 12t96 36q11 5 16.5 15t5.5 21v482q0 23-19.5 35t-40.5 1q-37-20-77.5-31T700-240q-60 0-116 21t-104 59ZM280-494Z" />
+                            </svg>
+                            <span class="sidebar-nav__text">Catalogue</span>
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-controller="Book" asp-action="Catalogue" class="sidebar-nav__link @Html.IsActive("Book", null, "sidebar-nav__link--active")">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000" class="sidebar-nav__icon">
+                                <path d="M560-564v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-600q-38 0-73 9.5T560-564Zm0 220v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-380q-38 0-73 9t-67 27Zm0-110v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-490q-38 0-73 9.5T560-454ZM260-320q47 0 91.5 10.5T440-278v-394q-41-24-87-36t-93-12q-36 0-71.5 7T120-692v396q35-12 69.5-18t70.5-6Zm260 42q44-21 88.5-31.5T700-320q36 0 70.5 6t69.5 18v-396q-33-14-68.5-21t-71.5-7q-47 0-93 12t-87 36v394Zm-40 118q-48-38-104-59t-116-21q-42 0-82.5 11T100-198q-21 11-40.5-1T40-234v-482q0-11 5.5-21T62-752q46-24 96-36t102-12q58 0 113.5 15T480-740q51-30 106.5-45T700-800q52 0 102 12t96 36q11 5 16.5 15t5.5 21v482q0 23-19.5 35t-40.5 1q-37-20-77.5-31T700-240q-60 0-116 21t-104 59ZM280-494Z" />
+                            </svg>
+                            <span class="sidebar-nav__text">Catalogue</span>
+                            <svg class="sidebar-nav__arrow" xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#999">
+                                <path d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z" />
+                            </svg>
+                        </a>
 
-                    <div class="sidebar-subnav">
-                        <a asp-controller="Book" asp-action="Catalogue" class="sidebar-subnav__link @Html.IsActive("Book", "Catalogue", "sidebar-subnav__link--active")">Catalogue</a>
-                        
-                        <div class="sidebar-subnav__separator"></div>
+                        <div class="sidebar-subnav">
+                            <a asp-controller="Book" asp-action="Catalogue" class="sidebar-subnav__link @Html.IsActive("Book", "Catalogue", "sidebar-subnav__link--active")">Catalogue</a>
+                            
+                            <div class="sidebar-subnav__separator"></div>
 
-                        <a asp-controller="Book" asp-action="ManageBook" class="sidebar-subnav__link @Html.IsActive("Book", "ManageBook", "sidebar-subnav__link--active")">Manage Book</a>
-                        <a asp-controller="Book" asp-action="ManageGenre" class="sidebar-subnav__link @Html.IsActive("Book", "ManageGenre", "sidebar-subnav__link--active")">Manage Genre</a>
-                        <a asp-controller="Book" asp-action="ManageAuthor" class="sidebar-subnav__link @Html.IsActive("Book", "ManageAuthor", "sidebar-subnav__link--active")">Manage Author</a>
-                        <a asp-controller="Book" asp-action="ManageReviews" class="sidebar-subnav__link @Html.IsActive("Book", "ManageReviews", "sidebar-subnav__link--active")">Manage Reviews</a>
-                    </div>
+                            <a asp-controller="Book" asp-action="ManageBook" class="sidebar-subnav__link @Html.IsActive("Book", "ManageBook", "sidebar-subnav__link--active")">Manage Book</a>
+                            <a asp-controller="Book" asp-action="ManageGenre" class="sidebar-subnav__link @Html.IsActive("Book", "ManageGenre", "sidebar-subnav__link--active")">Manage Genre</a>
+                            <a asp-controller="Book" asp-action="ManageAuthor" class="sidebar-subnav__link @Html.IsActive("Book", "ManageAuthor", "sidebar-subnav__link--active")">Manage Author</a>
+                            <a asp-controller="Book" asp-action="ManageReviews" class="sidebar-subnav__link @Html.IsActive("Book", "ManageReviews", "sidebar-subnav__link--active")">Manage Reviews</a>
+                        </div>
+                    }
                 </div>
 
-                <div class="sidebar-nav__item">
-                    <a asp-controller="Loan" asp-action="@(User.IsInRole("MEMBER") ? "History" : "ManageLoan")" class="sidebar-nav__link @Html.IsActive("Loan", null, "sidebar-nav__link--active")">
-                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000" class="sidebar-nav__icon">
-                            <path d="M240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h480q33 0 56.5 23.5T800-800v640q0 33-23.5 56.5T720-80H240Zm0-80h480v-640h-80v280l-100-60-100 60v-280H240v640Zm0 0v-640 640Zm200-360 100-60 100 60-100-60-100 60Z"/>
-                        </svg>
-                        <span class="sidebar-nav__text">Loan</span>
-                        <svg class="sidebar-nav__arrow" xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#999">
-                            <path d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z" />
-                        </svg>
-                    </a>
+                @if (User.IsInRole("STAFF") || User.IsInRole("ADMIN") || User.IsInRole("MEMBER"))
+                {
+                    <div class="sidebar-nav__item">
+                        <a asp-controller="Loan" asp-action="@(User.IsInRole("MEMBER") ? "History" : "ManageLoan")" class="sidebar-nav__link @Html.IsActive("Loan", null, "sidebar-nav__link--active")">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000" class="sidebar-nav__icon">
+                                <path d="M240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h480q33 0 56.5 23.5T800-800v640q0 33-23.5 56.5T720-80H240Zm0-80h480v-640h-80v280l-100-60-100 60v-280H240v640Zm0 0v-640 640Zm200-360 100-60 100 60-100-60-100 60Z"/>
+                            </svg>
+                            <span class="sidebar-nav__text">Loan</span>
+                            <svg class="sidebar-nav__arrow" xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#999">
+                                <path d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z" />
+                            </svg>
+                        </a>
 
-                    <div class="sidebar-subnav">
+                        <div class="sidebar-subnav">
+                            @if (User.IsInRole("MEMBER"))
+                            {
+                                <a asp-controller="Loan" asp-action="History" class="sidebar-subnav__link @Html.IsActive("Loan", "History", "sidebar-subnav__link--active")">History</a>
+                                <a asp-controller="Loan" asp-action="Reviews" class="sidebar-subnav__link @Html.IsActive("Loan", "Reviews", "sidebar-subnav__link--active")">My Reviews</a>
+                            }
+                            
+                            @if (User.IsInRole("STAFF") || User.IsInRole("ADMIN"))
+                            {
+                                @if (User.IsInRole("MEMBER")) { <div class="sidebar-subnav__separator"></div> }
+                                <a asp-controller="Loan" asp-action="Process" class="sidebar-subnav__link @Html.IsActive("Loan", "Process", "sidebar-subnav__link--active")">Process Loan</a>
+                                <a asp-controller="Loan" asp-action="ManageLoan" class="sidebar-subnav__link @Html.IsActive("Loan", "ManageLoan", "sidebar-subnav__link--active")">Manage Loan</a>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="sidebar-nav__item">
                         @if (User.IsInRole("MEMBER"))
                         {
-                            <a asp-controller="Loan" asp-action="History" class="sidebar-subnav__link @Html.IsActive("Loan", "History", "sidebar-subnav__link--active")">History</a>
-                            <a asp-controller="Loan" asp-action="Reviews" class="sidebar-subnav__link @Html.IsActive("Loan", "Reviews", "sidebar-subnav__link--active")">My Reviews</a>
+                            <a asp-controller="Reservation" asp-action="Index" class="sidebar-nav__link @Html.IsActive("Reservation", null, "sidebar-nav__link--active")">
+                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000" class="sidebar-nav__icon">
+                                    <path d="M160-120v-80h640v80H160Zm80-160q-33 0-56.5-23.5T160-360v-360q0-33 23.5-56.5T240-800h480q33 0 56.5 23.5T800-720v360q0 33-23.5 56.5T720-280H240Zm0-80h480v-360H240v360Zm80-80h320v-80H320v80Zm0-120h320v-80H320v80Zm0-120h320v-80H320v80Z" />
+                                </svg>
+                                <span class="sidebar-nav__text">Reservation</span>
+                            </a>
                         }
-                        
-                        @if (User.IsInRole("STAFF") || User.IsInRole("ADMIN"))
+                        else
                         {
-                            @if (User.IsInRole("MEMBER")) { <div class="sidebar-subnav__separator"></div> }
-                            <a asp-controller="Loan" asp-action="Process" class="sidebar-subnav__link @Html.IsActive("Loan", "Process", "sidebar-subnav__link--active")">Process Loan</a>
-                            <a asp-controller="Loan" asp-action="ManageLoan" class="sidebar-subnav__link @Html.IsActive("Loan", "ManageLoan", "sidebar-subnav__link--active")">Manage Loan</a>
+                            <a asp-controller="Reservation" asp-action="ManageReservation" class="sidebar-nav__link @Html.IsActive("Reservation", null, "sidebar-nav__link--active")">
+                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000" class="sidebar-nav__icon">
+                                    <path d="M160-120v-80h640v80H160Zm80-160q-33 0-56.5-23.5T160-360v-360q0-33 23.5-56.5T240-800h480q33 0 56.5 23.5T800-720v360q0 33-23.5 56.5T720-280H240Zm0-80h480v-360H240v360Zm80-80h320v-80H320v80Zm0-120h320v-80H320v80Zm0-120h320v-80H320v80Z" />
+                                </svg>
+                                <span class="sidebar-nav__text">Reservation</span>
+                            </a>
                         }
                     </div>
-                </div>
 
-                <div class="sidebar-nav__item">
-                    <a asp-controller="Reservation" asp-action="Index" class="sidebar-nav__link @Html.IsActive("Reservation", null, "sidebar-nav__link--active")">
-                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000" class="sidebar-nav__icon">
-                            <path d="M160-120v-80h640v80H160Zm80-160q-33 0-56.5-23.5T160-360v-360q0-33 23.5-56.5T240-800h480q33 0 56.5 23.5T800-720v360q0 33-23.5 56.5T720-280H240Zm0-80h480v-360H240v360Zm80-80h320v-80H320v80Zm0-120h320v-80H320v80Zm0-120h320v-80H320v80Z" />
-                        </svg>
-                        <span class="sidebar-nav__text">Reservation</span>
-                    </a>
-                </div>
-
-                <div class="sidebar-nav__item">
-                    <a asp-controller="Fine" asp-action="@(User.IsInRole("MEMBER") ? "Records" : "ManageFine")" class="sidebar-nav__link @Html.IsActive("Fine", null, "sidebar-nav__link--active")">
-                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000" class="sidebar-nav__icon">
-                            <path d="M160-240v-320 13-173 480Zm0-400h640v-80H160v80Zm307 480H160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v210q-36-25-78-37.5T716-560q-54 0-104 21t-88 59H160v240h283q3 21 9 41t15 39Zm320-25 28-28-75-75v-112h-40v128l87 87ZM721-80q-84 0-142.5-58T520-280q0-84 58.5-142T721-480q83 0 141 58.5T920-280q0 83-58 141.5T721-80Z"/>
-                        </svg>
-                        <span class="sidebar-nav__text">Fines</span>
-                    </a>
-                </div>
-
-                <div class="sidebar-nav__item">
-                    <a asp-controller="Room" asp-action="Index" class="sidebar-nav__link @Html.IsActive("Room", null, "sidebar-nav__link--active")">
-                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000" class="sidebar-nav__icon">
-                            <path d="M120-120v-80h80v-640h400v40h160v600h80v80H680v-600h-80v600H120Zm160-640v560-560Zm160 320q17 0 28.5-11.5T480-480q0-17-11.5-28.5T440-520q-17 0-28.5 11.5T400-480q0 17 11.5 28.5T440-440ZM280-200h240v-560H280v560Z" />
-                        </svg>
-                        <span class="sidebar-nav__text">Room</span>
-                    </a>
-                </div>
-
-                <div class="sidebar-nav__item">
-                    <a asp-controller="Booking" asp-action="Index" class="sidebar-nav__link @Html.IsActive("Booking", null, "sidebar-nav__link--active")">
-                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000" class="sidebar-nav__icon">
-                            <path d="M680-80v-120H560v-80h120v-120h80v120h120v80H760v120h-80Zm-480-80q-33 0-56.5-23.5T120-240v-480q0-33 23.5-56.5T200-800h40v-80h80v80h240v-80h80v80h40q33 0 56.5 23.5T760-720v244q-20-3-40-3t-40 3v-84H200v320h280q0 20 3 40t11 40H200Zm0-480h480v-80H200v80Zm0 0v-80 80Z" />
-                        </svg>
-                        <span class="sidebar-nav__text">Booking</span>
-                        <svg class="sidebar-nav__arrow" xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#999">
-                            <path d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z" />
-                        </svg>
-                    </a>
-                    <div class="sidebar-subnav">
-                        <a asp-controller="Booking" asp-action="Index" class="sidebar-subnav__link @Html.IsActive("Booking", "Index", "sidebar-subnav__link--active")">Index</a>
-                        <div class="sidebar-subnav__separator"></div>
-                        <a asp-controller="Booking" asp-action="BookingHistory" class="sidebar-subnav__link @Html.IsActive("Booking", "BookingHistory", "sidebar-subnav__link--active")">Booking History</a>
-                        <a asp-controller="Booking" asp-action="MasterCalendar" class="sidebar-subnav__link @Html.IsActive("Booking", "MasterCalendar", "sidebar-subnav__link--active")">Master Calendar</a>
-                    </div>
-                </div>
-                
-            @if (User.Identity.IsAuthenticated)
-            {
-                <div class="sidebar-nav__separator"></div> 
-
-                <div class="sidebar-nav__item">
-                    <form asp-controller="Account" asp-action="Logout" method="post" id="logoutForm" style="width: 100%;">
-                        <a href="javascript:document.getElementById('logoutForm').submit()" class="sidebar-nav__link sidebar-nav__link--logout">
+                    <div class="sidebar-nav__item">
+                        <a asp-controller="Fine" asp-action="@(User.IsInRole("MEMBER") ? "Records" : "ManageFine")" class="sidebar-nav__link @Html.IsActive("Fine", null, "sidebar-nav__link--active")">
                             <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000" class="sidebar-nav__icon">
-                                <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h280v80H200Zm440-160-55-58 102-102H360v-80h327L585-622l55-58 200 200-200 200Z" />
+                                <path d="M160-240v-320 13-173 480Zm0-400h640v-80H160v80Zm307 480H160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v210q-36-25-78-37.5T716-560q-54 0-104 21t-88 59H160v240h283q3 21 9 41t15 39Zm320-25 28-28-75-75v-112h-40v128l87 87ZM721-80q-84 0-142.5-58T520-280q0-84 58.5-142T721-480q83 0 141 58.5T920-280q0 83-58 141.5T721-80Z"/>
                             </svg>
-                            <span class="sidebar-nav__text">Logout</span>
+                            <span class="sidebar-nav__text">Fines</span>
                         </a>
-                    </form>
-                </div>
-            }
+                    </div>
+
+                    @if (User.IsInRole("STAFF") || User.IsInRole("ADMIN"))
+                    {
+                        <div class="sidebar-nav__item">
+                            <a asp-controller="Room" asp-action="Index" class="sidebar-nav__link @Html.IsActive("Room", null, "sidebar-nav__link--active")">
+                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000" class="sidebar-nav__icon">
+                                    <path d="M120-120v-80h80v-640h400v40h160v600h80v80H680v-600h-80v600H120Zm160-640v560-560Zm160 320q17 0 28.5-11.5T480-480q0-17-11.5-28.5T440-520q-17 0-28.5 11.5T400-480q0 17 11.5 28.5T440-440ZM280-200h240v-560H280v560Z" />
+                                </svg>
+                                <span class="sidebar-nav__text">Room</span>
+                            </a>
+                        </div>
+                    }
+
+                    <div class="sidebar-nav__item">
+                        @if (User.IsInRole("MEMBER"))
+                        {
+                            <a asp-controller="Booking" asp-action="Index" class="sidebar-nav__link @Html.IsActive("Booking", null, "sidebar-nav__link--active")">
+                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000" class="sidebar-nav__icon">
+                                    <path d="M680-80v-120H560v-80h120v-120h80v120h120v80H760v120h-80Zm-480-80q-33 0-56.5-23.5T120-240v-480q0-33 23.5-56.5T200-800h40v-80h80v80h240v-80h80v80h40q33 0 56.5 23.5T760-720v244q-20-3-40-3t-40 3v-84H200v320h280q0 20 3 40t11 40H200Zm0-480h480v-80H200v80Zm0 0v-80 80Z" />
+                                </svg>
+                                <span class="sidebar-nav__text">Booking</span>
+                                <svg class="sidebar-nav__arrow" xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#999">
+                                    <path d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z" />
+                                </svg>
+                            </a>
+                            <div class="sidebar-subnav">
+                                <a asp-controller="Booking" asp-action="Index" class="sidebar-subnav__link @Html.IsActive("Booking", "Index", "sidebar-subnav__link--active")">New Booking</a>
+                                <a asp-controller="Booking" asp-action="BookingHistory" class="sidebar-subnav__link @Html.IsActive("Booking", "BookingHistory", "sidebar-subnav__link--active")">Booking History</a>
+                            </div>
+                        }
+                        else
+                        {
+                            <a asp-controller="Booking" asp-action="MasterCalendar" class="sidebar-nav__link @Html.IsActive("Booking", null, "sidebar-nav__link--active")">
+                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000" class="sidebar-nav__icon">
+                                    <path d="M680-80v-120H560v-80h120v-120h80v120h120v80H760v120h-80Zm-480-80q-33 0-56.5-23.5T120-240v-480q0-33 23.5-56.5T200-800h40v-80h80v80h240v-80h80v80h40q33 0 56.5 23.5T760-720v244q-20-3-40-3t-40 3v-84H200v320h280q0 20 3 40t11 40H200Zm0-480h480v-80H200v80Zm0 0v-80 80Z" />
+                                </svg>
+                                <span class="sidebar-nav__text">Booking</span>
+                            </a>
+                        }
+                    </div>
+
+                    <div class="sidebar-nav__item">
+                        
+                    </div>
+                    
+                    @if (User.Identity!.IsAuthenticated)
+                    {
+                        <div class="sidebar-nav__separator"></div> 
+
+                        <div class="sidebar-nav__item">
+                            <form asp-controller="Account" asp-action="Logout" method="post" id="logoutForm" style="width: 100%;">
+                                <a href="javascript:document.getElementById('logoutForm').submit()" class="sidebar-nav__link sidebar-nav__link--logout">
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000" class="sidebar-nav__icon">
+                                        <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h280v80H200Zm440-160-55-58 102-102H360v-80h327L585-622l55-58 200 200-200 200Z" />
+                                    </svg>
+                                    <span class="sidebar-nav__text">Logout</span>
+                                </a>
+                            </form>
+                        </div>
+                    }
+                }
+                
             
         </div>
     </nav>
@@ -179,7 +224,7 @@
             </div>
 
             <div class="header-main__actions">
-                @if (User.Identity.IsAuthenticated)
+                @if (User.Identity!.IsAuthenticated)
                 {
                         if (User.IsInRole("MEMBER"))
                         {

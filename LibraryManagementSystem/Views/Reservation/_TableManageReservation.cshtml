@@ -1,0 +1,150 @@
+@model ReservationManagementVM
+
+<table class="table">
+    <thead>
+        <tr class="table__header">
+            @if (User.IsInRole("ADMIN"))
+            {
+                <th class="table__cell table__cell--checkbox">
+                    <input class="checkbox-styled" id="selectAll" type="checkbox" />
+                </th>
+            }
+            <th class="table__cell sortable-header @(Model.SortColumn == "Id" ? "active" : "")" data-sort="Id" data-order="@(Model.SortColumn == "Id" ? Model.SortOrder : "asc")" style="width: 80px;">
+                ID
+                @if (Model.SortColumn == "Id") { <span class="sort-icon">@(Model.SortOrder == "asc" ? "▲" : "▼")</span> }
+            </th>
+            <th class="table__cell sortable-header @(Model.SortColumn == "User" ? "active" : "")" data-sort="User" data-order="@(Model.SortColumn == "User" ? Model.SortOrder : "asc")">
+                User
+                @if (Model.SortColumn == "User") { <span class="sort-icon">@(Model.SortOrder == "asc" ? "▲" : "▼")</span> }
+            </th>
+            <th class="table__cell sortable-header @(Model.SortColumn == "Book" ? "active" : "")" data-sort="Book" data-order="@(Model.SortColumn == "Book" ? Model.SortOrder : "asc")">
+                Book
+                @if (Model.SortColumn == "Book") { <span class="sort-icon">@(Model.SortOrder == "asc" ? "▲" : "▼")</span> }
+            </th>
+            <th class="table__cell sortable-header @(Model.SortColumn == "ReservationDate" ? "active" : "")" data-sort="ReservationDate" data-order="@(Model.SortColumn == "ReservationDate" ? Model.SortOrder : "asc")" style="width: 180px;">
+                Reserved On
+                @if (Model.SortColumn == "ReservationDate") { <span class="sort-icon">@(Model.SortOrder == "asc" ? "▲" : "▼")</span> }
+            </th>
+            <th class="table__cell sortable-header @(Model.SortColumn == "Status" ? "active" : "")" data-sort="Status" data-order="@(Model.SortColumn == "Status" ? Model.SortOrder : "asc")" style="width: 180px;">
+                Status
+                @if (Model.SortColumn == "Status") { <span class="sort-icon">@(Model.SortOrder == "asc" ? "▲" : "▼")</span> }
+            </th>
+            <th class="table__cell" style="width: 150px; text-align: center;">Queue Pos.</th>
+            @if (User.IsInRole("ADMIN"))
+            {
+                <th class="table__cell table__cell--actions" style="width: 100px; text-align: center;">Action</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @if (!Model.Reservations.Any())
+        {
+            <tr class="table__row">
+                <td class="table__cell" colspan="@(User.IsInRole("ADMIN") ? "8" : "7")" style="text-align:center; color: var(--color-gray-500);">
+                    No reservations found.
+                </td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var item in Model.Reservations)
+            {
+                <tr class="table__row">
+                    @{ bool canDelete = Model.CanDelete.ContainsKey(item.Id) && Model.CanDelete[item.Id]; }
+                    @if (User.IsInRole("ADMIN"))
+                    {
+                        <td class="table__cell table__cell--checkbox">
+                            @if (canDelete)
+                            {
+                                <input class="row-checkbox checkbox-styled" type="checkbox" name="ids" value="@item.Id" data-name="@item.Id" />
+                            }
+                            else
+                            {
+                                <input class="checkbox-styled" type="checkbox" disabled style="opacity: 0.5; cursor: not-allowed;" />
+                            }
+                        </td>
+                    }
+                    <td class="table__cell table__cell--id">@item.Id</td>
+                    <td class="table__cell">
+                        <div style="display: flex; flex-direction: column;">
+                            <span style="font-weight: 600; color: var(--color-gray-900);">@item.UserName</span>
+                            <span style="font-size: 0.8rem; color: var(--color-gray-500);">@item.UserId</span>
+                        </div>
+                    </td>
+                    <td class="table__cell">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <img src="@(string.IsNullOrEmpty(item.BookImageURL) ? "/images/assets/no-cover.jpg" : $"/images/books/{item.BookImageURL}")" 
+                                 class="book-thumbnail" 
+                                 alt="@item.BookTitle" />
+                            <div class="book-info">
+                                <a href="@Url.Action("BookDetails", "Book", new { id = item.BookId })" class="book-title" style="text-decoration: none; color: inherit;">@item.BookTitle</a>
+                                <span class="book-author" style="font-size: 0.85rem; color: var(--color-gray-500);">@item.BookAuthors</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="table__cell">@item.ReservationDate?.ToString("yyyy-MM-dd")</td>
+                    <td class="table__cell">
+                        @if (item.Status == Reservation.ReservationStatus.READY)
+                        {
+                            <span style="color: var(--color-success); font-weight: 600;">Ready for Pickup</span>
+                            <div style="font-size: 0.8rem; color: var(--color-gray-500);">Expires: @item.ReservationDue?.ToString("yyyy-MM-dd")</div>
+                        }
+                        else if (item.Status == Reservation.ReservationStatus.PENDING)
+                        {
+                            <span style="color: var(--color-warning); font-weight: 600;">Pending</span>
+                        }
+                        else
+                        {
+                            <span style="color: var(--color-gray-500);">@System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(item.Status.ToString().ToLower())</span>
+                        }
+                    </td>
+                    <td class="table__cell" style="text-align: center;">
+                        @if (item.QueuePosition.HasValue)
+                        {
+                            <span class="count-badge count-badge--active" style="min-width: 40px;">#@item.QueuePosition</span>
+                        }
+                        else
+                        {
+                            <span style="color: var(--color-gray-400);">-</span>
+                        }
+                    </td>
+                    @if (User.IsInRole("ADMIN"))
+                    {
+                        <td class="table__cell table__cell--actions">
+                            <div class="table__actions">
+                                <button class="action__button action__button--delete js-delete-trigger"
+                                        data-id="@item.Id"
+                                        data-name="@item.Id"
+                                        title="@(canDelete ? "Delete" : "Cannot delete")"
+                                        type="button"
+                                        @(canDelete ? "" : "disabled style=opacity:0.5;cursor:not-allowed;")>
+                                    <svg class="button__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg>
+                                </button>
+                            </div>
+                        </td>
+                    }
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+@if (Model.TotalPages > 1)
+{
+    <div class="pagination">
+        @if (Model.CurrentPage > 1)
+        {
+            <button class="pagination__link" type="button" data-page="@(Model.CurrentPage - 1)">Previous</button>
+        }
+
+        @for (int i = 1; i <= Model.TotalPages; i++)
+        {
+            <button class="pagination__link @(i == Model.CurrentPage ? "pagination__link--active" : "")" type="button" data-page="@i">@i</button>
+        }
+
+        @if (Model.CurrentPage < Model.TotalPages)
+        {
+            <button class="pagination__link" type="button" data-page="@(Model.CurrentPage + 1)">Next</button>
+        }
+    </div>
+}
