@@ -103,7 +103,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         ViewBag.BookId = id;
 
         var hasActiveLoan = false;
-        if (User.Identity.IsAuthenticated)
+        if (User.Identity!.IsAuthenticated)
         {
             var username = User.Identity.Name;
             var user = db.Users.FirstOrDefault(u => u.Username == username);

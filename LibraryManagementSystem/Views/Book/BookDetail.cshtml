@@ -95,7 +95,7 @@
                             </button>
                         }
 
-                    @if (User.Identity.IsAuthenticated)
+                    @if (User.Identity!.IsAuthenticated)
                     {
                         <button type="button" class="form__button btn--secondary js-wishlist-trigger" onclick="toggleWishlist(this, '@Model.Id')" title="Add to Wishlist" style="width: 42px; padding: 0; flex-shrink: 0;">
                             <i class="fa-regular fa-heart"></i>

@@ -1,6 +1,5 @@
 ﻿﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using LibraryManagementSystem.Models;
 using Microsoft.EntityFrameworkCore;
 using LibraryManagementSystem.Extensions;
 
