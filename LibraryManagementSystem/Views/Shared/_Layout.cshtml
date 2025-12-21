@@ -51,11 +51,12 @@
                         <a asp-controller="Book" asp-action="ManageBook" class="sidebar-subnav__link @Html.IsActive("Book", "ManageBook", "sidebar-subnav__link--active")">Manage Book</a>
                         <a asp-controller="Book" asp-action="ManageGenre" class="sidebar-subnav__link @Html.IsActive("Book", "ManageGenre", "sidebar-subnav__link--active")">Manage Genre</a>
                         <a asp-controller="Book" asp-action="ManageAuthor" class="sidebar-subnav__link @Html.IsActive("Book", "ManageAuthor", "sidebar-subnav__link--active")">Manage Author</a>
+                        <a asp-controller="Book" asp-action="ManageReviews" class="sidebar-subnav__link @Html.IsActive("Book", "ManageReviews", "sidebar-subnav__link--active")">Manage Reviews</a>
                     </div>
                 </div>
 
                 <div class="sidebar-nav__item">
-                    <a asp-controller="Loan" asp-action="History" class="sidebar-nav__link @Html.IsActive("Loan", null, "sidebar-nav__link--active")">
+                    <a asp-controller="Loan" asp-action="@(User.IsInRole("MEMBER") ? "History" : "ManageLoan")" class="sidebar-nav__link @Html.IsActive("Loan", null, "sidebar-nav__link--active")">
                         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000" class="sidebar-nav__icon">
                             <path d="M240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h480q33 0 56.5 23.5T800-800v640q0 33-23.5 56.5T720-80H240Zm0-80h480v-640h-80v280l-100-60-100 60v-280H240v640Zm0 0v-640 640Zm200-360 100-60 100 60-100-60-100 60Z"/>
                         </svg>
@@ -66,11 +67,18 @@
                     </a>
 
                     <div class="sidebar-subnav">
-                        <a asp-controller="Loan" asp-action="History" class="sidebar-subnav__link @Html.IsActive("Loan", "History", "sidebar-subnav__link--active")">History</a>
-                        <a asp-controller="Loan" asp-action="Reviews" class="sidebar-subnav__link @Html.IsActive("Loan", "Reviews", "sidebar-subnav__link--active")">My Reviews</a>
-                        <div class="sidebar-subnav__separator"></div>
-                        <a asp-controller="Loan" asp-action="Process" class="sidebar-subnav__link @Html.IsActive("Loan", "Process", "sidebar-subnav__link--active")">Process Loan</a>
-                        <a asp-controller="Loan" asp-action="ManageLoan" class="sidebar-subnav__link @Html.IsActive("Loan", "ManageLoan", "sidebar-subnav__link--active")">Manage Loan</a>
+                        @if (User.IsInRole("MEMBER"))
+                        {
+                            <a asp-controller="Loan" asp-action="History" class="sidebar-subnav__link @Html.IsActive("Loan", "History", "sidebar-subnav__link--active")">History</a>
+                            <a asp-controller="Loan" asp-action="Reviews" class="sidebar-subnav__link @Html.IsActive("Loan", "Reviews", "sidebar-subnav__link--active")">My Reviews</a>
+                        }
+                        
+                        @if (User.IsInRole("STAFF") || User.IsInRole("ADMIN"))
+                        {
+                            @if (User.IsInRole("MEMBER")) { <div class="sidebar-subnav__separator"></div> }
+                            <a asp-controller="Loan" asp-action="Process" class="sidebar-subnav__link @Html.IsActive("Loan", "Process", "sidebar-subnav__link--active")">Process Loan</a>
+                            <a asp-controller="Loan" asp-action="ManageLoan" class="sidebar-subnav__link @Html.IsActive("Loan", "ManageLoan", "sidebar-subnav__link--active")">Manage Loan</a>
+                        }
                     </div>
                 </div>
 

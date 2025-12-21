@@ -76,26 +76,29 @@
                     }
 
                     <div style="display: flex; gap: 0.5rem;">
-                        @if (hasActiveLoan)
+                        @if (!User.Identity.IsAuthenticated || User.IsInRole("MEMBER"))
                         {
-                            <button type="button" class="form__button" style="flex: 1; background-color: var(--color-gray-300); color: var(--color-gray-500); cursor: not-allowed;" disabled>
-                                <i class="fa-solid fa-check"></i> Already Loaned
-                            </button>
-                        }
-                        else if (available > 0)
-                        {
-                            <button type="button" class="form__button form__button--submit js-loan-trigger" data-book-id="@Model.Id" data-book-title="@Model.Title" style="flex: 1;">
-                                <i class="fa-solid fa-book-open"></i> Loan
-                            </button>
-                        }
-                        else
-                        {
-                            <button type="button" class="form__button btn--secondary js-reserve-trigger" data-book-id="@Model.Id" data-book-title="@Model.Title" style="flex: 1;">
-                                <i class="fa-solid fa-bookmark"></i> Reserve
-                            </button>
+                            @if (hasActiveLoan)
+                            {
+                                <button type="button" class="form__button" style="flex: 1; background-color: var(--color-gray-300); color: var(--color-gray-500); cursor: not-allowed;" disabled>
+                                    <i class="fa-solid fa-check"></i> Already Loaned
+                                </button>
+                            }
+                            else if (available > 0)
+                            {
+                                <button type="button" class="form__button form__button--submit js-loan-trigger" data-book-id="@Model.Id" data-book-title="@Model.Title" style="flex: 1;">
+                                    <i class="fa-solid fa-book-open"></i> Loan
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="button" class="form__button btn--secondary js-reserve-trigger" data-book-id="@Model.Id" data-book-title="@Model.Title" style="flex: 1;">
+                                    <i class="fa-solid fa-bookmark"></i> Reserve
+                                </button>
+                            }
                         }
 
-                    @if (User.Identity!.IsAuthenticated)
+                    @if (User.Identity!.IsAuthenticated && User.IsInRole("MEMBER"))
                     {
                         <button type="button" class="form__button btn--secondary js-wishlist-trigger" onclick="toggleWishlist(this, '@Model.Id')" title="Add to Wishlist" style="width: 42px; padding: 0; flex-shrink: 0;">
                             <i class="fa-regular fa-heart"></i>

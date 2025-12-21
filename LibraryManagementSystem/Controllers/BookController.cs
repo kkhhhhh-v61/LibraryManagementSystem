@@ -6,10 +6,11 @@ using LibraryManagementSystem.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
+using LibraryManagementSystem.Services;
 
 namespace LibraryManagementSystem.Controllers;
 
-public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
+public class BookController(LMSDB db, IWebHostEnvironment en, INotificationService ns) : Controller
 {
     public IActionResult Catalogue(string? search, string? genreId, string? authorId, int? rating)
     {
@@ -504,7 +505,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
     }
 
     [HttpPost]
-    [Authorize(Roles = "ADMIN, STAFF")]
+    [Authorize(Roles = "ADMIN")]
     public IActionResult DeleteBook(string id)
     {
         var book = db.Books.Find(id);
@@ -527,7 +528,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
     }
 
     [HttpPost]
-    [Authorize(Roles = "ADMIN, STAFF")]
+    [Authorize(Roles = "ADMIN")]
     public IActionResult BatchDeleteBook(List<string> ids)
     {
         if (ids == null || ids.Count == 0)
@@ -850,7 +851,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
     }
 
     [HttpPost]
-    [Authorize(Roles = "ADMIN, STAFF")]
+    [Authorize(Roles = "ADMIN")]
     public IActionResult DeleteGenre(string id)
     {
         // 1. Fetch Genres with all their Books
@@ -885,7 +886,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
     }
 
     [HttpPost]
-    [Authorize(Roles = "ADMIN, STAFF")]
+    [Authorize(Roles = "ADMIN")]
     public IActionResult BatchDeleteGenre(List<string> ids)
     {
         if (ids == null || ids.Count == 0)
@@ -1025,7 +1026,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
     }
 
     [HttpPost]
-    [Authorize(Roles = "ADMIN, STAFF")]
+    [Authorize(Roles = "ADMIN")]
     public IActionResult DeleteAuthor(string id)
     {
         // 1. Fetch Authors with all their Books
@@ -1060,7 +1061,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
     }
 
     [HttpPost]
-    [Authorize(Roles = "ADMIN, STAFF")]
+    [Authorize(Roles = "ADMIN")]
     public IActionResult BatchDeleteAuthor(List<string> ids)
     {
         if (ids == null || ids.Count == 0)
@@ -1201,5 +1202,107 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         db.SaveChanges();
 
         return Json(new { success = true, message = "Review submitted successfully." });
+    }
+
+    [Authorize(Roles = "ADMIN, STAFF")]
+    public IActionResult ManageReviews(string? search, int? rating, int page = 1, string sort = "Date", string order = "desc")
+    {
+        var query = db.Reviews
+            .Include(r => r.Loan)
+            .ThenInclude(l => l.User)
+            .Include(r => r.Loan)
+            .ThenInclude(l => l.Copy)
+            .ThenInclude(c => c.Book)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            search = search.Trim();
+            query = query.Where(r => r.Loan.User.Username.Contains(search) || 
+                                     r.Loan.Copy.Book.Title.Contains(search) || 
+                                     r.Comment.Contains(search));
+        }
+
+        if (rating.HasValue)
+        {
+            query = query.Where(r => r.Rating == rating.Value);
+        }
+
+        bool isDesc = order == "desc";
+        query = sort switch
+        {
+            "Date" => isDesc ? query.OrderByDescending(r => r.ReviewDate) : query.OrderBy(r => r.ReviewDate),
+            "Rating" => isDesc ? query.OrderByDescending(r => r.Rating) : query.OrderBy(r => r.Rating),
+            "User" => isDesc ? query.OrderByDescending(r => r.Loan.User.Username) : query.OrderBy(r => r.Loan.User.Username),
+            "Book" => isDesc ? query.OrderByDescending(r => r.Loan.Copy.Book.Title) : query.OrderBy(r => r.Loan.Copy.Book.Title),
+            _ => isDesc ? query.OrderByDescending(r => r.ReviewDate) : query.OrderBy(r => r.ReviewDate)
+        };
+
+        int pageSize = 10;
+        int totalItems = query.Count();
+        int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+        ViewBag.TotalItems = totalItems;
+        if (page < 1) page = 1;
+        if (page > totalPages && totalPages > 0) page = totalPages;
+
+        var reviews = query.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+        var vm = new ReviewManagementVM
+        {
+            Reviews = reviews,
+            CurrentPage = page,
+            TotalPages = totalPages,
+            SearchTerm = search,
+            SortColumn = sort,
+            SortOrder = order,
+            FilterRating = rating
+        };
+
+        if (Request.IsAjax())
+        {
+            return PartialView("_TableReview", vm);
+        }
+
+        return View(vm);
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "ADMIN, STAFF")]
+    public IActionResult DeleteReview(string id, string reason)
+    {
+        var review = db.Reviews
+            .Include(r => r.Loan)
+            .ThenInclude(l => l.Copy)
+            .ThenInclude(c => c.Book)
+            .FirstOrDefault(r => r.Id == id);
+
+        if (review == null)
+        {
+            TempData["ToastMessage"] = "Review not found.";
+            TempData["ToastType"] = "error";
+            return RedirectToAction("ManageReviews");
+        }
+
+        if (string.IsNullOrWhiteSpace(reason))
+        {
+            TempData["ToastMessage"] = "A reason is required to delete a review.";
+            TempData["ToastType"] = "warning";
+            return RedirectToAction("ManageReviews");
+        }
+
+        // Send Notification
+        var userId = review.Loan.UserId;
+        var bookTitle = review.Loan.Copy.Book.Title;
+        var message = $"Your review for '{bookTitle}' was deleted by a moderator. Reason: {reason}";
+        
+        ns.Notify(userId, message, "/Loan/Reviews");
+
+        db.Reviews.Remove(review);
+        db.SaveChanges();
+
+        TempData["ToastMessage"] = "Review deleted and user notified.";
+        TempData["ToastType"] = "success";
+
+        return RedirectToAction("ManageReviews");
     }
 }

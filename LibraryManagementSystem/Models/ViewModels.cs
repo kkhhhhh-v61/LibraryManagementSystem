@@ -701,3 +701,14 @@ public class ReviewHistoryVM
     public int CurrentPage { get; set; }
     public int TotalPages { get; set; }
 }
+
+public class ReviewManagementVM
+{
+    public List<Review> Reviews { get; set; } = new();
+    public int CurrentPage { get; set; }
+    public int TotalPages { get; set; }
+    public string? SearchTerm { get; set; }
+    public string SortColumn { get; set; } = "Date";
+    public string SortOrder { get; set; } = "desc";
+    public int? FilterRating { get; set; }
+}

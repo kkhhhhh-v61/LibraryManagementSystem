@@ -8,6 +8,7 @@ namespace LibraryManagementSystem.Controllers
     [Authorize]
     public class LoanController(LMSDB db) : Controller
     {
+        [Authorize(Roles = "MEMBER")]
         public IActionResult History(string? search, string? status, int page = 1, string sort = "LoanDate", string order = "desc")
         {
             var username = User.Identity?.Name;
@@ -75,6 +76,7 @@ namespace LibraryManagementSystem.Controllers
             return View(vm);
         }
 
+        [Authorize(Roles = "MEMBER")]
         public IActionResult Reviews(int page = 1)
         {
             var username = User.Identity?.Name;
@@ -121,6 +123,7 @@ namespace LibraryManagementSystem.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "MEMBER")]
         public IActionResult Create(string bookId)
         {
             var username = User.Identity?.Name;
@@ -175,7 +178,7 @@ namespace LibraryManagementSystem.Controllers
         }
 
         [HttpPost]
-        [Authorize]
+        [Authorize(Roles = "MEMBER")]
         public IActionResult BatchCancelLoan(List<string> ids)
         {
             if (ids == null || ids.Count == 0)
@@ -216,7 +219,7 @@ namespace LibraryManagementSystem.Controllers
         }
 
         [HttpPost]
-        [Authorize]
+        [Authorize(Roles = "MEMBER")]
         public IActionResult CancelLoan(string id)
         {
             var username = User.Identity?.Name;
@@ -239,6 +242,7 @@ namespace LibraryManagementSystem.Controllers
             return RedirectToAction("History");
         }
 
+        [Authorize(Roles = "MEMBER")]
         public IActionResult Confirmation(string id)
         {
             var username = User.Identity?.Name;
@@ -260,6 +264,7 @@ namespace LibraryManagementSystem.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "MEMBER")]
         public async Task<IActionResult> MergedConfirmation(List<string> ids)
         {
             if (ids == null || ids.Count <= 1)
