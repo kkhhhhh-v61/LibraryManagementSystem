@@ -1,4 +1,5 @@
 ﻿@model IEnumerable<LibraryManagementSystem.Models.User>
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 
 @foreach (var item in Model)
 {
@@ -9,7 +10,11 @@
 
         <td>
             <div class="user-profile-flex">
-                <img src="/images/profiles/@(item.ImageURL ?? "default-profile.png")" class="table-avatar" alt="profile" />
+                @* The ?? operator ensures that if ImageURL is null or empty, it uses the grey avatar *@
+                <img src="/images/profiles/@(string.IsNullOrEmpty(item.ImageURL) ? "default-profile.png" : item.ImageURL)"
+                     class="table-avatar"
+                     alt="profile"
+                     onerror="this.onerror=null; this.src='/images/assets/default-profile.png';" />
                 <div>
                     <span class="user-text-main">@item.Username</span>
                     <span class="user-text-sub">@item.Email</span>

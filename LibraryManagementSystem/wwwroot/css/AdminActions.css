@@ -59,6 +59,7 @@
 
 /* Form Inputs (Matching your app.css variables) */
 .admin-field-group {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: var(--spacing-xxs);
@@ -150,4 +151,29 @@
         grid-column: span 1;
     }
 }
-    
+/* ===========================================================================
+   PASSWORD TOGGLE STYLING
+   =========================================================================== */
+
+/* Ensure the wrapper centers the icon vertically */
+.admin-field-group div[style*="position: relative"] {
+    display: flex;
+    align-items: center;
+}
+
+.toggle-icon {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%); /* Perfect vertical centering */
+    cursor: pointer;
+    color: #666;
+    z-index: 10;
+    font-size: 16px;
+    background: white; /* Prevents input borders from showing through the icon */
+    padding-left: 5px;
+}
+
+    .toggle-icon:hover {
+        color: var(--color-primary-base);
+    }

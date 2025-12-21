@@ -30,6 +30,10 @@ body {
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
     border: 1px solid #e2e8f0;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 30px;
+    margin-bottom: 0;
 }
 
 /* --- Header Section (Title + Search) --- */
@@ -103,6 +107,7 @@ body {
 .table-responsive {
     width: 100%;
     overflow-x: auto; /* Scrollbar if screen is too small */
+    margin-bottom: 5px;
 }
 
 .custom-table {
@@ -147,7 +152,9 @@ body {
     height: 40px;
     border-radius: 50%;
     object-fit: cover;
-    border: 1px solid #e2e8f0;
+    background-color: #e9ecef; 
+    display: inline-block;
+    border: 1px solid #ddd;
 }
 
 .user-text-main {
@@ -252,4 +259,64 @@ body {
     position: relative;
     width: 300px; /* Adjusted to fit better with the button */
     flex-shrink: 1;
+}
+/* Centered Pagination Styling */
+.pagination-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+    width: 100%;
+    gap: 1rem;
+    padding: 5px 0;
+}
+
+.page-indicator {
+    white-space: nowrap; /* Prevents "Page 1 of 2" from wrapping to a new line */
+    min-width: fit-content;
+}
+.btn-nav {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: 1px solid #3b71ca;
+    color: #3b71ca;
+    padding: 5px 12px;
+    font-size: 0.85rem;
+}
+
+    .btn-nav:hover:not(.disabled) {
+        background-color: #3b71ca;
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(59, 113, 202, 0.25);
+    }
+
+    .btn-nav.disabled {
+        border-color: #e0e0e0;
+        color: #bdbdbd;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+.page-indicator {
+    color: #757575;
+    font-size: 0.95rem;
+    letter-spacing: 0.5px;
+}
+.toast-container {
+    z-index: 9999;
+}
+
+.toast {
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    font-weight: 500;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.bg-success {
+    background-color: #28a745 !important; /* Standard success green */
 }

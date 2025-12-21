@@ -4,7 +4,7 @@
     ViewData["Title"] = "Add New Staff";
 }
 <link rel="stylesheet" href="~/css/AdminActions.css" />
-<div class="admin-action-view">
+
 <div class="admin-action-view">
     <div class="admin-action-card">
         <div class="admin-action-header">
@@ -29,7 +29,7 @@
 
                 <div class="admin-field-group">
                     <label class="admin-label">Username</label>
-                    <input asp-for="Username" class="admin-input" />
+                    <input asp-for="Username" class="admin-input" placeholder="Enter staff's username" autocomplete="new-password" />
                     <span asp-validation-for="Username" class="admin-validation-error"></span>
                 </div>
                 <div class="admin-field-group">
@@ -40,17 +40,24 @@
 
                 <div class="admin-field-group admin-full-width">
                     <label class="admin-label">Phone Number</label>
-                    <input asp-for="ContactNo" class="admin-input" placeholder="01X-XXXXXXX" />
+                    <input asp-for="ContactNo" class="admin-input" placeholder="0123456789" />
                 </div>
 
                 <div class="admin-field-group">
-                    <label class="admin-label">Password</label>
-                    <input asp-for="Password" type="password" class="admin-input" />
+                    <label class="admin-label" for="Password">Password</label>
+                    <div style="position: relative; width: 100%;">
+                        <input asp-for="Password" class="admin-input" id="Password" placeholder="Password" style="width: 100%;" />
+                        <i class="fas fa-eye toggle-icon" onclick="togglePassword('Password', this)"></i>
+                    </div>
                     <span asp-validation-for="Password" class="admin-validation-error"></span>
                 </div>
+
                 <div class="admin-field-group">
-                    <label class="admin-label">Confirm Password</label>
-                    <input asp-for="ConfirmPassword" type="password" class="admin-input" />
+                    <label class="admin-label" for="ConfirmPassword">Confirm Password</label>
+                    <div style="position: relative; width: 100%;">
+                        <input asp-for="ConfirmPassword" class="admin-input" id="ConfirmPassword" placeholder="Confirm Password" style="width: 100%;" />
+                        <i class="fas fa-eye toggle-icon" onclick="togglePassword('ConfirmPassword', this)"></i>
+                    </div>
                     <span asp-validation-for="ConfirmPassword" class="admin-validation-error"></span>
                 </div>
             </div>
@@ -62,7 +69,6 @@
         </form>
     </div>
 </div>
-
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");

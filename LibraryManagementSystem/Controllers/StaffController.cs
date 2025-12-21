@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;       // Needed for ADO.NET
-using Microsoft.EntityFrameworkCore;  // Needed for EF Core (UserDetails)
-using LibraryManagementSystem.Models; // Ensure this matches your namespace
-using Microsoft.Extensions.Configuration; // Needed for IConfiguration
+using Microsoft.Data.SqlClient;       
+using Microsoft.EntityFrameworkCore;  
+using LibraryManagementSystem.Models;
+using Microsoft.Extensions.Configuration; 
 
 namespace LibraryManagementSystem.Controllers
 {
