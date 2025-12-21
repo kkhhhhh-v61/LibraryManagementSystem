@@ -1,0 +1,153 @@
+﻿/* ==========================================================================
+   MODULE: ADMIN ACTIONS (Create/Edit Staff)
+   Linked to: AdminController Views
+   ========================================================================== */
+
+/* This covers the whole page area */
+.admin-action-view {
+    display: flex;
+    justify-content: center; /* Centers horizontally */
+    align-items: flex-start; /* Aligns to top with some padding */
+    min-height: 100vh;
+    background-color: #F0F0F0; /* The uniform grey you want */
+    padding: 40px 20px;
+    width: 100%; /* Ensures it takes full width */
+}
+
+/* The actual white card containing the form */
+.admin-action-card {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 600px; /* Limits width so it doesn't get too stretched */
+}
+
+/* Header Section */
+.admin-action-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-xl);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 2px solid var(--color-gray-100);
+}
+
+    .admin-action-header h2 {
+        color: var(--color-gray-900);
+        font-size: var(--text-xl);
+        font-weight: var(--weight-bold);
+        margin: 0;
+    }
+
+    .admin-action-header i {
+        color: var(--color-primary-base);
+        font-size: 1.5rem;
+    }
+
+/* Form Layout (Using your form-grid logic) */
+.admin-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-lg);
+}
+
+.admin-full-width {
+    grid-column: span 2;
+}
+
+/* Form Inputs (Matching your app.css variables) */
+.admin-field-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xxs);
+}
+
+.admin-label {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-bold);
+    color: var(--color-gray-700);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.admin-input {
+    height: 48px;
+    padding: 0 var(--spacing-md);
+    border: 1px solid var(--color-gray-300);
+    border-radius: var(--spacing-sm);
+    background-color: var(--color-white);
+    color: var(--color-gray-900);
+    font-size: var(--text-md);
+    transition: all 0.2s ease-in-out;
+}
+
+    .admin-input:focus {
+        outline: none;
+        border-color: var(--color-primary-base);
+        box-shadow: 0 0 0 3px var(--color-primary-light);
+    }
+
+    .admin-input:read-only {
+        background-color: var(--color-gray-100);
+        color: var(--color-gray-500);
+        cursor: not-allowed;
+        border-color: var(--color-gray-200);
+    }
+
+/* Button Actions */
+.admin-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-xl);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid var(--color-gray-200);
+}
+
+.btn-admin-cancel {
+    color: var(--color-gray-600);
+    text-decoration: none;
+    font-weight: var(--weight-medium);
+    transition: color 0.2s;
+}
+
+    .btn-admin-cancel:hover {
+        color: var(--color-gray-900);
+    }
+
+.btn-admin-save {
+    background-color: var(--color-primary-base);
+    color: var(--color-white);
+    border: none;
+    padding: var(--spacing-md) var(--spacing-xl);
+    border-radius: var(--spacing-sm);
+    font-weight: var(--weight-bold);
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+    .btn-admin-save:hover {
+        background-color: var(--color-primary-semi-dark);
+    }
+
+/* Error Styling */
+.admin-validation-error {
+    color: var(--color-error);
+    font-size: var(--text-sm);
+    margin-top: 2px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .admin-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-full-width {
+        grid-column: span 1;
+    }
+}
+    

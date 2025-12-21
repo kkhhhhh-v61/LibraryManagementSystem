@@ -1,0 +1,70 @@
+﻿@model LibraryManagementSystem.Models.RegisterVM
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Add New Staff";
+}
+<link rel="stylesheet" href="~/css/AdminActions.css" />
+<div class="admin-action-view">
+<div class="admin-action-view">
+    <div class="admin-action-card">
+        <div class="admin-action-header">
+            <i class="fas fa-user-plus"></i>
+            <h2>Register New Staff Member</h2>
+        </div>
+
+        <form asp-action="CreateStaff" method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="admin-form-grid">
+                <div class="admin-field-group">
+                    <label class="admin-label">First Name</label>
+                    <input asp-for="FirstName" class="admin-input" placeholder="e.g. John" />
+                    <span asp-validation-for="FirstName" class="admin-validation-error"></span>
+                </div>
+                <div class="admin-field-group">
+                    <label class="admin-label">Last Name</label>
+                    <input asp-for="LastName" class="admin-input" placeholder="e.g. Doe" />
+                    <span asp-validation-for="LastName" class="admin-validation-error"></span>
+                </div>
+
+                <div class="admin-field-group">
+                    <label class="admin-label">Username</label>
+                    <input asp-for="Username" class="admin-input" />
+                    <span asp-validation-for="Username" class="admin-validation-error"></span>
+                </div>
+                <div class="admin-field-group">
+                    <label class="admin-label">Email Address</label>
+                    <input asp-for="Email" type="email" class="admin-input" placeholder="staff@library.com" />
+                    <span asp-validation-for="Email" class="admin-validation-error"></span>
+                </div>
+
+                <div class="admin-field-group admin-full-width">
+                    <label class="admin-label">Phone Number</label>
+                    <input asp-for="ContactNo" class="admin-input" placeholder="01X-XXXXXXX" />
+                </div>
+
+                <div class="admin-field-group">
+                    <label class="admin-label">Password</label>
+                    <input asp-for="Password" type="password" class="admin-input" />
+                    <span asp-validation-for="Password" class="admin-validation-error"></span>
+                </div>
+                <div class="admin-field-group">
+                    <label class="admin-label">Confirm Password</label>
+                    <input asp-for="ConfirmPassword" type="password" class="admin-input" />
+                    <span asp-validation-for="ConfirmPassword" class="admin-validation-error"></span>
+                </div>
+            </div>
+
+            <div class="admin-form-actions">
+                <a asp-action="Index" asp-controller="Staff" class="btn-admin-cancel">Cancel</a>
+                <button type="submit" class="btn-admin-save">Create Staff Account</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -433,18 +433,36 @@ namespace LibraryManagementSystem.Controllers
 
         private async Task SignInUser(LMSUser user)
         {
+            // 1. Get the Role Name (e.g., "ADMIN")
+            string roleName = user.Role.ToString();
+
             var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.Id),
-                new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.Role, user.Role.ToString()),
-                // If ImageURL is null, use a default placeholder
-                new Claim("ProfilePicture", user.ImageURL ?? "default-profile.png")
-            };
+    {
+        new Claim(ClaimTypes.NameIdentifier, user.Id),
+        new Claim(ClaimTypes.Name, user.Username),
+        
+        // FIX: Add the Role exactly as it is (ADMIN)
+        new Claim(ClaimTypes.Role, roleName),
+        
+        // OPTIONAL FIX: Also add "Admin" (Title Case) just in case your Views expect that
+        // This acts as a backup so both checks work.
+        new Claim(ClaimTypes.Role, roleName[0] + roleName.Substring(1).ToLower()),
+
+        new Claim("ProfilePicture", user.ImageURL ?? "default-profile.png")
+    };
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var authProperties = new AuthenticationProperties
+            {
+                // Keep user logged in for 30 days
+                IsPersistent = true,
+                ExpiresUtc = DateTime.UtcNow.AddDays(30)
+            };
 
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity),
+                authProperties);
         }
         [HttpGet]
         [Authorize] // Ensures only logged-in users can see this

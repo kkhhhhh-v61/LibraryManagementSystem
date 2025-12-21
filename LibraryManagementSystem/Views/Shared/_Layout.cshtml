@@ -104,12 +104,11 @@
                                 User Management
                             </a>
 
-                            @if (User.IsInRole("ADMIN"))
+                            @if (User.IsInRole("ADMIN") || User.IsInRole("Admin"))
                             {
-                                <div class="sidebar-subnav__separator"></div>
-                                <a asp-controller="Staff" asp-action="StaffList" class="sidebar-subnav__link @Html.IsActive("Staff", "StaffList", "sidebar-subnav__link--active")">
-                                    Staff Management
-                                </a>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Admin" asp-action="Index">Admin Panel</a>
+                                </li>
                             }
                         </div>
                     </div>

@@ -1,0 +1,114 @@
+﻿@model IEnumerable<LibraryManagementSystem.Models.User>
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex align-items-center">
+            <h5 class="mb-0 me-2">User Management</h5>
+            <span class="badge bg-light text-dark border">@Model.Count() Records</span>
+
+            <a asp-controller="Admin" asp-action="CreateStaff" class="btn btn-primary btn-sm ms-3 shadow-sm">
+                <i class="fas fa-plus me-1"></i> Add New Staff
+            </a>
+        </div>
+
+        <div class="input-group" style="width: 250px;">
+            <input type="text" class="form-control form-control-sm" placeholder="Search users...">
+        </div>
+    </div>
+
+    <form asp-action="UserList" method="get" class="mb-4">
+        <div class="input-group shadow-sm" style="max-width: 500px;">
+            <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
+            <input type="text" name="searchString" class="form-control border-start-0" placeholder="Search by name, email or ID..." />
+            <button class="btn btn-primary" type="submit">Search</button>
+        </div>
+    </form>
+
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr class="text-muted text-uppercase small">
+                        <th class="ps-4">User ID</th>
+                        <th>User</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Phone</th>
+                        <th class="text-end pe-4">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="ps-4 font-monospace">@item.Id</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <img src="@(string.IsNullOrEmpty(item.ImageURL) ? "/images/default-user.png" : item.ImageURL)"
+                                         width="35" height="35" class="rounded-circle me-3 border shadow-sm">
+                                    <div>
+                                        <div class="fw-bold text-dark">@item.Username</div>
+                                        <div class="small text-muted">@item.Email</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                @{
+                                    var roleClass = item.Role.ToString() == "ADMIN" ? "text-purple" :
+                                    (item.Role.ToString() == "STAFF" ? "text-primary" : "text-muted");
+                                }
+                                <span class="fw-bold @roleClass small">@item.Role</span>
+                            </td>
+                            <td>
+                                @if (item.Status == LibraryManagementSystem.Models.User.UserStatus.ACTIVE)
+                                {
+                                    <span class="badge rounded-pill bg-success-soft text-success">
+                                        <i class="fas fa-circle me-1" style="font-size: 8px;"></i> ACTIVE
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge rounded-pill bg-danger-soft text-danger">
+                                        <i class="fas fa-circle me-1" style="font-size: 8px;"></i> @item.Status
+                                    </span>
+                                }
+                            </td>
+                            <td class="text-muted">@(item.ContactNo ?? "N/A")</td>
+                            <td class="text-end pe-4">
+                                <div class="btn-group">
+                                    <a asp-controller="Admin" asp-action="Edit" asp-route-id="@item.Id"
+                                       class="btn btn-outline-secondary btn-sm border-0" title="Edit">
+                                        <i class="fas fa-pencil-alt"></i>
+                                    </a>
+                                    <a asp-action="UserDetails" asp-route-id="@item.Id"
+                                       class="btn btn-outline-secondary btn-sm border-0" title="View Profile">
+                                        <i class="fas fa-ban"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Adding some styles to match your screenshot colors */
+    .bg-success-soft {
+        background-color: #e8fadf;
+    }
+
+    .bg-danger-soft {
+        background-color: #fee7e9;
+    }
+
+    .text-purple {
+        color: #6f42c1;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+</style>

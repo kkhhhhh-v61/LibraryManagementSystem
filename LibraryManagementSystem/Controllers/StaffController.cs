@@ -23,13 +23,19 @@ namespace LibraryManagementSystem.Controllers
         [HttpGet]
         public IActionResult Index()
         {
-            ViewBag.CurrentPage = 1;
-            ViewBag.TotalPages = 0;
-            ViewBag.TotalRecords = 0;
-            ViewBag.HasPrevious = false;
-            ViewBag.HasNext = false;
+            // Fetch the first page of users immediately so the view isn't empty
+            int pageSize = 5;
+            var users = _db.Users.OrderBy(u => u.Id).Take(pageSize).ToList();
 
-            return View(new List<User>());
+            // Set initial metadata for the first load
+            int totalRecords = _db.Users.Count();
+            ViewBag.TotalRecords = totalRecords;
+            ViewBag.CurrentPage = 1;
+            ViewBag.TotalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
+            ViewBag.HasPrevious = false;
+            ViewBag.HasNext = totalRecords > pageSize;
+
+            return View(users); // Pass the list instead of empty List<User>()
         }
 
         // GET: Staff/UserDetails/{id}

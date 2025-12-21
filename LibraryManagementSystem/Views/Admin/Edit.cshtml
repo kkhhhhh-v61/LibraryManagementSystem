@@ -1,0 +1,70 @@
+﻿@model LibraryManagementSystem.Models.ProfileVM
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Edit User";
+}
+<link rel="stylesheet" href="~/css/AdminActions.css" />
+
+<div class="admin-action-view">
+
+    <div class="admin-action-view">
+        <div class="admin-action-card">
+            <div class="admin-action-header">
+                <i class="fas fa-user-edit"></i>
+                <h2>Edit Staff Member: @Model.Username</h2>
+            </div>
+
+            <form asp-action="Edit" asp-route-id="@ViewData["UserId"]" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Username" />
+
+                <div class="admin-form-grid">
+                    <div class="admin-field-group">
+                        <label class="admin-label">User ID</label>
+                        <input class="admin-input" value="@ViewData["UserId"]" readonly />
+                    </div>
+                    <div class="admin-field-group">
+                        <label class="admin-label">Role</label>
+                        <input asp-for="Role" class="admin-input" readonly />
+                    </div>
+
+                    <div class="admin-field-group">
+                        <label class="admin-label">First Name</label>
+                        <input asp-for="FirstName" class="admin-input" />
+                        <span asp-validation-for="FirstName" class="admin-validation-error"></span>
+                    </div>
+                    <div class="admin-field-group">
+                        <label class="admin-label">Last Name</label>
+                        <input asp-for="LastName" class="admin-input" />
+                        <span asp-validation-for="LastName" class="admin-validation-error"></span>
+                    </div>
+
+                    <div class="admin-field-group admin-full-width">
+                        <label class="admin-label">Email Address</label>
+                        <input asp-for="Email" type="email" class="admin-input" />
+                        <span asp-validation-for="Email" class="admin-validation-error"></span>
+                    </div>
+
+                    <div class="admin-field-group">
+                        <label class="admin-label">Contact No</label>
+                        <input asp-for="ContactNo" class="admin-input" />
+                    </div>
+                    <div class="admin-field-group">
+                        <label class="admin-label">Credibility Score</label>
+                        <input asp-for="CredibilityScore" type="number" class="admin-input" />
+                    </div>
+                </div>
+
+                <div class="admin-form-actions">
+                    <a asp-action="Index" asp-controller="Staff" class="btn-admin-cancel">Discard Changes</a>
+                    <button type="submit" class="btn-admin-save">Save Profile Updates</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

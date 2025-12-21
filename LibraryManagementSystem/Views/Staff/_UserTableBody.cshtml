@@ -39,9 +39,25 @@
         <td>@(item.ContactNo ?? "-")</td>
 
         <td class="text-end">
-            <a asp-controller="Staff" asp-action="UserDetails" asp-route-id="@item.Id" class="btn-icon" title="View Details">
-                <i class="fas fa-edit"></i>
+            <a asp-controller="Admin" asp-action="Edit" asp-route-id="@item.Id" class="btn-icon" title="Edit User" style="margin-right: 5px;">
+                <i class="fas fa-pencil-alt"></i>
             </a>
+
+            @if (User.IsInRole("ADMIN"))
+            {
+                /* Determine logic: If Active -> Show Red Ban Icon. If Inactive -> Show Green Check Icon */
+                bool isActive = item.Status.ToString() == "ACTIVE";
+                string btnColor = isActive ? "text-danger" : "text-success";
+                string btnIcon = isActive ? "fa-ban" : "fa-check-circle";
+                string titleText = isActive ? "Deactivate User" : "Activate User";
+
+                <button onclick="toggleStatus('@item.Id', this)"
+                        class="btn-icon @btnColor"
+                        title="@titleText"
+                        style="border:none; background:none; margin-left: 5px;">
+                    <i class="fas @btnIcon"></i>
+                </button>
+            }
         </td>
     </tr>
 }
@@ -61,11 +77,3 @@
        data-page-index="@ViewBag.CurrentPage"
        data-total-pages="@ViewBag.TotalPages"
        data-total-records="@ViewBag.TotalRecords" />
-@if (!Model.Any())
-{
-    <tr>
-        <td colspan="6" style="text-align:center; padding: 50px; color: #999;">
-            No users found matching your search.
-        </td>
-    </tr>
-}
