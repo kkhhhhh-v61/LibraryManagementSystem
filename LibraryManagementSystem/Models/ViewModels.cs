@@ -117,12 +117,13 @@ public class LoginVM
         public string Username { get; set; }
         public string Role { get; set; }
 
-        [Display(Name = "Credibility Score")]
+        [Required]
+        [Range(0, 100, ErrorMessage = "Credibility Score must be between 0 and 100.")]
         public int CredibilityScore { get; set; }
 
-        // --- Validation Rules Synced with RegisterVM ---
+    // --- Validation Rules Synced with RegisterVM ---
 
-        [Display(Name = "First Name")]
+    [Display(Name = "First Name")]
         [Required(ErrorMessage = "{0} is required.")]
         [StringLength(50, MinimumLength = 1, ErrorMessage = "{0} must be between 1 and 50 characters.")]
         [RegularExpression(@"^[a-zA-Z\s\-]+$", ErrorMessage = "{0} can only contain letters.")]
@@ -137,7 +138,7 @@ public class LoginVM
         [Display(Name = "Email")]
         [Required(ErrorMessage = "{0} is required.")]
         [EmailAddress(ErrorMessage = "Invalid Email Address.")]
-        [RegularExpression(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", ErrorMessage = "Email must contain a valid domain (e.g., user@example.com).")]
+        [RegularExpression(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", ErrorMessage = "Email must contain a valid domain (e.g., user @example.com).")]
         public string Email { get; set; }
 
         [Display(Name = "Contact No.")]

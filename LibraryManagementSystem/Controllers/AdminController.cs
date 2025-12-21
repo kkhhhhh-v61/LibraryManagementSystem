@@ -29,36 +29,45 @@ namespace LibraryManagementSystem.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateStaff(RegisterVM model)
         {
-            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.Password);
-
             if (ModelState.IsValid)
             {
-                // 1. Check for duplicates
-                if (_db.Users.Any(u => u.Username == model.Username || u.Email == model.Email))
+                // 1. IMPROVED: Individual checks for clear feedback
+                bool isUsernameTaken = _db.Users.Any(u => u.Username == model.Username);
+                bool isEmailTaken = _db.Users.Any(u => u.Email == model.Email);
+                bool isPhoneTaken = _db.Users.Any(u => u.ContactNo == model.ContactNo);
+
+                if (isUsernameTaken || isEmailTaken || isPhoneTaken)
                 {
-                    ModelState.AddModelError("", "Username or Email already exists.");
+                    if (isUsernameTaken)
+                        ModelState.AddModelError("Username", "This username is already registered.");
+
+                    if (isEmailTaken)
+                        ModelState.AddModelError("Email", "This email is already in use.");
+
+                    if (isPhoneTaken)
+                        ModelState.AddModelError("ContactNo", "This phone number is already registered.");
+
+                    // Add a toast so they know WHY the button click didn't redirect
+                    TempData["ToastMessage"] = "Please correct the highlighted errors.";
+                    TempData["ToastType"] = "error";
+
                     return View(model);
                 }
 
-                // 2. Generate a Sequential ID (e.g., S00002)
+                // 2. Security: Hash password only AFTER validation passes
+                string hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.Password);
+
+                // 3. Generate Sequential ID
                 var lastStaff = _db.Users
                     .Where(u => u.Id.StartsWith("S"))
                     .OrderByDescending(u => u.Id)
                     .FirstOrDefault();
 
-                string newId;
-                if (lastStaff == null)
-                {
-                    newId = "S00001"; // Start here if no staff exist
-                }
-                else
-                {
-                    // Extract the number part, increment it, and format back to 5 digits
-                    int lastIdNumber = int.Parse(lastStaff.Id.Substring(1));
-                    newId = "S" + (lastIdNumber + 1).ToString("D5");
-                }
+                string newId = lastStaff == null
+                    ? "S00001"
+                    : "S" + (int.Parse(lastStaff.Id.Substring(1)) + 1).ToString("D5");
 
-                // 3. Map View Model to Database Model
+                // 4. Mapping
                 var newStaff = new User
                 {
                     Id = newId,
@@ -67,7 +76,7 @@ namespace LibraryManagementSystem.Controllers
                     FirstName = model.FirstName,
                     LastName = model.LastName,
                     ContactNo = model.ContactNo,
-                    PasswordHash = hashedPassword, // Note: In production, use hashing!
+                    PasswordHash = hashedPassword,
                     Role = UserRole.STAFF,
                     Status = UserStatus.ACTIVE,
                     CredibilityScore = 100,
@@ -75,12 +84,12 @@ namespace LibraryManagementSystem.Controllers
                     IsProfilePublic = true
                 };
 
-                // 4. Save to Database
                 _db.Users.Add(newStaff);
                 await _db.SaveChangesAsync();
 
-                TempData["Success"] = "New Staff Member " + newId + " Created Successfully!";
-                return RedirectToAction("Index", "Staff"); // Redirect to the working UI list
+                TempData["ToastMessage"] = "Staff member successfully registered!";
+                TempData["ToastType"] = "success";
+                return RedirectToAction("Index", "Staff");
             }
 
             return View(model);
@@ -115,19 +124,21 @@ namespace LibraryManagementSystem.Controllers
             // Map Database User -> ProfileVM
             var model = new LibraryManagementSystem.Models.ProfileVM
             {
-                Username = user.Username, // Read-only usually
+                Username = user.Username,
                 Email = user.Email,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 ContactNo = user.ContactNo,
-                Role = user.Role.ToString(), // Convert Enum to String
+                Role = user.Role.ToString(),
                 CredibilityScore = user.CredibilityScore,
                 IsProfilePublic = user.IsProfilePublic
-                // We don't map Password here (security)
             };
 
-            ViewData["UserId"] = user.Id; // Keep ID separate for the form post
-            return View(model);
+            // REMOVE THE REDIRECT AND TOAST MESSAGE FROM HERE
+            // These belonged in the Create method, not the Edit GET method.
+
+            ViewData["UserId"] = id; // Ensure the ID is passed to the view for the form
+            return View(model);      // This allows the Edit page to actually load!
         }
 
         [HttpPost]
@@ -145,6 +156,7 @@ namespace LibraryManagementSystem.Controllers
 
             if (ModelState.IsValid)
             {
+                // 1. Update the user properties
                 user.FirstName = model.FirstName;
                 user.LastName = model.LastName;
                 user.Email = model.Email;
@@ -154,16 +166,15 @@ namespace LibraryManagementSystem.Controllers
                 _db.Entry(user).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
                 await _db.SaveChangesAsync();
 
-                TempData["ToastMessage"] = "Update Successful!";
+                // 2. Set the Success Toast Message here!
+                TempData["ToastMessage"] = "Profile for " + user.Username + " updated successfully!";
                 TempData["ToastType"] = "success";
+
+                // 3. Redirect back to the list
                 return RedirectToAction("Index", "Staff");
             }
 
-            // DEBUG: If you reach here, the button "did nothing" because validation failed.
-            // This will print the errors to your Output window in Visual Studio
-            var errors = ModelState.Values.SelectMany(v => v.Errors);
-            foreach (var error in errors) { System.Diagnostics.Debug.WriteLine(error.ErrorMessage); }
-
+            // If validation fails, stay on the edit page
             ViewData["UserId"] = id;
             return View(model);
         }
