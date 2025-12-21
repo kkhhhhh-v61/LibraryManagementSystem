@@ -175,40 +175,38 @@ namespace LibraryManagementSystem.Controllers
             if (ModelState.IsValid)
             {
                 // ==================================================
-                // DUPLICATE DATA CHECKS
+                // DUPLICATE DATA CHECKS (SOFT-DELETE AWARE)
                 // ==================================================
-                bool hasDuplicate = false;
 
-                // Check Username
-                if (await _db.Users.AnyAsync(u => u.Username == model.Username))
+                // 1. Check for ANY user (active or deleted) with this Username/Email
+                // We use IgnoreQueryFilters so we don't crash the unique index
+                var existingUser = await _db.Users
+                    .IgnoreQueryFilters()
+                    .FirstOrDefaultAsync(u => u.Username == model.Username || u.Email == model.Email || u.ContactNo == model.ContactNo);
+
+                if (existingUser != null)
                 {
-                    ModelState.AddModelError("Username", "Username already taken.");
-                    hasDuplicate = true;
+                    // If the user exists and is NOT deleted, it's a real duplicate
+                    if (!existingUser.IsDeleted)
+                    {
+                        if (existingUser.Username == model.Username) ModelState.AddModelError("Username", "Username already taken.");
+                        if (existingUser.Email == model.Email) ModelState.AddModelError("Email", "Email already registered.");
+                        if (existingUser.ContactNo == model.ContactNo) ModelState.AddModelError("ContactNo", "Phone number already in use.");
+
+                        TempData["ToastMessage"] = "Registration failed! Details already in use.";
+                        TempData["ToastType"] = "error";
+                        return View(model);
+                    }
+                    else
+                    {
+                        // OPTIONAL: If the record exists but IS DELETED, we "Hard Delete" it 
+                        // so the new registration can re-use the Username/Email/ID logic.
+                        _db.Users.Remove(existingUser);
+                        await _db.SaveChangesAsync();
+                    }
                 }
 
-                // Check Email
-                if (await _db.Users.AnyAsync(u => u.Email == model.Email))
-                {
-                    ModelState.AddModelError("Email", "Email already registered.");
-                    hasDuplicate = true;
-                }
-
-                // Check Contact Number
-                if (await _db.Users.AnyAsync(u => u.ContactNo == model.ContactNo))
-                {
-                    ModelState.AddModelError("ContactNo", "Phone number already in use.");
-                    hasDuplicate = true;
-                }
-
-                // IF DUPLICATES FOUND: Show Toast and Stop
-                if (hasDuplicate)
-                {
-                    TempData["ToastMessage"] = "Registration failed! One or more details are already registered.";
-                    TempData["ToastType"] = "error"; // Shows Red Toast
-                    return View(model);
-                }
-
-                // Generate User ID
+                // Generate User ID (Already uses IgnoreQueryFilters in your code, which is correct!)
                 string newUserId = "U00001";
                 var lastUser = await _db.Users.IgnoreQueryFilters()
                     .Where(u => u.Id.StartsWith("U"))
@@ -220,22 +218,18 @@ namespace LibraryManagementSystem.Controllers
                     newUserId = "U" + (lastIdNum + 1).ToString("D5");
                 }
 
-                // Handle Image (Using Helper)
+                // Handle Image
                 string stringFileName = "default-profile.png";
-
                 if (model.ProfilePhoto != null)
                 {
                     var imageValidation = Helper.ValidateImage(model.ProfilePhoto);
                     if (imageValidation != ValidationResult.Success)
                     {
                         ModelState.AddModelError("ProfilePhoto", imageValidation.ErrorMessage);
-                        // Also show a toast for image error if you want
                         TempData["ToastMessage"] = "Invalid Profile Photo.";
                         TempData["ToastType"] = "error";
                         return View(model);
                     }
-
-                    // Save and get filename
                     stringFileName = Helper.SaveImage(model.ProfilePhoto, "profiles", _webHostEnvironment.WebRootPath);
                 }
 
@@ -250,7 +244,8 @@ namespace LibraryManagementSystem.Controllers
                     ContactNo = model.ContactNo,
                     Role = LMSUser.UserRole.MEMBER,
                     Status = LMSUser.UserStatus.ACTIVE,
-                    ImageURL = stringFileName
+                    ImageURL = stringFileName,
+                    IsDeleted = false // Explicitly set to false
                 };
 
                 _db.Users.Add(user);
@@ -263,7 +258,6 @@ namespace LibraryManagementSystem.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            // If we got here, normal validation failed (e.g. password too short)
             TempData["ToastMessage"] = "Please check your input.";
             TempData["ToastType"] = "warning";
             return View(model);
