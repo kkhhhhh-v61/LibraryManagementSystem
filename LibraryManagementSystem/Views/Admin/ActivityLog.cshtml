@@ -1,0 +1,129 @@
+﻿@model LibraryManagementSystem.Models.ActivityLogVM
+@{
+    ViewData["Title"] = "Activity Log";
+}
+
+@* --- 1. ANTI-FLASH LOGIC --- *@
+<script>
+    if (localStorage.getItem('activityLogActiveTab') === 'bookings') {
+        document.documentElement.classList.add('show-bookings-mode');
+    }
+</script>
+
+
+
+
+<link rel="stylesheet" href="~/css/activity-log.css" />
+
+<div class="container-fluid">
+    <div class="bookbase-card" style="position: relative;">
+
+        <div id="loadingOverlay"><div class="spinner-border text-primary"></div></div>
+
+        <div class="card-header-custom">
+            <div class="header-left">
+                <h1 class="page-title">Activity Log</h1>
+                <span class="record-badge">History</span>
+            </div>
+
+            <div class="search-box">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="searchInput" class="search-input" placeholder="Search logs..." autocomplete="off">
+                <i class="fas fa-times clear-icon" id="clearBtn" title="Clear search"></i>
+            </div>
+        </div>
+
+        <div class="tab-row">
+            <button id="btnShowLoans" class="custom-tab-btn active" onclick="switchTab('loans')">LOANS HISTORY</button>
+            <button id="btnShowBookings" class="custom-tab-btn" onclick="switchTab('bookings')">BOOKINGS HISTORY</button>
+        </div>
+
+        <div id="activityLogContainer" style="flex-grow: 1;">
+            <partial name="_ActivityLogTables" model="Model" />
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // GLOBAL VARIABLES
+        let currentSort = "";
+        let currentSearch = "";
+        let currentPage = 1; // <--- NEW VARIABLE
+        let searchTimer;
+
+        // 1. AJAX ENGINE
+        function fetchData() {
+            const overlay = document.getElementById('loadingOverlay');
+            overlay.style.display = 'flex';
+
+            // Include pageNumber in URL
+            const url = `@Url.Action("ActivityLog")?searchString=${encodeURIComponent(currentSearch)}&sortOrder=${encodeURIComponent(currentSort)}&pageNumber=${currentPage}`;
+
+            fetch(url, {
+                headers: { "X-Requested-With": "XMLHttpRequest" }
+            })
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('activityLogContainer').innerHTML = html;
+                overlay.style.display = 'none';
+            })
+            .catch(err => {
+                console.error(err);
+                overlay.style.display = 'none';
+            });
+        }
+
+        // 2. PAGINATION TRIGGER (Called by Next/Prev buttons)
+        function changePage(newPage) {
+            if(newPage < 1) return;
+            currentPage = newPage;
+            fetchData();
+        }
+
+        // 3. SORTING (Reset page to 1)
+        function ajaxSort(sortOrder) {
+            currentSort = sortOrder;
+            currentPage = 1; // Always reset to page 1 when sorting
+            fetchData();
+        }
+
+        // 4. TAB LOGIC (Visual Only)
+        function switchTab(tabName) {
+            if (tabName === 'bookings') {
+                document.documentElement.classList.add('show-bookings-mode');
+                document.getElementById('btnShowLoans').classList.remove('active');
+            } else {
+                document.documentElement.classList.remove('show-bookings-mode');
+                document.getElementById('btnShowLoans').classList.add('active');
+            }
+            localStorage.setItem('activityLogActiveTab', tabName);
+        }
+
+        // 5. SEARCH LOGIC (Reset page to 1)
+        document.addEventListener("DOMContentLoaded", function() {
+            const searchInput = document.getElementById('searchInput');
+            const clearBtn = document.getElementById('clearBtn');
+
+            searchInput.addEventListener('input', function() {
+                currentSearch = this.value;
+                clearBtn.style.display = currentSearch.length > 0 ? 'block' : 'none';
+
+                clearTimeout(searchTimer);
+                searchTimer = setTimeout(() => {
+                    currentPage = 1; // Always reset to page 1 when searching
+                    fetchData();
+                }, 500);
+            });
+
+            clearBtn.addEventListener('click', function() {
+                searchInput.value = '';
+                currentSearch = '';
+                currentPage = 1;
+                clearBtn.style.display = 'none';
+                searchInput.focus();
+                fetchData();
+            });
+        });
+    </script>
+}

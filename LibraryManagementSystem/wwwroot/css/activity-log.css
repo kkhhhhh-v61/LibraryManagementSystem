@@ -1,0 +1,342 @@
+﻿/* wwwroot/css/activity-log.css */
+
+:root {
+    --primary-color: #4361ee;
+    --bg-color: #f3f4f6;
+    --text-dark: #2b3442;
+    --text-muted: #8898aa;
+    --border-color: #e9ecef;
+    --success-color: #10b981;
+    --danger-color: #ef476f;
+}
+
+body {
+    background-color: var(--bg-color) !important;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* --- 1. FORCE FULL WIDTH & LAYOUT --- */
+/* This overrides the default container to make it 100% width */
+.container, .container-fluid, .main-content, .layout__content {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 20px !important; /* Slightly less padding on edges to maximize space */
+    box-sizing: border-box;
+}
+
+footer {
+    display: none !important;
+}
+
+/* --- 2. MAIN CARD --- */
+.bookbase-card {
+    width: 100%;
+    background: #ffffff;
+    border-radius: 12px; /* More rounded corners */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 85vh; /* Tall card */
+}
+
+/* --- 3. HEADER & SEARCH --- */
+.card-header-custom {
+    padding: 25px 40px; /* Bigger header */
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #fff;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.page-title {
+    font-size: 1.4rem; /* Larger Title */
+    font-weight: 700;
+    color: var(--text-dark);
+    margin: 0;
+}
+
+.record-badge {
+    background-color: #f1f5f9;
+    color: #64748b;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* Ensure the container allows absolute positioning inside it */
+.search-box {
+    position: relative;
+    width: 300px;
+}
+
+/* Magnifier Icon (Left) */
+.search-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #8898aa;
+    pointer-events: none; /* Allows clicking through to the input */
+    z-index: 10;
+}
+
+/* "X" Clear Icon (Right) - NEW */
+.clear-icon {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #8898aa;
+    display: none; /* Hidden by default */
+    z-index: 10;
+    transition: color 0.2s;
+}
+
+    .clear-icon:hover {
+        color: #dc3545; /* Red on hover */
+    }
+
+/* Input Styling */
+.search-input {
+    width: 100%;
+    /* Left padding for magnifier, Right padding for X */
+    padding: 10px 40px 10px 45px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    outline: none;
+}
+
+    .search-input:focus {
+        border-color: #4361ee;
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+    }/* --- 4. TABS --- */
+.tab-row {
+    padding: 0 40px;
+    border-bottom: 1px solid var(--border-color);
+    background: #fff;
+    display: flex;
+    gap: 30px;
+}
+
+.custom-tab-btn {
+    border: none;
+    background: none;
+    padding: 20px 5px;
+    font-weight: 600;
+    color: var(--text-muted);
+    border-bottom: 3px solid transparent;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+    .custom-tab-btn:hover {
+        color: var(--primary-color);
+    }
+
+    .custom-tab-btn.active {
+        color: var(--primary-color);
+        border-bottom: 3px solid var(--primary-color);
+    }
+
+/* --- 5. TABLE STYLING --- */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.custom-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed; /* Ensures columns respect width percentages */
+}
+
+    .custom-table thead th {
+        background-color: #f8fafc; /* Slight grey header background */
+        color: #64748b;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 0.6px;
+        padding: 20px 40px;
+        border-bottom: 1px solid var(--border-color);
+        text-align: left;
+    }
+
+    .custom-table tbody td {
+        padding: 20px 40px;
+        vertical-align: middle;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .custom-table tbody tr:hover {
+        background-color: #f8fafc;
+    }
+
+/* --- 6. IMAGES & CONTENT --- */
+
+/* Book Cover Styling */
+.book-flex {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.table-book-img {
+    width: 45px;
+    height: 65px;
+    border-radius: 4px;
+    object-fit: cover;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background-color: #eee;
+}
+
+/* User Avatar Styling */
+.user-profile-flex {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.table-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    background-color: #eee;
+}
+
+/* Typography */
+.text-main {
+    font-weight: 600;
+    color: var(--text-dark);
+    font-size: 0.95rem;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.text-sub {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    display: block;
+}
+
+/* Status Dots */
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+    .status-pill.returned {
+        background-color: #dcfce7;
+        color: #166534;
+    }
+
+    .status-pill.active {
+        background-color: #fee2e2;
+        color: #991b1b;
+    }
+
+    .status-pill.reserved {
+        background-color: #e0f2fe;
+        color: #075985;
+    }
+/* ... existing css ... */
+
+/* --- 7. TAB CONTENT UTILITIES --- */
+/* By default, hide all tab panes */
+.tab-pane {
+    display: none;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+    /* Show the one with the active class */
+    .tab-pane.active {
+        display: block;
+    }
+
+/* Simple fade animation for smoother switching */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Highlight search text matches (optional, used by JS search) */
+.highlight {
+    background-color: #fff3cd;
+    padding: 2px;
+    border-radius: 2px;
+}
+<style >
+/* Default State */
+#loansTableSection {
+    display: block;
+}
+
+#bookingsTableSection {
+    display: none;
+}
+
+/* Tabs */
+.custom-tab-btn.active {
+    color: var(--primary-color) !important;
+    border-bottom: 3px solid var(--primary-color) !important;
+}
+
+/* Magic Switch */
+html.show-bookings-mode #loansTableSection {
+    display: none !important;
+}
+
+html.show-bookings-mode #bookingsTableSection {
+    display: block !important;
+}
+
+/* Button Flip */
+html.show-bookings-mode #btnShowLoans {
+    color: var(--text-muted) !important;
+    border-bottom-color: transparent !important;
+}
+
+html.show-bookings-mode #btnShowBookings {
+    color: var(--primary-color) !important;
+    border-bottom: 3px solid var(--primary-color) !important;
+}
+
+/* Loading Spinner */
+#loadingOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.7);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 50;
+}

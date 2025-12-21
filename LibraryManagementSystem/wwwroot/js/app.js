@@ -716,3 +716,42 @@ $(document).ready(function () {
         });
     }
 });
+/* ===========================================================================
+   ACTIVITY LOG / CIRCULATION HISTORY LOGIC
+   =========================================================================== */
+
+$(document).ready(function () {
+
+    // 1. ACTIVITY LOG TABS
+    // ------------------------------------------------
+    // Expects buttons with class .custom-tab-btn and data-target="#id"
+    // Expects content divs with class .tab-pane and matching id
+    $(".custom-tab-btn").on("click", function () {
+        // A. Handle Button State
+        $(".custom-tab-btn").removeClass("active");
+        $(this).addClass("active");
+
+        // B. Handle Content State
+        var targetId = $(this).data("target"); // e.g., "#current-loans"
+
+        // Hide all tab panes in the activity container
+        $(".tab-pane").removeClass("active");
+
+        // Show the target pane
+        $(targetId).addClass("active");
+    });
+
+    // 2. ACTIVITY LOG SEARCH (Client Side)
+    // ------------------------------------------------
+    // Filters rows in .custom-table based on input in .activity-log-search
+    $(".search-input").on("keyup", function () {
+        var value = $(this).val().toLowerCase();
+
+        // Target the table rows inside the visible tab
+        // If you want to search ALL tabs, remove the ".tab-pane.active" part
+        $(".custom-table tbody tr").filter(function () {
+            // Toggle visibility based on match
+            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+        });
+    });
+});

@@ -28,90 +28,100 @@ public class LMSDB(DbContextOptions options) : DbContext(options)
 
 /* ------------------------------ LAI CHEE KIT ------------------------------ */
 
-public class User
+using System.ComponentModel.DataAnnotations;
+
+namespace LibraryManagementSystem.Models
 {
-    public enum UserRole
+    public class User
     {
-        ADMIN,
-        STAFF,
-        MEMBER
+        public enum UserRole
+        {
+            ADMIN,
+            STAFF,
+            MEMBER
+        }
+
+        public enum UserStatus
+        {
+            ACTIVE,     // Normal user
+            INACTIVE,   // Banned/Suspended by Admin (Not deleted)
+            LOCKED      // Temporary lock due to too many failed login attempts
+        }
+
+        [Key]
+        [MaxLength(6)]
+        public string Id { get; set; } // PK: e.g., "U00001"
+
+        [MaxLength(50)]
+        public string Username { get; set; }
+
+        [MaxLength(255)]
+        public string PasswordHash { get; set; }
+
+        [MaxLength(50)]
+        public string FirstName { get; set; }
+
+        [MaxLength(50)]
+        public string LastName { get; set; }
+
+        [MaxLength(255)]
+        public string Email { get; set; }
+
+        [MaxLength(15)]
+        public string ContactNo { get; set; }
+
+        public UserRole Role { get; set; }
+
+        [MaxLength(255)]
+        public string? ImageURL { get; set; }
+
+        public UserStatus Status { get; set; }
+
+        // --- Feature: Credibility System ---
+        // Logic: Starts at 100. -1 for late return, -10 for booking no-show.
+        public int CredibilityScore { get; set; } = 100;
+
+        // --- Feature: Security (Login Blocking) ---
+        // Logic: Increment on wrong password. If > 3, set Status to LOCKED.
+        public int FailedLoginAttempts { get; set; } = 0;
+        public DateTime? LockoutEnd { get; set; }
+
+        // --- Feature: User Profile Sharing ---
+        // Logic: If false, other members cannot view their profile details.
+        public bool IsProfilePublic { get; set; } = true;
+
+        // --- Feature: Soft Delete (NEW) ---
+        // Logic: If true, the user is hidden from the system but data is kept.
+        public bool IsDeleted { get; set; } = false;
+        public DateTime? DeletedAt { get; set; }
+
+        // --- Navigation Properties ---
+        public List<Loan> Loans { get; set; } = [];
+        public List<Booking> Bookings { get; set; } = [];
+        public List<Wishlist> Wishlists { get; set; } = [];
+        public List<Fine> Fines { get; set; } = [];
+        public List<PasswordResetToken> PasswordResetTokens { get; set; } = [];
     }
 
-    public enum UserStatus
+    // Feature: Password Recovery (Email with token link).
+    public class PasswordResetToken
     {
-        ACTIVE,     // Normal user
-        INACTIVE,   // Deleted/Banned by Admin
-        LOCKED      // Temporary lock due to too many failed login attempts
+        [Key]
+        public int Id { get; set; }
+
+        [MaxLength(6)]
+        public string UserId { get; set; }
+
+        [MaxLength(255)]
+        public string Token { get; set; } // The random secure string sent to email
+
+        public DateTime ExpiryDate { get; set; }
+
+        public bool IsUsed { get; set; } = false; // Prevents re-using the same link
+
+        public User User { get; set; }
     }
-
-    [Key]
-    [MaxLength(6)]
-    public string Id { get; set; } // PK: e.g., "U00001"
-
-    [MaxLength(50)]
-    public string Username { get; set; }
-
-    [MaxLength(255)]
-    public string PasswordHash { get; set; }
-
-    [MaxLength(50)]
-    public string FirstName { get; set; }
-
-    [MaxLength(50)]
-    public string LastName { get; set; }
-
-    [MaxLength(255)]
-    public string Email { get; set; }
-
-    [MaxLength(15)]
-    public string ContactNo { get; set; }
-
-    public UserRole Role { get; set; }
-
-    [MaxLength(255)]
-    public string? ImageURL { get; set; } 
-
-    public UserStatus Status { get; set; }
-
-    // Feature: Credibility System
-    // Logic: Starts at 100. -1 for late return, -10 for booking no-show.
-    public int CredibilityScore { get; set; } = 100;
-
-    // Feature: Security (Login Blocking)
-    // Logic: Increment this on wrong password. If > 3, set Status to LOCKED or use LockoutEnd.
-    public int FailedLoginAttempts { get; set; } = 0;
-    public DateTime? LockoutEnd { get; set; } // The time when they can try logging in again.
-
-    // Feature: User Profile Sharing
-    // Logic: If false, other members cannot view their profile details.
-    public bool IsProfilePublic { get; set; } = true;
-
-    public List<Loan> Loans { get; set; } = [];          
-    public List<Booking> Bookings { get; set; } = [];    
-    public List<Wishlist> Wishlists { get; set; } = [];  
-    public List<Fine> Fines { get; set; } = [];         
-    public List<PasswordResetToken> PasswordResetTokens { get; set; } = []; 
 }
-
-// Feature: Password Recovery (Email with token link).
-public class PasswordResetToken
-{
-    [Key]
-    public int Id { get; set; }
-
-    [MaxLength(6)]
-    public string UserId { get; set; }
-
-    [MaxLength(255)]
-    public string Token { get; set; } // The random secure string sent to email
-
-    public DateTime ExpiryDate { get; set; } 
-
-    public bool IsUsed { get; set; } = false; // Prevents re-using the same link
-
-    public User User { get; set; }
-}
-
 
 
 /* ------------------------------ TAN KAI HAO ------------------------------ */

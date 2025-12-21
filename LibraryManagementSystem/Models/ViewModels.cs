@@ -176,8 +176,57 @@ public class LoginVM
         [Compare("NewPassword", ErrorMessage = "Passwords do not match")]
         public string ConfirmNewPassword { get; set; }
     }
+// Models/ViewModels/ActivityLogVM.cs
 
+public class ActivityLogVM
+{
+    public List<AdminLoanDTO> Loans { get; set; } = new();
+    public List<AdminBookingDTO> Bookings { get; set; } = new();
+    public int CurrentPage { get; set; } = 1;
+    public int TotalPages { get; set; } = 1;
 
+    // Helpers
+    public bool HasPrevious => CurrentPage > 1;
+    public bool HasNext => CurrentPage < TotalPages;
+}
+
+public class AdminLoanDTO
+{
+    public string LoanId { get; set; }
+    public string BookTitle { get; set; }
+
+    // This already existed, good.
+    public string BookImageUrl { get; set; }
+
+    public string UserId { get; set; }
+    public string UserName { get; set; }
+    public string UserEmail { get; set; }
+
+    // ADD THIS NEW PROPERTY
+    public string UserProfileUrl { get; set; }
+
+    public DateOnly LoanDate { get; set; }
+    public DateOnly LoanDue { get; set; }
+    public DateOnly? ReturnDate { get; set; }
+    public string Status { get; set; }
+}
+
+public class AdminBookingDTO
+{
+    public string BookingId { get; set; }
+    public string FacilityName { get; set; }
+
+    public string UserId { get; set; }
+    public string UserName { get; set; }
+
+    // ADD THIS NEW PROPERTY
+    public string UserProfileUrl { get; set; }
+
+    public DateTime BookingDate { get; set; }
+    public TimeSpan StartTime { get; set; }
+    public TimeSpan EndTime { get; set; }
+    public string Status { get; set; }
+}
 
 /* ============================== TAN KAI HAO ============================== */
 

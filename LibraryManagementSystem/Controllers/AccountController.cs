@@ -390,13 +390,8 @@ namespace LibraryManagementSystem.Controllers
                 TempData["ToastMessage"] = "This link has expired.";
                 return RedirectToAction("Login");
             }
-
-            //Update Password (Using BCrypt to match your Register logic)
             resetToken.User.PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password);
-
             resetToken.IsUsed = true;
-
-            //Clear any locks the user might have had
             resetToken.User.FailedLoginAttempts = 0;
             resetToken.User.LockoutEnd = null;
             if (resetToken.User.Status == LMSUser.UserStatus.LOCKED)
@@ -440,14 +435,8 @@ namespace LibraryManagementSystem.Controllers
     {
         new Claim(ClaimTypes.NameIdentifier, user.Id),
         new Claim(ClaimTypes.Name, user.Username),
-        
-        // FIX: Add the Role exactly as it is (ADMIN)
         new Claim(ClaimTypes.Role, roleName),
-        
-        // OPTIONAL FIX: Also add "Admin" (Title Case) just in case your Views expect that
-        // This acts as a backup so both checks work.
         new Claim(ClaimTypes.Role, roleName[0] + roleName.Substring(1).ToLower()),
-
         new Claim("ProfilePicture", user.ImageURL ?? "default-profile.png")
     };
 
@@ -654,6 +643,52 @@ namespace LibraryManagementSystem.Controllers
             await _db.SaveChangesAsync();
 
             return Json(new { success = true, message = "Password changed successfully!" });
+        }
+        // =======================================================
+        // DELETE ACCOUNT (SOFT DELETE)
+        // =======================================================
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteAccount()
+        {
+            // 1. Get the current user ID
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Json(new { success = false, message = "User session not found." });
+
+            // 2. Fetch User from DB
+            var user = await _db.Users.FindAsync(userId);
+            if (user == null)
+                return Json(new { success = false, message = "User not found." });
+
+            try
+            {
+                // 3. OPTIONAL: Delete Profile Image if it's not the default
+                if (!string.IsNullOrEmpty(user.ImageURL) && user.ImageURL != "default-profile.png")
+                {
+                    string filePath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "profiles", user.ImageURL);
+                    if (System.IO.File.Exists(filePath))
+                    {
+                        System.IO.File.Delete(filePath);
+                    }
+                }
+
+                // 4. Perform Soft Delete (Change status to INACTIVE)
+                // This prevents login while keeping data for library records
+                user.Status = LMSUser.UserStatus.INACTIVE;
+                _db.Users.Update(user);
+                await _db.SaveChangesAsync();
+
+                // 5. Sign the user out immediately
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+                return Json(new { success = true, message = "Account deleted successfully. We're sorry to see you go!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error during deletion: " + ex.Message });
+            }
         }
     }
 }
