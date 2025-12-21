@@ -8,7 +8,7 @@ using LibraryManagementSystem.Extensions;
 namespace LibraryManagementSystem.Controllers;
 
 [Authorize]
-public class FineController(LMSDB db, IFineService fineService) : Controller
+public class FineController(LMSDB db, IFineService fineService, INotificationService ns) : Controller
 {
     [Authorize(Roles = "MEMBER")]
     public IActionResult Index()
@@ -194,10 +194,10 @@ public class FineController(LMSDB db, IFineService fineService) : Controller
     }
 
     [HttpPost]
-    [Authorize(Roles = "ADMIN, STAFF")]
-    public IActionResult MarkFinePaid(string id)
+    [Authorize(Roles = "ADMIN")]
+    public IActionResult WaiveFine(string id)
     {
-        var fine = db.Fines.Find(id);
+        var fine = db.Fines.Include(f => f.Loan).FirstOrDefault(f => f.Id == id);
         if (fine == null)
         {
             TempData["ToastMessage"] = "Fine not found.";
@@ -215,7 +215,10 @@ public class FineController(LMSDB db, IFineService fineService) : Controller
         fine.IsPaid = true;
         db.SaveChanges();
 
-        TempData["ToastMessage"] = "Fine marked as paid.";
+        // Notify user
+        ns.Notify(fine.Loan.UserId, $"Your fine (ID: {fine.Id}) of RM {fine.Amount:F2} has been waived by an administrator.", "/Fine/Records");
+
+        TempData["ToastMessage"] = "Fine has been waived successfully and the user has been notified.";
         TempData["ToastType"] = "success";
         return RedirectToAction("ManageFine");
     }
@@ -256,6 +259,40 @@ public class FineController(LMSDB db, IFineService fineService) : Controller
         db.SaveChanges();
 
         TempData["ToastMessage"] = $"Successfully deleted {fines.Count} fine(s).";
+        TempData["ToastType"] = "success";
+
+        return RedirectToAction("ManageFine");
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "ADMIN")]
+    public IActionResult BatchWaiveFine(List<string> ids)
+    {
+        if (ids == null || ids.Count == 0)
+        {
+            TempData["ToastMessage"] = "No items selected.";
+            TempData["ToastType"] = "warning";
+            return RedirectToAction("ManageFine");
+        }
+
+        var fines = db.Fines.Include(f => f.Loan).Where(f => ids.Contains(f.Id) && !f.IsPaid).ToList();
+
+        if (fines.Count == 0)
+        {
+            TempData["ToastMessage"] = "No unpaid fines found in selection.";
+            TempData["ToastType"] = "warning";
+            return RedirectToAction("ManageFine");
+        }
+
+        foreach (var fine in fines)
+        {
+            fine.IsPaid = true;
+            ns.Notify(fine.Loan.UserId, $"Your fine (ID: {fine.Id}) of RM {fine.Amount:F2} has been waived by an administrator.", "/Fine/Records");
+        }
+
+        db.SaveChanges();
+
+        TempData["ToastMessage"] = $"Successfully waived {fines.Count} fine(s).";
         TempData["ToastType"] = "success";
 
         return RedirectToAction("ManageFine");

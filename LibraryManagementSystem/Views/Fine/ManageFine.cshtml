@@ -90,6 +90,9 @@
                     <button class="form__button form__button--danger button--batch-delete" id="batchDeleteButton" type="button">
                         Delete Selected
                     </button>
+                    <button class="form__button form__button--success button--batch-waive" id="batchWaiveButton" type="button">
+                        Waive Selected
+                    </button>
                 </div>
             </div>
         }
@@ -122,6 +125,54 @@
                     <button class="form__button form__button--danger" type="submit">Delete</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <div class="modal" id="modal-waive">
+        <div class="modal__container">
+            <div class="modal__header">
+                <h2 class="modal__title">Confirm Waive</h2>
+                <button class="modal__close js-close-modal" type="button">
+                    <svg class="close__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
+                        <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/>
+                    </svg>
+                </button>
+            </div>
+
+            <form class="modal__form" asp-action="WaiveFine" method="post">
+                <div class="modal__content">
+                    <p class="modal__text">
+                        Are you sure you want to waive fine '<span class="text--highlight js-waive-name"></span>'?
+                        This action cannot be undone.
+                    </p>
+                    <input type="hidden" name="id" value="" />
+                </div>
+                <div class="modal__footer">
+                    <button class="form__button form__button--cancel js-cancel-waive" type="button">Cancel</button>
+                    <button class="form__button form__button--success" type="submit">Waive</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="modal-batch-waive">
+        <div class="modal__container">
+            <div class="modal__header">
+                <h2 class="modal__title">Confirm Batch Waive</h2>
+                <button class="modal__close js-close-modal" type="button">
+                    <svg class="close__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
+                        <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
+                    </svg>
+                </button>
+            </div>
+            <div class="modal__content">
+                <p class="modal__text">The following fines will be waived:</p>
+                <div class="delete-list" id="batchWaiveList"></div>
+            </div>
+            <div class="modal__footer">
+                <button class="form__button form__button--cancel js-cancel-batch" type="button">Cancel</button>
+                <button class="form__button form__button--success" id="confirmBatchWaive" type="button">Confirm Waive</button>
+            </div>
         </div>
     </div>
 

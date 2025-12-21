@@ -371,6 +371,7 @@ function performAjaxSearch(term, page, sort, order) {
 
 function updateBatchButtonState() {
     const batchButton = document.getElementById("batchDeleteButton");
+    const batchWaiveButton = document.getElementById("batchWaiveButton");
     const deselectButton = document.getElementById("deselectAllButton");
     const selectionCountSpan = document.getElementById("selectionCount");
     const mergeButton = document.getElementById("mergeSlipsButton");
@@ -385,6 +386,7 @@ function updateBatchButtonState() {
             selectionCountSpan.classList.add("active");
         }
         batchButton.classList.add("active");
+        if (batchWaiveButton) batchWaiveButton.classList.add("active");
         if (deselectButton) deselectButton.classList.add("active");
 
         if (mergeButton) {
@@ -397,6 +399,7 @@ function updateBatchButtonState() {
     } else {
         if (selectionCountSpan) selectionCountSpan.classList.remove("active");
         batchButton.classList.remove("active");
+        if (batchWaiveButton) batchWaiveButton.classList.remove("active");
         if (deselectButton) deselectButton.classList.remove("active");
         if (mergeButton) {
             mergeButton.style.display = "none";
@@ -422,6 +425,7 @@ function bindTableContentEvents() {
                         name: cb.dataset.name,
                         books: cb.dataset.books,
                         status: cb.dataset.status,
+                        ispaid: cb.dataset.ispaid,
                     });
                 } else {
                     selectionState.delete(cb.value);
@@ -443,6 +447,7 @@ function bindTableContentEvents() {
                     name: this.dataset.name,
                     books: this.dataset.books,
                     status: this.dataset.status,
+                    ispaid: this.dataset.ispaid,
                 });
             } else {
                 selectionState.delete(this.value);
@@ -576,6 +581,15 @@ function bindStaticModalEvents() {
                         input.value = id;
                         batchForm.appendChild(input);
                     });
+
+                    // Ensure we are using the correct action for delete
+                    if (
+                        batchForm.id === "batchForm" &&
+                        window.location.pathname.includes("/Fine/ManageFine")
+                    ) {
+                        batchForm.action = "/Fine/BatchDeleteFine";
+                    }
+
                     batchForm.submit();
                 };
 
@@ -583,6 +597,77 @@ function bindStaticModalEvents() {
                 if (closeBtn) closeBtn.onclick = closeBatchModal;
                 batchModal.onclick = (e) => {
                     if (e.target === batchModal) closeBatchModal();
+                };
+            }
+        });
+    }
+
+    const batchWaiveButton = document.getElementById("batchWaiveButton");
+    if (batchWaiveButton && batchForm) {
+        batchWaiveButton.addEventListener("click", function () {
+            const count = selectionState.size;
+            if (count == 0) return;
+
+            const waiveModal = document.getElementById("modal-batch-waive");
+            const listContainer = document.getElementById("batchWaiveList");
+            const confirmBtn = document.getElementById("confirmBatchWaive");
+            const cancelBtn = waiveModal.querySelector(".js-cancel-batch");
+            const closeBtn = waiveModal.querySelector(".js-close-modal");
+
+            if (waiveModal && listContainer) {
+                listContainer.innerHTML = "";
+
+                selectionState.forEach((data, id) => {
+                    const name = data.name;
+                    const isPaid = data.ispaid === "true";
+
+                    let statusText = isPaid ? "Already Paid" : "Ready to waive";
+                    let isUnsafe = isPaid;
+
+                    const item = document.createElement("div");
+                    item.className = `delete-item ${
+                        isUnsafe ? "delete-item--unsafe" : ""
+                    }`;
+
+                    const icon = isUnsafe
+                        ? `<svg class="delete-item__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="#ef4444"><path d="M480-280q17 0 28.5-11.5T520-320q0-17-11.5-28.5T480-360q-17 0-28.5 11.5T440-320q0 17 11.5 28.5T480-280Zm-40-160h80v-240h-80v240Zm40 360q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"/></svg>`
+                        : `<svg class="delete-item__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="#22c55e"><path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z"/></svg>`;
+
+                    item.innerHTML = `
+                        <div class="delete-item__info">
+                            <span class="delete-item__name">ID: ${name}</span>
+                            <span class="delete-item__status">${statusText}</span>
+                        </div>
+                        ${icon}
+                    `;
+                    listContainer.appendChild(item);
+                });
+
+                waiveModal.classList.add("active");
+                const closeWaiveModal = () =>
+                    waiveModal.classList.remove("active");
+
+                confirmBtn.onclick = () => {
+                    const existingHidden =
+                        batchForm.querySelectorAll('input[name="ids"]');
+                    existingHidden.forEach((el) => el.remove());
+
+                    selectionState.forEach((_, id) => {
+                        const input = document.createElement("input");
+                        input.type = "hidden";
+                        input.name = "ids";
+                        input.value = id;
+                        batchForm.appendChild(input);
+                    });
+
+                    batchForm.action = "/Fine/BatchWaiveFine";
+                    batchForm.submit();
+                };
+
+                if (cancelBtn) cancelBtn.onclick = closeWaiveModal;
+                if (closeBtn) closeBtn.onclick = closeWaiveModal;
+                waiveModal.onclick = (e) => {
+                    if (e.target === waiveModal) closeWaiveModal();
                 };
             }
         });
@@ -668,6 +753,22 @@ function bindStaticModalEvents() {
             cancelDeleteButton.addEventListener("click", closeDeleteModal);
         deleteModal.addEventListener("click", (e) => {
             if (e.target === deleteModal) closeDeleteModal();
+        });
+    }
+
+    // Waive Modal Static Events
+    const waiveModal = document.getElementById("modal-waive");
+    if (waiveModal) {
+        const closeWaiveButton = waiveModal.querySelector(".js-close-modal");
+        const cancelWaiveButton = waiveModal.querySelector(".js-cancel-waive");
+        const closeWaiveModal = () => waiveModal.classList.remove("active");
+
+        if (closeWaiveButton)
+            closeWaiveButton.addEventListener("click", closeWaiveModal);
+        if (cancelWaiveButton)
+            cancelWaiveButton.addEventListener("click", closeWaiveModal);
+        waiveModal.addEventListener("click", (e) => {
+            if (e.target === waiveModal) closeWaiveModal();
         });
     }
 }
@@ -766,6 +867,26 @@ function bindDynamicModalTriggers() {
                 if (deleteNameDisplay) deleteNameDisplay.textContent = name;
 
                 deleteModal.classList.add("active");
+            });
+        });
+    }
+
+    // Waive Triggers
+    const waiveModal = document.getElementById("modal-waive");
+    if (waiveModal) {
+        const waiveIdInput = waiveModal.querySelector("input[name='id']");
+        const waiveNameDisplay = waiveModal.querySelector(".js-waive-name");
+        const waiveButtons = document.querySelectorAll(".js-waive-trigger");
+
+        waiveButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+                const id = button.dataset.id;
+                const name = button.dataset.name;
+
+                waiveIdInput.value = id;
+                if (waiveNameDisplay) waiveNameDisplay.textContent = name;
+
+                waiveModal.classList.add("active");
             });
         });
     }

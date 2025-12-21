@@ -639,6 +639,11 @@ a.count-badge:hover {
     color: var(--color-white);
 }
 
+.action__button--waive:hover {
+    background-color: var(--color-success);
+    color: var(--color-white);
+}
+
 /* Specific Overrides */
 .button--back {
     width: auto;
@@ -661,8 +666,13 @@ a.count-badge:hover {
     display: none;
 }
 
+.button--batch-waive {
+    display: none;
+}
+
 .button--batch-delete.active,
 .button--deselect-all.active,
+.button--batch-waive.active,
 .selection-count.active {
     display: inline-block;
 }

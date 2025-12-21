@@ -1,4 +1,7 @@
 @model FineManagementVM
+@{
+    bool showActionColumn = User.IsInRole("ADMIN");
+}
 
 <table class="table">
     <thead>
@@ -45,14 +48,17 @@
                     <span class="sort-icon">@(Model.SortOrder == "asc" ? "▲" : "▼")</span>
                 }
             </th>
+            @if (showActionColumn)
+            {
             <th class="table__cell table__cell--actions" style="width: 100px; text-align: center;">Action</th>
+            }
         </tr>
     </thead>
     <tbody>
         @if (!Model.Fines.Any())
         {
             <tr class="table__row">
-                <td class="table__cell" colspan="@(User.IsInRole("ADMIN") ? "8" : "7")" style="text-align:center; color: var(--color-gray-500);">
+                <td class="table__cell" colspan="@(User.IsInRole("ADMIN") ? "8" : (showActionColumn ? "7" : "6"))" style="text-align:center; color: var(--color-gray-500);">
                     No fines found.
                 </td>
             </tr>
@@ -70,7 +76,7 @@
                         <td class="table__cell table__cell--checkbox">
                             @if (canDelete)
                             {
-                                <input class="row-checkbox checkbox-styled" type="checkbox" name="ids" value="@fine.Id" data-name="@fine.Id" />
+                                <input class="row-checkbox checkbox-styled" type="checkbox" name="ids" value="@fine.Id" data-name="@fine.Id" data-ispaid="@fine.IsPaid.ToString().ToLower()" />
                             }
                             else
                             {
@@ -92,30 +98,36 @@
                         @if (fine.IsPaid) { <span class="status-badge status-available">Paid</span> }
                         else { <span class="status-badge status-unavailable">Unpaid</span> }
                     </td>
-                    <td class="table__cell table__cell--actions">
-                        <div class="table__actions">
-                            @if (!fine.IsPaid)
-                            {
-                                <form asp-action="MarkFinePaid" method="post" style="display:inline;">
-                                    <input type="hidden" name="id" value="@fine.Id" />
-                                    <button class="action__button action__button--add" title="Mark as Paid" type="submit">
-                                        <svg class="button__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000"><path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z"/></svg>
+                    @if (showActionColumn)
+                    {
+                        <td class="table__cell table__cell--actions">
+                            <div class="table__actions">
+                                @if (!fine.IsPaid)
+                                {
+                                    @if (User.IsInRole("ADMIN"))
+                                    {
+                                        <button class="action__button action__button--waive js-waive-trigger" 
+                                                data-id="@fine.Id" 
+                                                data-name="@fine.Id"
+                                                title="Waive Fine" type="button">
+                                            <svg class="button__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000"><path d="M880-720v480q0 33-23.5 56.5T800-160H160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720Zm-720 80h640v-80H160v80Zm0 160v240h640v-240H160Zm0 240v-480 480Z"/></svg>
+                                        </button>
+                                    }
+                                }
+                                @if (User.IsInRole("ADMIN"))
+                                {
+                                    <button class="action__button action__button--delete js-delete-trigger"
+                                            data-id="@fine.Id"
+                                            data-name="@fine.Id"
+                                            title="@(canDelete ? "Delete" : "Cannot delete")"
+                                            type="button"
+                                            @(canDelete ? "" : "disabled style=opacity:0.5;cursor:not-allowed;")>
+                                        <svg class="button__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg>
                                     </button>
-                                </form>
-                            }
-                            @if (User.IsInRole("ADMIN"))
-                            {
-                                <button class="action__button action__button--delete js-delete-trigger"
-                                        data-id="@fine.Id"
-                                        data-name="@fine.Id"
-                                        title="@(canDelete ? "Delete" : "Cannot delete")"
-                                        type="button"
-                                        @(canDelete ? "" : "disabled style=opacity:0.5;cursor:not-allowed;")>
-                                    <svg class="button__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg>
-                                </button>
-                            }
-                        </div>
-                    </td>
+                                }
+                            </div>
+                        </td>
+                    }
                 </tr>
             }
         }
