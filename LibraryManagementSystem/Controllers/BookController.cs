@@ -1,4 +1,4 @@
-﻿﻿﻿﻿using System.ComponentModel.DataAnnotations;
+﻿﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -12,13 +12,27 @@ namespace LibraryManagementSystem.Controllers;
 
 public class BookController(LMSDB db, IWebHostEnvironment en, INotificationService ns, IReservationService rs) : Controller
 {
-    public IActionResult Catalogue(string? search, string? genreId, string? authorId, int? rating)
+    public IActionResult Catalogue(string? search, string? genreId, string? authorId, int? rating, int? year, int? edition)
     {
-        var genres = db.Genres.OrderBy(g => g.Name).Select(g => new SelectListItem(g.Name, g.Id)).ToList();
-        var authors = db.Authors.OrderBy(a => a.Name).Select(a => new SelectListItem(a.Name, a.Id)).ToList();
+        var nonArchivedBooks = db.Books.Where(b => !b.IsArchived);
+
+        var genres = nonArchivedBooks
+            .SelectMany(b => b.Genres)
+            .Distinct()
+            .OrderBy(g => g.Name)
+            .Select(g => new SelectListItem(g.Name, g.Id)).ToList();
+        var authors = nonArchivedBooks
+            .SelectMany(b => b.Authors)
+            .Distinct()
+            .OrderBy(a => a.Name)
+            .Select(a => new SelectListItem(a.Name, a.Id)).ToList();
+        var years = nonArchivedBooks.Select(b => b.PublicationYear).Distinct().OrderByDescending(y => y).Select(y => new SelectListItem(y.ToString(), y.ToString())).ToList();
+        var editions = nonArchivedBooks.Select(b => b.Edition).Distinct().OrderBy(e => e).Select(e => new SelectListItem(e.ToString(), e.ToString())).ToList();
 
         ViewBag.Genres = genres;
         ViewBag.Authors = authors;
+        ViewBag.Years = years;
+        ViewBag.Editions = editions;
 
         var query = db.Books
             .Include(b => b.Authors)
@@ -39,6 +53,16 @@ public class BookController(LMSDB db, IWebHostEnvironment en, INotificationServi
         if (!string.IsNullOrWhiteSpace(authorId))
         {
             query = query.Where(b => b.Authors.Any(a => a.Id == authorId));
+        }
+
+        if (year.HasValue)
+        {
+            query = query.Where(b => b.PublicationYear == year.Value);
+        }
+
+        if (edition.HasValue)
+        {
+            query = query.Where(b => b.Edition == edition.Value);
         }
 
         var books = query.OrderByDescending(b => b.DateAdded).ToList();
@@ -250,6 +274,13 @@ public class BookController(LMSDB db, IWebHostEnvironment en, INotificationServi
         int pageSize = 10;
         int totalItems = query.Count();
         int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+        if (totalItems <= 1)
+        {
+            dateFrom ??= DateOnly.FromDateTime(DateTime.Today);
+            dateTo ??= DateOnly.FromDateTime(DateTime.Today);
+        }
+
         ViewBag.TotalItems = db.Books.Count();
         if (page < 1) page = 1;
         if (page > totalPages && totalPages > 0) page = totalPages;
@@ -275,8 +306,8 @@ public class BookController(LMSDB db, IWebHostEnvironment en, INotificationServi
             SelectedGenreId = genreId,
             FilterFeatured = featured,
             FilterArchived = archived,
-            AuthorList = db.Authors.OrderBy(a => a.Name).Select(a => new SelectListItem(a.Name, a.Id)).ToList(),
-            GenreList = db.Genres.OrderBy(g => g.Name).Select(g => new SelectListItem(g.Name, g.Id)).ToList(),
+            AuthorList = db.Books.SelectMany(b => b.Authors).Distinct().OrderBy(a => a.Name).Select(a => new SelectListItem(a.Name, a.Id)).ToList(),
+            GenreList = db.Books.SelectMany(b => b.Genres).Distinct().OrderBy(g => g.Name).Select(g => new SelectListItem(g.Name, g.Id)).ToList(),
             CanDelete = items.ToDictionary(b => b.Id, b => !activeCopiesBookIds.Contains(b.Id))
         };
 
@@ -1295,9 +1326,20 @@ public class BookController(LMSDB db, IWebHostEnvironment en, INotificationServi
         int pageSize = 10;
         int totalItems = query.Count();
         int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+        if (totalItems <= 1)
+        {
+            dateFrom ??= DateOnly.FromDateTime(DateTime.Today);
+            dateTo ??= DateOnly.FromDateTime(DateTime.Today);
+        }
+
         ViewBag.TotalItems = totalItems;
         if (page < 1) page = 1;
         if (page > totalPages && totalPages > 0) page = totalPages;
+
+        var allDates = db.Reviews.Select(r => r.ReviewDate);
+        ViewBag.MinDate = allDates.Any() ? allDates.Min().ToString("yyyy-MM-dd") : null;
+        ViewBag.MaxDate = allDates.Any() ? allDates.Max().ToString("yyyy-MM-dd") : null;
 
         var reviews = query.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 

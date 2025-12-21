@@ -1,4 +1,4 @@
-﻿﻿using Microsoft.AspNetCore.Mvc;
+﻿﻿﻿﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using LibraryManagementSystem.Extensions;
@@ -63,9 +63,20 @@ namespace LibraryManagementSystem.Controllers
             int pageSize = 10;
             int totalItems = query.Count();
             int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+            if (totalItems <= 1)
+            {
+                dateFrom ??= DateOnly.FromDateTime(DateTime.Today);
+                dateTo ??= DateOnly.FromDateTime(DateTime.Today);
+            }
+
             ViewBag.TotalItems = totalItems;
             if (page < 1) page = 1;
             if (page > totalPages && totalPages > 0) page = totalPages;
+
+            var allDates = db.Loans.Where(l => l.UserId == user.Id).Select(l => l.LoanDate);
+            ViewBag.MinDate = allDates.Any() ? allDates.Min().ToString("yyyy-MM-dd") : null;
+            ViewBag.MaxDate = allDates.Any() ? allDates.Max().ToString("yyyy-MM-dd") : null;
 
             var items = query.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
@@ -155,9 +166,20 @@ namespace LibraryManagementSystem.Controllers
             int pageSize = 10;
             int totalItems = uniqueLoans.Count();
             int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+            if (totalItems <= 1)
+            {
+                dateFrom ??= DateOnly.FromDateTime(DateTime.Today);
+                dateTo ??= DateOnly.FromDateTime(DateTime.Today);
+            }
+
             ViewBag.TotalItems = totalItems;
             if (page < 1) page = 1;
             if (page > totalPages && totalPages > 0) page = totalPages;
+
+            var allDates = db.Reviews.Where(r => r.Loan.UserId == user.Id).Select(r => r.ReviewDate);
+            ViewBag.MinDate = allDates.Any() ? allDates.Min().ToString("yyyy-MM-dd") : null;
+            ViewBag.MaxDate = allDates.Any() ? allDates.Max().ToString("yyyy-MM-dd") : null;
 
             var loans = uniqueLoans.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
@@ -418,6 +440,13 @@ namespace LibraryManagementSystem.Controllers
             int pageSize = 10;
             int totalItems = query.Count();
             int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+            if (totalItems <= 1)
+            {
+                dateFrom ??= DateOnly.FromDateTime(DateTime.Today);
+                dateTo ??= DateOnly.FromDateTime(DateTime.Today);
+            }
+
             ViewBag.TotalItems = db.Loans.Count();
             if (page < 1) page = 1;
             if (page > totalPages && totalPages > 0) page = totalPages;

@@ -62,16 +62,15 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
                         <div class="filter-group">
                             <label class="filter-label">Loan Date</label>
                             <div class="filter-date-range" style="display: flex; gap: 0.5rem; align-items: center;">
                                 <input type="date" id="filterDateFrom" class="filter-input" 
-                                       value="@(Model.DateFrom?.ToString("yyyy-MM-dd"))" 
+                                       min="@ViewBag.MinDate" max="@ViewBag.MaxDate" value="@(Model.DateFrom?.ToString("yyyy-MM-dd"))" 
                                        style="width: 100%; padding: 8px; border: 1px solid var(--color-gray-300); border-radius: var(--spacing-sm); font-family: var(--font-main);" />
                                 <span style="color: var(--color-gray-500);">-</span>
                                 <input type="date" id="filterDateTo" class="filter-input" 
-                                       value="@(Model.DateTo?.ToString("yyyy-MM-dd"))"
+                                       min="@ViewBag.MinDate" max="@ViewBag.MaxDate" value="@(Model.DateTo?.ToString("yyyy-MM-dd"))"
                                        style="width: 100%; padding: 8px; border: 1px solid var(--color-gray-300); border-radius: var(--spacing-sm); font-family: var(--font-main);" />
                             </div>
                         </div>
@@ -81,6 +80,7 @@
                                 Clear All Filters
                             </button>
                         </div>
+                    </div>
                     </div>
                 </div>
                 <div class="search__wrapper">
