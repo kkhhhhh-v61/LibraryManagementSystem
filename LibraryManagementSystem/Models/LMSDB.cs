@@ -24,100 +24,118 @@ public class LMSDB(DbContextOptions options) : DbContext(options)
     public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
     public DbSet<Notification> Notifications { get; set; }
 
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<User>().HasQueryFilter(u => !u.IsDeleted);
+
+        // Save Enums as Strings (Readable in DB: "ADMIN" instead of 0)
+        modelBuilder.Entity<User>().Property(u => u.Role).HasConversion<string>();
+        modelBuilder.Entity<User>().Property(u => u.Status).HasConversion<string>();
+        modelBuilder.Entity<Copy>().Property(c => c.Status).HasConversion<string>();
+        modelBuilder.Entity<Loan>().Property(l => l.Status).HasConversion<string>();
+
+        // Unique Indexes (Prevent duplicate Emails/Usernames)
+        modelBuilder.Entity<User>().HasIndex(u => u.Username).IsUnique();
+        modelBuilder.Entity<User>().HasIndex(u => u.Email).IsUnique();
+
+        // Composite Key for Wishlist
+        modelBuilder.Entity<Wishlist>().HasKey(w => new { w.UserId, w.BookId });
+
+        // Decimal Precision (Fix warnings for Price/Fines)
+        modelBuilder.Entity<Fine>().Property(f => f.Amount).HasPrecision(8, 2);
+        modelBuilder.Entity<Fine>().Property(f => f.OverdueRate).HasPrecision(8, 2);
+        modelBuilder.Entity<RoomCategory>().Property(r => r.HourlyRate).HasPrecision(5, 2);
+        modelBuilder.Entity<Booking>().Property(b => b.TotalPrice).HasPrecision(8, 2);
+    }
 }
 
 /* ------------------------------ LAI CHEE KIT ------------------------------ */
-    public class User
+public class User
+{
+    public enum UserRole
     {
-        public enum UserRole
-        {
-            ADMIN,
-            STAFF,
-            MEMBER
-        }
-
-        public enum UserStatus
-        {
-            ACTIVE,     // Normal user
-            INACTIVE,   // Banned/Suspended by Admin (Not deleted)
-            LOCKED      // Temporary lock due to too many failed login attempts
-        }
-
-        [Key]
-        [MaxLength(6)]
-        public string Id { get; set; } // PK: e.g., "U00001"
-
-        [MaxLength(50)]
-        public string Username { get; set; }
-
-        [MaxLength(255)]
-        public string PasswordHash { get; set; }
-
-        [MaxLength(50)]
-        public string FirstName { get; set; }
-
-        [MaxLength(50)]
-        public string LastName { get; set; }
-
-        [MaxLength(255)]
-        public string Email { get; set; }
-
-        [MaxLength(15)]
-        public string ContactNo { get; set; }
-
-        public UserRole Role { get; set; }
-
-        [MaxLength(255)]
-        public string? ImageURL { get; set; }
-
-        public UserStatus Status { get; set; }
-
-        // --- Feature: Credibility System ---
-        // Logic: Starts at 100. -1 for late return, -10 for booking no-show.
-        public int CredibilityScore { get; set; } = 100;
-
-        // --- Feature: Security (Login Blocking) ---
-        // Logic: Increment on wrong password. If > 3, set Status to LOCKED.
-        public int FailedLoginAttempts { get; set; } = 0;
-        public DateTime? LockoutEnd { get; set; }
-
-        // --- Feature: User Profile Sharing ---
-        // Logic: If false, other members cannot view their profile details.
-        public bool IsProfilePublic { get; set; } = true;
-
-        // --- Feature: Soft Delete (NEW) ---
-        // Logic: If true, the user is hidden from the system but data is kept.
-        public bool IsDeleted { get; set; } = false;
-        public DateTime? DeletedAt { get; set; }
-
-        // --- Navigation Properties ---
-        public List<Loan> Loans { get; set; } = [];
-        public List<Booking> Bookings { get; set; } = [];
-        public List<Wishlist> Wishlists { get; set; } = [];
-        public List<Fine> Fines { get; set; } = [];
-        public List<PasswordResetToken> PasswordResetTokens { get; set; } = [];
+        ADMIN,
+        STAFF,
+        MEMBER
     }
 
-    // Feature: Password Recovery (Email with token link).
-    public class PasswordResetToken
+    public enum UserStatus
     {
-        [Key]
-        public int Id { get; set; }
-
-        [MaxLength(6)]
-        public string UserId { get; set; }
-
-        [MaxLength(255)]
-        public string Token { get; set; } // The random secure string sent to email
-
-        public DateTime ExpiryDate { get; set; }
-
-        public bool IsUsed { get; set; } = false; // Prevents re-using the same link
-
-        public User User { get; set; }
+        ACTIVE,     // Normal user
+        INACTIVE,   // Banned/Suspended by Admin (Not deleted)
+        LOCKED      // Temporary lock due to too many failed login attempts
     }
 
+    [Key]
+    [MaxLength(6)]
+    public string Id { get; set; } // PK: e.g., "U00001"
 
+    [MaxLength(50)]
+    public string Username { get; set; }
+
+    [MaxLength(255)]
+    public string PasswordHash { get; set; }
+
+    [MaxLength(50)]
+    public string FirstName { get; set; }
+
+    [MaxLength(50)]
+    public string LastName { get; set; }
+
+    [MaxLength(255)]
+    public string Email { get; set; }
+
+    [MaxLength(15)]
+    public string ContactNo { get; set; }
+
+    public UserRole Role { get; set; }
+
+    [MaxLength(255)]
+    public string? ImageURL { get; set; }
+
+    public UserStatus Status { get; set; }
+
+    // --- Feature: Credibility System ---
+    public int CredibilityScore { get; set; } = 100;
+
+    // --- Feature: Security (Login Blocking) ---
+    public int FailedLoginAttempts { get; set; } = 0;
+    public DateTime? LockoutEnd { get; set; }
+
+    // --- Feature: User Profile Sharing ---
+    public bool IsProfilePublic { get; set; } = true;
+
+    // --- Feature: Soft Delete (NEW) ---
+    public bool IsDeleted { get; set; } = false;
+    public DateTime? DeletedAt { get; set; }
+
+    // --- Navigation Properties ---
+    public List<Loan> Loans { get; set; } = [];
+    public List<Booking> Bookings { get; set; } = [];
+    public List<Wishlist> Wishlists { get; set; } = [];
+    public List<Fine> Fines { get; set; } = [];
+    public List<PasswordResetToken> PasswordResetTokens { get; set; } = [];
+}
+
+// Feature: Password Recovery (Email with token link).
+public class PasswordResetToken
+{
+    [Key]
+    public int Id { get; set; }
+
+    [MaxLength(6)]
+    public string UserId { get; set; }
+
+    [MaxLength(255)]
+    public string Token { get; set; }
+
+    public DateTime ExpiryDate { get; set; }
+
+    public bool IsUsed { get; set; } = false;
+
+    public User User { get; set; }
+}
 
 /* ------------------------------ TAN KAI HAO ------------------------------ */
 

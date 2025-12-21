@@ -52,12 +52,17 @@ namespace LibraryManagementSystem.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Find the user in the database
-                var user = await _db.Users.FirstOrDefaultAsync(u => u.Username == model.Username);
+                // Use .IgnoreQueryFilters() to see if the user exists but is deleted
+                var user = await _db.Users
+                    .IgnoreQueryFilters()
+                    .FirstOrDefaultAsync(u => u.Username == model.Username);
 
-                if (user == null)
+                if (user == null) { /* Standard invalid login logic */ }
+
+                // CHECK IF DELETED
+                if (user.IsDeleted)
                 {
-                    TempData["ToastMessage"] = "Invalid username or password.";
+                    TempData["ToastMessage"] = "This account has been deleted.";
                     TempData["ToastType"] = "error";
                     return View(model);
                 }
@@ -652,43 +657,29 @@ namespace LibraryManagementSystem.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteAccount()
         {
-            // 1. Get the current user ID
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
-                return Json(new { success = false, message = "User session not found." });
+            if (string.IsNullOrEmpty(userId)) return Json(new { success = false });
 
-            // 2. Fetch User from DB
             var user = await _db.Users.FindAsync(userId);
-            if (user == null)
-                return Json(new { success = false, message = "User not found." });
+            if (user == null) return Json(new { success = false });
 
             try
             {
-                // 3. OPTIONAL: Delete Profile Image if it's not the default
-                if (!string.IsNullOrEmpty(user.ImageURL) && user.ImageURL != "default-profile.png")
-                {
-                    string filePath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "profiles", user.ImageURL);
-                    if (System.IO.File.Exists(filePath))
-                    {
-                        System.IO.File.Delete(filePath);
-                    }
-                }
+                // --- THE SOFT DELETE SWITCH ---
+                user.IsDeleted = true;
+                user.DeletedAt = DateTime.Now;
+                user.Status = LMSUser.UserStatus.INACTIVE; // Optional: keep as INACTIVE too
 
-                // 4. Perform Soft Delete (Change status to INACTIVE)
-                // This prevents login while keeping data for library records
-                user.Status = LMSUser.UserStatus.INACTIVE;
                 _db.Users.Update(user);
                 await _db.SaveChangesAsync();
 
-                // 5. Sign the user out immediately
                 await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-
-                return Json(new { success = true, message = "Account deleted successfully. We're sorry to see you go!" });
+                return Json(new { success = true });
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "Error during deletion: " + ex.Message });
+                return Json(new { success = false, message = ex.Message });
             }
         }
     }
-}
+    }
