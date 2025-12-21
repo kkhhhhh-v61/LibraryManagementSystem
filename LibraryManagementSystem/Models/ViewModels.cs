@@ -486,6 +486,8 @@ public class ReservationVM
     public string? BookTitle { get; set; }
     public string? BookImageURL { get; set; }
     public string? BookAuthors { get; set; }
+
+    public string? UserName { get; set; }
 }
 
 public class ReservationListVM
@@ -499,6 +501,20 @@ public class ReservationListVM
     public string? FilterStatus { get; set; }
     public DateOnly? DateFrom { get; set; }
     public DateOnly? DateTo { get; set; }
+}
+
+public class ReservationManagementVM
+{
+    public List<ReservationVM> Reservations { get; set; } = new();
+    public int CurrentPage { get; set; }
+    public int TotalPages { get; set; }
+    public string? SearchTerm { get; set; }
+    public string SortColumn { get; set; } = "ReservationDate";
+    public string SortOrder { get; set; } = "desc";
+    public string? FilterStatus { get; set; }
+    public DateOnly? DateFrom { get; set; }
+    public DateOnly? DateTo { get; set; }
+    public Dictionary<string, bool> CanDelete { get; set; } = new();
 }
 
 public class PaymentVM : IValidatableObject

@@ -6,9 +6,9 @@ using LibraryManagementSystem.Services;
 
 namespace LibraryManagementSystem.Controllers;
 
-[Authorize(Roles = "MEMBER")]
 public class ReservationController(LMSDB db, IReservationService rs) : Controller
 {
+    [Authorize(Roles = "MEMBER")]
     public IActionResult Index(string? search, string? status, DateOnly? dateFrom, DateOnly? dateTo, int page = 1, string sort = "ReservationDate", string order = "desc")
     {
         var username = User.Identity?.Name;
@@ -96,7 +96,7 @@ public class ReservationController(LMSDB db, IReservationService rs) : Controlle
                 QueuePosition = position,
                 BookTitle = item.Book.Title,
                 BookImageURL = item.Book.ImageURL,
-                BookAuthors = string.Join(", ", item.Book.Authors.Select(a => a.Name))
+                BookAuthors = string.Join(", ", item.Book.Authors.Select(a => a.Name)),
             };
         }).ToList();
 
@@ -122,6 +122,7 @@ public class ReservationController(LMSDB db, IReservationService rs) : Controlle
     }
 
     [HttpPost]
+    [Authorize(Roles = "MEMBER")]
     [ValidateAntiForgeryToken]
     public IActionResult Create(string bookId)
     {
@@ -162,6 +163,7 @@ public class ReservationController(LMSDB db, IReservationService rs) : Controlle
     }
 
     [HttpPost]
+    [Authorize(Roles = "MEMBER")]
     public IActionResult Cancel(string id, string? returnUrl)
     {
         var reservation = db.Reservations.Find(id);
@@ -193,6 +195,7 @@ public class ReservationController(LMSDB db, IReservationService rs) : Controlle
     }
 
     [HttpPost]
+    [Authorize(Roles = "MEMBER")]
     public IActionResult BatchCancel(List<string> ids)
     {
         if (ids == null || ids.Count == 0)
@@ -233,6 +236,7 @@ public class ReservationController(LMSDB db, IReservationService rs) : Controlle
     }
 
     [HttpPost]
+    [Authorize(Roles = "MEMBER")]
     public IActionResult Confirm(string id)
     {
         var reservation = db.Reservations.Find(id);
@@ -258,5 +262,149 @@ public class ReservationController(LMSDB db, IReservationService rs) : Controlle
         db.SaveChanges();
 
         return RedirectToAction("Confirmation", "Loan", new { id = loan.Id });
+    }
+
+    [Authorize(Roles = "ADMIN, STAFF")]
+    public IActionResult ManageReservation(string? search, string? status, DateOnly? dateFrom, DateOnly? dateTo, int page = 1, string sort = "ReservationDate", string order = "desc")
+    {
+        var query = db.Reservations
+            .Include(r => r.User)
+            .Include(r => r.Book)
+            .ThenInclude(b => b.Authors)
+            .AsQueryable();
+
+        // Search
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            search = search.Trim();
+            query = query.Where(r => r.Book.Title.Contains(search) || r.User.Username.Contains(search) || r.Id.Contains(search));
+        }
+
+        // Filter Status
+        if (!string.IsNullOrWhiteSpace(status) && Enum.TryParse<Reservation.ReservationStatus>(status, true, out var statusEnum))
+        {
+            query = query.Where(r => r.Status == statusEnum);
+        }
+
+        if (dateFrom.HasValue)
+        {
+            query = query.Where(r => DateOnly.FromDateTime(r.ReservationDate) >= dateFrom.Value);
+        }
+
+        if (dateTo.HasValue)
+        {
+            query = query.Where(r => DateOnly.FromDateTime(r.ReservationDate) <= dateTo.Value);
+        }
+
+        // Sorting
+        bool isDesc = order == "desc";
+        query = sort switch
+        {
+            "Id" => isDesc ? query.OrderByDescending(r => r.Id) : query.OrderBy(r => r.Id),
+            "User" => isDesc ? query.OrderByDescending(r => r.User.Username) : query.OrderBy(r => r.User.Username),
+            "Book" => isDesc ? query.OrderByDescending(r => r.Book.Title) : query.OrderBy(r => r.Book.Title),
+            "ReservationDate" => isDesc ? query.OrderByDescending(r => r.ReservationDate) : query.OrderBy(r => r.ReservationDate),
+            "Status" => isDesc ? query.OrderByDescending(r => r.Status) : query.OrderBy(r => r.Status),
+            _ => isDesc ? query.OrderByDescending(r => r.ReservationDate) : query.OrderBy(r => r.ReservationDate)
+        };
+
+        // Pagination
+        int pageSize = 10;
+        int totalItems = query.Count();
+        int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+        if (totalItems <= 1)
+        {
+            dateFrom ??= DateOnly.FromDateTime(DateTime.Today);
+            dateTo ??= DateOnly.FromDateTime(DateTime.Today);
+        }
+
+        ViewBag.TotalItems = totalItems;
+        if (page < 1) page = 1;
+        if (page > totalPages && totalPages > 0) page = totalPages;
+
+        var allDates = db.Reservations.Select(r => r.ReservationDate);
+        ViewBag.MinDate = allDates.Any() ? allDates.Min().ToString("yyyy-MM-dd") : null;
+        ViewBag.MaxDate = allDates.Any() ? allDates.Max().ToString("yyyy-MM-dd") : null;
+        ViewBag.DateFrom = dateFrom?.ToString("yyyy-MM-dd");
+        ViewBag.DateTo = dateTo?.ToString("yyyy-MM-dd");
+
+        var items = query.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+        var vms = items.Select(item => {
+            int? position = null;
+            if (item.Status == Reservation.ReservationStatus.PENDING)
+            {
+                position = db.Reservations.Count(r => r.BookId == item.BookId &&
+                                                      r.Status == Reservation.ReservationStatus.PENDING &&
+                                                      r.ReservationDate < item.ReservationDate) + 1;
+            }
+            return new ReservationVM
+            {
+                Id = item.Id,
+                UserId = item.UserId,
+                UserName = item.User.Username,
+                BookId = item.BookId,
+                CopyId = item.CopyId,
+                ReservationDate = item.ReservationDate,
+                ReservationDue = item.ReservationDue,
+                Status = item.Status,
+                QueuePosition = position,
+                BookTitle = item.Book.Title,
+                BookImageURL = item.Book.ImageURL,
+                BookAuthors = string.Join(", ", item.Book.Authors.Select(a => a.Name))
+            };
+        }).ToList();
+
+        var model = new ReservationManagementVM
+        {
+            Reservations = vms,
+            CurrentPage = page,
+            TotalPages = totalPages,
+            SearchTerm = search,
+            SortColumn = sort,
+            SortOrder = order,
+            FilterStatus = status,
+            DateFrom = dateFrom,
+            DateTo = dateTo,
+            CanDelete = items.ToDictionary(r => r.Id, r => true)
+        };
+
+        if (Request.IsAjax())
+        {
+            return PartialView("_TableManageReservation", model);
+        }
+
+        return View("ManageReservation", model);
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "ADMIN")]
+    public IActionResult DeleteReservation(string id)
+    {
+        var reservation = db.Reservations.Find(id);
+        if (reservation == null)
+        {
+            TempData["ToastMessage"] = "Reservation not found.";
+            TempData["ToastType"] = "error";
+        }
+        else
+        {
+            if (reservation.Status == Reservation.ReservationStatus.READY && reservation.CopyId != null)
+            {
+                db.Reservations.Remove(reservation);
+                db.SaveChanges();
+                rs.AssignNextReservation(reservation.BookId, reservation.CopyId);
+            }
+            else
+            {
+                db.Reservations.Remove(reservation);
+                db.SaveChanges();
+            }
+
+            TempData["ToastMessage"] = $"Reservation '{id}' deleted successfully.";
+            TempData["ToastType"] = "success";
+        }
+        return RedirectToAction("ManageReservation");
     }
 }
