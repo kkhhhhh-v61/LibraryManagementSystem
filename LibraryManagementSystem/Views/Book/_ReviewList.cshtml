@@ -1,0 +1,68 @@
+@model List<Review>
+@{
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 0;
+    int? currentRating = ViewBag.CurrentRating;
+    string bookId = ViewBag.BookId;
+    int totalReviews = ViewBag.TotalReviews ?? 0;
+}
+
+@if (Model != null && Model.Any())
+{
+    <div class="reviews-list">
+        @foreach (var review in Model)
+        {
+            <div class="review-card">
+                <div class="review-header">
+                    <img src="@(string.IsNullOrEmpty(review.Loan.User.ImageURL) || review.Loan.User.ImageURL == "default-profile.png" ? "/images/assets/default-profile.png" : $"/images/profiles/{review.Loan.User.ImageURL}")" class="review-avatar" />
+                    <div class="review-user-info">
+                        <span class="review-username">@review.Loan.User.Username</span>
+                        <span class="review-date">@review.ReviewDate.ToString("MMM dd, yyyy")</span>
+                    </div>
+                    <div class="review-stars">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            <i class="fa-solid fa-star @(i <= review.Rating ? "star-filled" : "star-empty")"></i>
+                        }
+                    </div>
+                </div>
+                <div class="review-body">
+                    <p>@review.Comment</p>
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (totalPages > 1)
+    {
+        <div class="pagination" style="margin-top: 1rem; justify-content: center;">
+            @if (currentPage > 1)
+            {
+                <button class="pagination__link" onclick="loadReviews('@bookId', '@currentRating', @(currentPage - 1))">Previous</button>
+            }
+
+            @for (int i = 1; i <= totalPages; i++)
+            {
+                <button class="pagination__link @(i == currentPage ? "pagination__link--active" : "")" onclick="loadReviews('@bookId', '@currentRating', @i)">@i</button>
+            }
+
+            @if (currentPage < totalPages)
+            {
+                <button class="pagination__link" onclick="loadReviews('@bookId', '@currentRating', @(currentPage + 1))">Next</button>
+            }
+        </div>
+    }
+}
+else
+{
+    <div class="no-reviews">
+        @if (totalReviews > 0)
+        {
+            <p>No reviews found matching this filter.</p>
+        }
+        else
+        {
+            <p>No reviews yet. Be the first to review this book!</p>
+        }
+    </div>
+}

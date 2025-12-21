@@ -58,7 +58,7 @@
                             <i class="fa-solid fa-star @(i <= Math.Round(avgRating) ? "star-filled" : "star-empty")"></i>
                         }
                     </div>
-                    <span class="rating-text">@avgRating.ToString("0.0") (@reviews.Count reviews)</span>
+                    <span class="rating-text">@avgRating.ToString("0.0") (@ViewBag.TotalReviews reviews)</span>
                 </div>
 
                 <div class="public-detail-actions" style="display: flex; flex-direction: column; gap: 0.5rem;">
@@ -129,39 +129,26 @@
         <div class="public-detail-separator"></div>
 
         <div class="public-reviews-container">
-        <h2 class="section-title">Reviews & Ratings</h2>
-        
-        @if(reviews.Count > 0)
-        {
-            <div class="reviews-list">
-                @foreach(var review in reviews)
-                {
-                    <div class="review-card">
-                        <div class="review-header">
-                            <img src="@(string.IsNullOrEmpty(review.Loan.User.ImageURL) ? "/images/assets/default-profile.png" : $"/images/profiles/{review.Loan.User.ImageURL}")" class="review-avatar" />
-                            <div class="review-user-info">
-                                <span class="review-username">@review.Loan.User.Username</span>
-                                <span class="review-date">@review.ReviewDate.ToString("MMM dd, yyyy")</span>
-                            </div>
-                            <div class="review-stars">
-                                @for(int i=1; i<=5; i++) {
-                                    <i class="fa-solid fa-star @(i <= review.Rating ? "star-filled" : "star-empty")"></i>
-                                }
-                            </div>
-                        </div>
-                        <div class="review-body">
-                            <p>@review.Comment</p>
-                        </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h2 class="section-title" style="margin: 0;">Reviews & Ratings</h2>
+                <div class="filter-dropdown" id="reviewRatingDropdown" data-book-id="@Model.Id" style="min-width: 140px;">
+                    <button class="filter-dropdown__trigger" type="button" style="height: 36px; background-color: var(--color-white); border-color: var(--color-gray-300);">
+                        <span class="trigger__text">All Ratings</span>
+                        <svg class="trigger__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" height="20" width="20" fill="currentColor"><path d="M480-360 280-560h400L480-360Z"/></svg>
+                    </button>
+                    <div class="filter-dropdown__menu">
+                        <div class="filter-dropdown__item selected" data-value="">All Ratings</div>
+                        <div class="filter-dropdown__item" data-value="5">5 Stars</div>
+                        <div class="filter-dropdown__item" data-value="4">4 Stars</div>
+                        <div class="filter-dropdown__item" data-value="3">3 Stars</div>
+                        <div class="filter-dropdown__item" data-value="2">2 Stars</div>
+                        <div class="filter-dropdown__item" data-value="1">1 Star</div>
                     </div>
-                }
+                </div>
             </div>
-        }
-        else
-        {
-            <div class="no-reviews">
-                <p>No reviews yet. Be the first to review this book!</p>
+            <div id="reviewsContainer">
+                <partial name="_ReviewList" model="reviews" />
             </div>
-        }
         </div>
     </div>
 </div>

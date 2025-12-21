@@ -50,7 +50,7 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         return View(books);
     }
 
-    public IActionResult BookDetails(string id)
+    public IActionResult BookDetails(string id, int? rating, int page = 1)
     {
         var book = db.Books
             .Include(b => b.Authors)
@@ -69,16 +69,38 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         ViewBag.TotalCopies = copies.Count;
         ViewBag.AvailableCopies = copies.Count(c => c.Status == Copy.CopyStatus.AVAILABLE);
 
-        // Reviews
-        var reviews = db.Reviews
+        // Reviews Query
+        var reviewsQuery = db.Reviews
             .Include(r => r.Loan)
             .ThenInclude(l => l.User)
-            .Where(r => r.Loan.Copy.BookId == id)
-            .OrderByDescending(r => r.ReviewDate)
-            .ToList();
+            .Where(r => r.Loan.Copy.BookId == id);
 
-        ViewBag.Reviews = reviews;
-        ViewBag.AverageRating = reviews.Any() ? reviews.Average(r => r.Rating) : 0.0;
+        // Global Stats
+        int totalReviews = reviewsQuery.Count();
+        double avgRating = totalReviews > 0 ? reviewsQuery.Average(r => r.Rating) : 0.0;
+        ViewBag.AverageRating = avgRating;
+        ViewBag.TotalReviews = totalReviews;
+
+        // Filtering
+        if (rating.HasValue)
+        {
+            reviewsQuery = reviewsQuery.Where(r => r.Rating == rating.Value);
+        }
+
+        // Sorting & Pagination
+        int pageSize = 5;
+        int filteredCount = reviewsQuery.Count();
+        int totalPages = (int)Math.Ceiling(filteredCount / (double)pageSize);
+        if (page < 1) page = 1;
+        if (page > totalPages && totalPages > 0) page = totalPages;
+
+        var pagedReviews = reviewsQuery.OrderByDescending(r => r.ReviewDate).Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+        ViewBag.Reviews = pagedReviews;
+        ViewBag.CurrentPage = page;
+        ViewBag.TotalPages = totalPages;
+        ViewBag.CurrentRating = rating;
+        ViewBag.BookId = id;
 
         var hasActiveLoan = false;
         if (User.Identity.IsAuthenticated)
@@ -97,6 +119,11 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
             }
         }
         ViewBag.HasActiveLoan = hasActiveLoan;
+
+        if (Request.IsAjax())
+        {
+            return PartialView("_ReviewList", pagedReviews);
+        }
 
         return View("BookDetail", book);
     }
@@ -1068,5 +1095,37 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         img.Save(fullPath);
 
         return filename;
+    }
+
+    [HttpPost]
+    [Authorize]
+    public IActionResult SubmitReview(string loanId, int rating, string? comment)
+    {
+        var username = User.Identity?.Name;
+        var user = db.Users.FirstOrDefault(u => u.Username == username);
+        if (user == null) return Json(new { success = false, message = "User not found." });
+
+        var loan = db.Loans.Include(l => l.Review).FirstOrDefault(l => l.Id == loanId && l.UserId == user.Id);
+
+        if (loan == null) return Json(new { success = false, message = "Loan record not found." });
+        if (loan.Status != Loan.LoanStatus.RETURNED) return Json(new { success = false, message = "You can only review returned books." });
+        if (loan.Review != null) return Json(new { success = false, message = "You have already reviewed this book." });
+
+        if (rating < 1 || rating > 5) return Json(new { success = false, message = "Please provide a rating." });
+
+        var lastId = db.Reviews.OrderByDescending(r => r.Id).Select(r => r.Id).FirstOrDefault();
+        var review = new Review
+        {
+            Id = Helper.GenerateNewId(lastId, 'R'),
+            LoanId = loanId,
+            Rating = rating,
+            Comment = comment?.Trim(),
+            ReviewDate = DateTime.Now
+        };
+
+        db.Reviews.Add(review);
+        db.SaveChanges();
+
+        return Json(new { success = true, message = "Review submitted successfully." });
     }
 }

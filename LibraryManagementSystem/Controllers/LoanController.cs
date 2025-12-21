@@ -18,6 +18,7 @@ namespace LibraryManagementSystem.Controllers
             var query = db.Loans
                 .Include(l => l.Copy)
                 .ThenInclude(c => c.Book)
+                .Include(l => l.Review)
                 .Where(l => l.UserId == user.Id)
                 .AsQueryable();
 
