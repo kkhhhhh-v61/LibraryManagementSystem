@@ -380,6 +380,79 @@ function initializeBookDetails() {
 }
 
 /* ===========================================================================
+   BOOK COVER CROPPER
+   =========================================================================== */
+
+function initializeBookCropper() {
+    const input = document.getElementById("Image"); // asp-for="Image"
+    if (!input) return;
+
+    const modal = document.getElementById("modal-book-crop");
+    const image = document.getElementById("book-crop-image");
+    const confirmBtn = document.getElementById("btn-confirm-crop");
+    const resetBtn = document.getElementById("btn-reset-crop");
+    const closeBtns = modal.querySelectorAll(".js-close-modal");
+    let cropper;
+
+    input.addEventListener("change", function (e) {
+        if (e.target.files && e.target.files.length > 0) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function (evt) {
+                // Ensure image is loaded before initializing cropper
+                image.onload = function () {
+                    if (cropper) cropper.destroy();
+                    cropper = new Cropper(image, {
+                        aspectRatio: 2 / 3,
+                        viewMode: 1,
+                        autoCropArea: 1,
+                        background: false,
+                    });
+                };
+                image.src = evt.target.result;
+                modal.classList.add("active");
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    confirmBtn.addEventListener("click", function () {
+        if (!cropper) return;
+        const data = cropper.getData(true); // true for rounded integers
+
+        document.getElementById("CropX").value = data.x;
+        document.getElementById("CropY").value = data.y;
+        document.getElementById("CropWidth").value = data.width;
+        document.getElementById("CropHeight").value = data.height;
+
+        // Update preview with cropped version
+        const canvas = cropper.getCroppedCanvas();
+        const preview = document.querySelector(".upload__preview");
+        const wrapper = document.querySelector(".upload__wrapper");
+
+        if (preview && wrapper) {
+            preview.src = canvas.toDataURL();
+            wrapper.classList.add("has-image");
+        }
+
+        modal.classList.remove("active");
+    });
+
+    if (resetBtn) {
+        resetBtn.addEventListener("click", () => {
+            if (cropper) cropper.reset();
+        });
+    }
+
+    closeBtns.forEach((btn) =>
+        btn.addEventListener("click", () => {
+            modal.classList.remove("active");
+            input.value = ""; // Clear input if cancelled
+        })
+    );
+}
+
+/* ===========================================================================
    INITIALIZATION
    =========================================================================== */
 
@@ -405,4 +478,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Initialize Book Details Page
     initializeBookDetails();
+
+    // Initialize Book Cropper
+    initializeBookCropper();
 });

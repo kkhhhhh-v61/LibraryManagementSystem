@@ -1,9 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using LibraryManagementSystem.Extensions;
 using Microsoft.AspNetCore.Authorization;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
 
 namespace LibraryManagementSystem.Controllers;
 
@@ -77,6 +79,24 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
 
         ViewBag.Reviews = reviews;
         ViewBag.AverageRating = reviews.Any() ? reviews.Average(r => r.Rating) : 0.0;
+
+        var hasActiveLoan = false;
+        if (User.Identity.IsAuthenticated)
+        {
+            var username = User.Identity.Name;
+            var user = db.Users.FirstOrDefault(u => u.Username == username);
+            if (user != null)
+            {
+                hasActiveLoan = db.Loans
+                    .Include(l => l.Copy)
+                    .Any(l => l.UserId == user.Id &&
+                              l.Copy.BookId == id &&
+                              (l.Status == Loan.LoanStatus.RESERVED ||
+                               l.Status == Loan.LoanStatus.IN_LOAN ||
+                               l.Status == Loan.LoanStatus.OVERDUE));
+            }
+        }
+        ViewBag.HasActiveLoan = hasActiveLoan;
 
         return View("BookDetail", book);
     }
@@ -222,7 +242,14 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         string? imageUrl = null;
         if (vm.Image != null)
         {
-            imageUrl = Helper.SaveImage(vm.Image, "books", en.WebRootPath);
+            if (vm.CropWidth.HasValue && vm.CropHeight.HasValue)
+            {
+                imageUrl = SaveCroppedImage(vm.Image, vm.CropX ?? 0, vm.CropY ?? 0, vm.CropWidth.Value, vm.CropHeight.Value, en.WebRootPath);
+            }
+            else
+            {
+                imageUrl = Helper.SaveImage(vm.Image, "books", en.WebRootPath);
+            }
         }
 
         // 5. Generate ID
@@ -355,7 +382,14 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         if (vm.Image != null)
         {
             DeleteImage(book.ImageURL);
-            book.ImageURL = Helper.SaveImage(vm.Image, "books", en.WebRootPath);
+            if (vm.CropWidth.HasValue && vm.CropHeight.HasValue)
+            {
+                book.ImageURL = SaveCroppedImage(vm.Image, vm.CropX ?? 0, vm.CropY ?? 0, vm.CropWidth.Value, vm.CropHeight.Value, en.WebRootPath);
+            }
+            else
+            {
+                book.ImageURL = Helper.SaveImage(vm.Image, "books", en.WebRootPath);
+            }
         }
 
         // 5. Update Properties
@@ -571,6 +605,13 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         var copy = db.Copies.Find(id);
         if (copy != null)
         {
+            if (copy.Status != Copy.CopyStatus.AVAILABLE)
+            {
+                TempData["ToastMessage"] = "Cannot delete a copy that is not available.";
+                TempData["ToastType"] = "error";
+                return RedirectToAction("ManageBookDetail", new { id = bookId });
+            }
+
             db.Copies.Remove(copy);
             db.SaveChanges();
             TempData["ToastMessage"] = "Copy deleted successfully.";
@@ -596,11 +637,26 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
         }
 
         var copies = db.Copies.Where(c => ids.Contains(c.Id)).ToList();
-        db.Copies.RemoveRange(copies);
-        db.SaveChanges();
+        
+        var safeToDelete = copies.Where(c => c.Status == Copy.CopyStatus.AVAILABLE).ToList();
+        var unsafeItems = copies.Where(c => c.Status != Copy.CopyStatus.AVAILABLE).ToList();
 
-        TempData["ToastMessage"] = $"Successfully deleted {copies.Count} copy(s).";
-        TempData["ToastType"] = "success";
+        if (safeToDelete.Count > 0)
+        {
+            db.Copies.RemoveRange(safeToDelete);
+            db.SaveChanges();
+        }
+
+        if (unsafeItems.Count > 0)
+        {
+            TempData["ToastMessage"] = $"Deleted {safeToDelete.Count} copy(s). Skipped {unsafeItems.Count} copy(s) because they are not available.";
+            TempData["ToastType"] = "warning";
+        }
+        else
+        {
+            TempData["ToastMessage"] = $"Successfully deleted {safeToDelete.Count} copy(s).";
+            TempData["ToastType"] = "success";
+        }
 
         return RedirectToAction("ManageBookDetail", new { id = bookId });
     }
@@ -992,5 +1048,25 @@ public class BookController(LMSDB db, IWebHostEnvironment en) : Controller
                 System.IO.File.Delete(imagePath);
             }
         }
+    }
+
+    private string SaveCroppedImage(IFormFile image, int x, int y, int width, int height, string webRootPath)
+    {
+        string filename = Guid.NewGuid().ToString("N") + ".jpg";
+        string folderPath = Path.Combine(webRootPath, "images", "books");
+        string fullPath = Path.Combine(folderPath, filename);
+
+        Directory.CreateDirectory(folderPath);
+
+        using var stream = image.OpenReadStream();
+        using var img = Image.Load(stream);
+
+        // Ensure crop rectangle is within bounds
+        var cropRect = new Rectangle(x, y, width, height);
+        
+        img.Mutate(ctx => ctx.Crop(cropRect));
+        img.Save(fullPath);
+
+        return filename;
     }
 }

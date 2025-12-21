@@ -1,0 +1,84 @@
+@model List<Loan>
+@{
+    ViewBag.Title = "Merged Loan Slip";
+    var user = Model.FirstOrDefault()?.User;
+}
+
+@section head {
+    <link rel="stylesheet" href="/css/book.css" asp-append-version="true" />
+    <link rel="stylesheet" href="/css/loan.css" asp-append-version="true" />
+}
+
+<div class="confirmation-container">
+    <div class="slip-header">
+        <div class="slip-title">Merged Loan Slip</div>
+        <div class="slip-subtitle">@Model.Count Loan Items</div>
+    </div>
+
+    @if (user != null)
+    {
+        <div class="slip-details" style="margin-bottom: 2rem;">
+            <div class="detail-row"><span class="detail-label">Borrower</span><span class="detail-value">@user.Username (@user.Id)</span></div>
+        </div>
+
+        <div class="barcode-section" style="margin-bottom: 2rem;">
+            <div class="barcode-item">
+                <div class="barcode-label">User ID</div>
+                <svg id="barcode-user" data-value="@user.Id"></svg>
+            </div>
+        </div>
+    }
+
+    <div class="slip-details">
+        @foreach (var loan in Model)
+        {
+            <div style="border: 1px solid var(--color-gray-200); border-radius: var(--spacing-sm); padding: var(--spacing-md); margin-bottom: var(--spacing-md);">
+                <div class="detail-row" style="padding-top: 0;">
+                    <span class="detail-label">Book Title</span>
+                    <span class="detail-value">@loan.Copy.Book.Title</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Loan ID</span>
+                    <span class="detail-value">@loan.Id</span>
+                </div>
+                @switch (loan.Status)
+                {
+                    case Loan.LoanStatus.RESERVED:
+                        <div class="detail-row" style="border-bottom: none; padding-bottom: 0;">
+                            <span class="detail-label">Pickup Deadline</span>
+                            <span class="detail-value" style="color: var(--color-primary-base);">@loan.PickupDue.ToString("yyyy-MM-dd")</span>
+                        </div>
+                        break;
+                    case Loan.LoanStatus.IN_LOAN:
+                        <div class="detail-row" style="border-bottom: none; padding-bottom: 0;">
+                            <span class="detail-label">Return Due Date</span>
+                            <span class="detail-value" style="color: var(--color-gray-700);">@loan.LoanDue.ToString("yyyy-MM-dd")</span>
+                        </div>
+                        break;
+                    case Loan.LoanStatus.OVERDUE:
+                        <div class="detail-row" style="border-bottom: none; padding-bottom: 0;">
+                            <span class="detail-label">Return Was Due</span>
+                            <span class="detail-value" style="color: var(--color-error);">@loan.LoanDue.ToString("yyyy-MM-dd")</span>
+                        </div>
+                        break;
+                }
+                 <div class="barcode-section" style="margin: 1rem 0 0 0;">
+                    <div class="barcode-item">
+                        <div class="barcode-label">Book Copy (@loan.Copy.Barcode)</div>
+                        <svg class="barcode-book" data-value="@loan.Copy.Barcode"></svg>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="print-hide">
+        <a href="@Url.Action("History", "Loan")" class="form__button btn--secondary">Back to My Loans</a>
+        <button onclick="window.print()" class="form__button form__button--submit">Print Slip</button>
+    </div>
+</div>
+
+@section foot {
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <script src="/js/loan.js" asp-append-version="true"></script>
+}

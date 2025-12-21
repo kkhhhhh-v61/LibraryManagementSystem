@@ -72,44 +72,27 @@
 @section foot {
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="/js/room.js" asp-append-version="true"></script>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ajax-unobtrusive/3.2.6/jquery.unobtrusive-ajax.min.js"></script>
-    
 
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 
     <script>
-        let timeout = null;
-
-        function submitSearch() {
-            clearTimeout(timeout);
-            timeout = setTimeout(function () {
-                $("#searchForm").submit();
-            }, 500);
-        }
-
         $(document).ready(function () {
             @if (TempData["Success"] != null)
             {
-                        <text>
-                            showToast('@TempData["Success"]', 'success');
-                        </text>
+                    <text>if(window.showToast) showToast('@TempData["Success"]', 'success');</text>
             }
 
             @if (TempData["Error"] != null)
             {
-                        <text>
-                            showToast('@TempData["Error"]', 'error');
-                        </text>
+                    <text>if(window.showToast) showToast('@TempData["Error"]', 'error');</text>
             }
 
             @if (!ViewData.ModelState.IsValid && TempData["Error"] == null)
             {
-                        <text>
-                            showToast('Please check input fields.', 'error');
-                        </text>
+                    <text>if(window.showToast) showToast('Please check input fields.', 'error');</text>
             }
         });
     </script>

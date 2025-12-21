@@ -45,7 +45,14 @@
             {
                 <tr class="table__row">
                     <td class="table__cell table__cell--checkbox">
-                        <input class="row-checkbox checkbox-styled" type="checkbox" name="ids" value="@copy.Id" data-name="@copy.Barcode" />
+                        @if (copy.Status == Copy.CopyStatus.AVAILABLE)
+                        {
+                            <input class="row-checkbox checkbox-styled" type="checkbox" name="ids" value="@copy.Id" data-name="@copy.Barcode" data-status="@copy.Status" />
+                        }
+                        else
+                        {
+                            <input class="checkbox-styled" type="checkbox" disabled style="opacity: 0.3; cursor: default;" />
+                        }
                     </td>
                     <td class="table__cell table__cell--id">@copy.Id</td>
                     <td class="table__cell" style="font-family: monospace;">@copy.Barcode</td>
@@ -67,7 +74,8 @@
                                     data-id="@copy.Id" 
                                     data-name="@copy.Barcode" 
                                     title="Delete"
-                                    type="button">
+                                    type="button"
+                                    @(copy.Status != Copy.CopyStatus.AVAILABLE ? "disabled style=opacity:0.5;cursor:not-allowed;" : "")>
                                 <svg class="button__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg>
                             </button>
                         </div>

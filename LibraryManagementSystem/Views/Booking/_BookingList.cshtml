@@ -14,7 +14,13 @@
 
 @foreach (var item in Model)
 {
-    <div class="booking-item">
+    bool isPending = item.Status == LibraryManagementSystem.Models.Booking.BookingStatus.PENDING;
+
+    string clickAction = isPending ? $"onclick=\"location.href='/Payment/Index?bookingId={item.Id}'\"" : "";
+    string cursorStyle = isPending ? "cursor: pointer;" : "";
+    string hoverTitle = isPending ? "title=\"Click to Pay\"" : "";
+
+    <div class="booking-item" style="@cursorStyle" @Html.Raw(clickAction) @Html.Raw(hoverTitle)>
 
         <div class="date-box">
             <span class="date-month">@item.StartTime.ToString("MMM")</span>
@@ -24,7 +30,8 @@
 
         <div class="info-section">
             <span class="seq-number">
-                <span style="margin-left:2px; opacity:0.5;">NO. @(rowNo--)</span>
+                <span style="color:#64748b; font-weight:500;">#@item.Id</span>
+                <span style="margin-left:8px; opacity:0.5;">(NO. @(rowNo--))</span>
             </span>
 
             <div class="room-title">
@@ -56,14 +63,17 @@
             {
                 if (isEnded)
                 {
+
                     <span class="badge bg-completed">Completed</span>
                 }
                 else if (isInProgress)
                 {
+
                     <span class="badge bg-inprogress">In Progress</span>
                 }
                 else
                 {
+
                     <span class="badge bg-confirmed">Confirmed</span>
                 }
             }
@@ -78,25 +88,28 @@
 
             @if (!isStarted)
             {
+                string roomName = item.Room.Name;
+                string catName = item.Room.RoomCategory.Name;
+                string dateStr = item.StartTime.ToString("MMM dd, yyyy");
+                string timeStr = $"{item.StartTime:hh:mm tt} - {item.EndTime:hh:mm tt}";
+
                 if (item.Status == LibraryManagementSystem.Models.Booking.BookingStatus.PENDING)
                 {
-                    <form asp-action="Cancel" method="post" onsubmit="return confirm('Are you sure you want to cancel this booking?');" style="margin:0;">
-                        <input type="hidden" name="id" value="@item.Id" />
-                        <button type="submit" class="btn-cancel">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                            Cancel
-                        </button>
-                    </form>
+                    <button type="button" class="btn-cancel"
+                            data-room="@roomName" data-cat="@catName" data-date="@dateStr" data-time="@timeStr"
+                            onclick="openCancelModal(event, '@item.Id', 'cancel', this)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        Cancel
+                    </button>
                 }
                 else if (item.Status == LibraryManagementSystem.Models.Booking.BookingStatus.CONFIRMED)
                 {
-                    <form asp-action="Cancel" method="post" onsubmit="return confirm('This booking is paid. Are you sure you want to cancel and request a refund?');" style="margin:0;">
-                        <input type="hidden" name="id" value="@item.Id" />
-                        <button type="submit" class="btn-cancel" style="color:#d97706; border-color:#d97706;">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6" /><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13" /></svg>
-                            Refund
-                        </button>
-                    </form>
+                    <button type="button" class="btn-cancel" style="color:#d97706; border-color:#d97706;"
+                            data-room="@roomName" data-cat="@catName" data-date="@dateStr" data-time="@timeStr"
+                            onclick="openCancelModal(event, '@item.Id', 'refund', this)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6" /><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13" /></svg>
+                        Refund
+                    </button>
                 }
             }
         </div>

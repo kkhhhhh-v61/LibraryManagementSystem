@@ -252,6 +252,11 @@ public class BookInsertVM
 
     [DisplayName("Archived")]
     public bool IsArchived { get; set; } = false;
+
+    public int? CropX { get; set; }
+    public int? CropY { get; set; }
+    public int? CropWidth { get; set; }
+    public int? CropHeight { get; set; }
 }
 
 public class BookEditVM
@@ -304,6 +309,11 @@ public class BookEditVM
 
     [DisplayName("Archived")]
     public bool IsArchived { get; set; } = false;
+
+    public int? CropX { get; set; }
+    public int? CropY { get; set; }
+    public int? CropWidth { get; set; }
+    public int? CropHeight { get; set; }
 }
 
 public class BookDetailVM
@@ -416,6 +426,51 @@ public class ReservationVM
 
     [Display(Name = "Queue Position")]
     public int? QueuePosition { get; set; }
+}
+
+public class PaymentVM : IValidatableObject
+{
+    [Required]
+    public string BookingId { get; set; }
+
+    [Required(ErrorMessage = "Cardholder Name is required.")]
+    [Display(Name = "Cardholder Name")]
+    public string CardName { get; set; }
+
+    [Required(ErrorMessage = "Card Number is required.")]
+    [RegularExpression(@"^[\d ]{16,19}$", ErrorMessage = "Invalid card number format.")]
+    [Display(Name = "Card Number")]
+    public string CardNumber { get; set; }
+
+    [Required(ErrorMessage = "Expiry Date is required.")]
+    [RegularExpression(@"^(0[1-9]|1[0-2])\/?([0-9]{2})$", ErrorMessage = "Format must be MM/YY.")]
+    [Display(Name = "Expiry Date")]
+    public string ExpiryDate { get; set; }
+
+    [Required(ErrorMessage = "CVC is required.")]
+    [RegularExpression(@"^\d{3}$", ErrorMessage = "CVC must be 3 digits.")]
+    public string Cvc { get; set; }
+
+    public Booking? Booking { get; set; }
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (!string.IsNullOrEmpty(ExpiryDate) && ExpiryDate.Contains('/'))
+        {
+            var parts = ExpiryDate.Split('/');
+            if (parts.Length == 2 && int.TryParse(parts[0], out int month) && int.TryParse(parts[1], out int year))
+            {
+                int fullYear = 2000 + year;
+
+                var now = DateTime.Now;
+
+                if (fullYear < now.Year || (fullYear == now.Year && month < now.Month))
+                {
+                    yield return new ValidationResult("Card has expired.", new[] { nameof(ExpiryDate) });
+                }
+            }
+        }
+    }
 }
 
 
@@ -586,4 +641,55 @@ public class BookingCreateVM : IValidatableObject
         if (EndTime.TotalHours > CloseHour)
             yield return new ValidationResult($"Library closes at {CloseHour}:00.", new[] { nameof(EndTime) });
     }
+}
+
+/* ============================== LOAN MANAGEMENT ============================== */
+
+public class LoanManagementVM
+{
+    public List<Loan> ExistingLoans { get; set; } = new();
+    public int CurrentPage { get; set; }
+    public int TotalPages { get; set; }
+    public string? SearchTerm { get; set; }
+    public string SortColumn { get; set; } = "Id";
+    public string SortOrder { get; set; } = "desc";
+    public string? FilterStatus { get; set; }
+    public DateOnly? DateFrom { get; set; }
+    public DateOnly? DateTo { get; set; }
+    public LoanEditVM EditForm { get; set; } = new();
+}
+
+public class LoanEditVM
+{
+    [Required]
+    public string Id { get; set; }
+
+    [DisplayName("Loan Date")]
+    [Required]
+    public DateOnly LoanDate { get; set; }
+
+    [DisplayName("Pickup Due")]
+    [Required]
+    public DateOnly PickupDue { get; set; }
+
+    [DisplayName("Pickup Date")]
+    public DateOnly? PickupDate { get; set; }
+
+    [DisplayName("Due Date")]
+    [Required]
+    public DateOnly LoanDue { get; set; }
+
+    [DisplayName("Return Date")]
+    public DateOnly? ReturnDate { get; set; }
+}
+
+public class LoanHistoryVM
+{
+    public List<Loan> Loans { get; set; } = new();
+    public int CurrentPage { get; set; }
+    public int TotalPages { get; set; }
+    public string? SearchTerm { get; set; }
+    public string SortColumn { get; set; } = "LoanDate";
+    public string SortOrder { get; set; } = "desc";
+    public string? FilterStatus { get; set; }
 }

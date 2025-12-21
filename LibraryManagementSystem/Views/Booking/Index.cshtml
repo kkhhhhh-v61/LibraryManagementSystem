@@ -111,44 +111,19 @@
 
     <script>
         $(document).ready(function () {
-            $('form').on('submit', function (e) {
-                var startVal = $('#inputStart').val();
-                var endVal = $('#inputEnd').val();
-
-                if (startVal && endVal) {
-                    var start = new Date("2000-01-01T" + startVal);
-                    var end = new Date("2000-01-01T" + endVal);
-
-                    var diffMs = end - start;
-                    var diffMins = diffMs / 1000 / 60;
-
-                    if (diffMins > 0 && diffMins < 30) {
-                        e.preventDefault();
-                        showToast('Booking duration must be at least 30 minutes.', 'error');
-                        return false;
-                    }
-                }
-            });
-
             @if (TempData["Success"] != null)
             {
-                    <text>
-                        showToast('@TempData["Success"]', 'success');
-                    </text>
+                    <text>if(window.showToast) showToast('@TempData["Success"]', 'success');</text>
             }
 
             @if (TempData["Error"] != null)
             {
-                    <text>
-                        showToast('@TempData["Error"]', 'error');
-                    </text>
+                    <text>if(window.showToast) showToast('@TempData["Error"]', 'error');</text>
             }
 
             @if (!ViewData.ModelState.IsValid && TempData["Error"] == null)
             {
-                    <text>
-                        showToast('Please check input fields.', 'error');
-                    </text>
+                    <text>if(window.showToast) showToast('Please check input fields.', 'error');</text>
             }
         });
     </script>

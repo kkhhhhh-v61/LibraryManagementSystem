@@ -1,0 +1,173 @@
+.confirmation-container {
+    max-width: 600px;
+    margin: 2rem auto;
+    background: var(--color-white);
+    padding: var(--spacing-xl);
+    border-radius: var(--spacing-md);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    border: 1px solid var(--color-gray-200);
+}
+.slip-header {
+    border-bottom: 2px dashed var(--color-gray-200);
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+.slip-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--color-gray-900);
+    margin-bottom: 0.5rem;
+}
+.slip-subtitle {
+    color: var(--color-success);
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+.slip-details {
+    text-align: left;
+    margin-bottom: 2rem;
+}
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--color-gray-100);
+}
+.detail-label {
+    color: var(--color-gray-600);
+    font-weight: 500;
+}
+.detail-value {
+    color: var(--color-gray-900);
+    font-weight: 600;
+}
+.barcode-section {
+    margin: 2rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    align-items: center;
+}
+.barcode-item {
+    text-align: center;
+}
+.barcode-label {
+    font-size: 0.8rem;
+    color: var(--color-gray-500);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+}
+.print-hide {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+}
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    .confirmation-container,
+    .confirmation-container * {
+        visibility: visible;
+    }
+    .confirmation-container {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        box-shadow: none;
+        margin: 0;
+        border: none;
+    }
+    .print-hide {
+        display: none;
+    }
+    .layout__sidebar,
+    .layout__header {
+        display: none;
+    }
+}
+
+/* Process Page Styles */
+.process-container {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: var(--spacing-lg);
+    height: 100%;
+}
+.scanner-panel {
+    background: var(--color-white);
+    border-radius: var(--spacing-sm);
+    padding: var(--spacing-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+.scanner-viewport {
+    width: 100%;
+    aspect-ratio: 4/3;
+    background: #000;
+    border-radius: var(--spacing-sm);
+    overflow: hidden;
+    position: relative;
+}
+.results-panel {
+    background: var(--color-white);
+    border-radius: var(--spacing-sm);
+    padding: var(--spacing-lg);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.mode-tabs {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+}
+.mode-tab {
+    flex: 1;
+    padding: var(--spacing-sm);
+    text-align: center;
+    background: var(--color-gray-100);
+    border-radius: var(--spacing-sm);
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--color-gray-600);
+    transition: all 0.2s;
+}
+.mode-tab.active {
+    background: var(--color-primary-base);
+    color: var(--color-white);
+}
+.manual-input-group {
+    display: flex;
+    justify-content: space-evenly;
+}
+#reader {
+    width: 100%;
+    height: 100%;
+}
+/* Hide html5-qrcode default elements we don't want */
+#reader__dashboard_section_csr span,
+#reader__dashboard_section_swaplink {
+    display: none !important;
+}
+
+/* Mode Selection Modal */
+.mode-selection-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+}
+.mode-selection-btn {
+    height: 120px;
+    flex-direction: column;
+    font-size: 1.2rem;
+    gap: var(--spacing-sm);
+}
