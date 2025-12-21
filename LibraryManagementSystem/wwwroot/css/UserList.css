@@ -110,9 +110,10 @@ body {
 .custom-table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 800px; 
+    min-width: 800px;
+}
 
-    .custom-table thead th {
+    .custom-table thead th{
         background-color: #fff;
         color: #94a3b8;
         font-size: 0.75rem;
@@ -312,4 +313,5 @@ body {
 }
 
 .bg-success {
-    background-color: #28a745 !important; 
+    background-color: #28a745 !important;
+}
